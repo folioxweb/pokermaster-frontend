@@ -1442,3 +1442,151 @@ button, input, select {
 .poker-deal-btn:hover {
   transform: translateY(-2px);
 }
+
+/* ==============================================================================
+   8. MOBILE & TABLET RESPONSIVENESS (PWA COMPATIBILITY)
+   ============================================================================== */
+
+@media (max-width: 768px) {
+  .table-header-bar {
+    padding: 0.4rem 0.75rem;
+    gap: 6px;
+  }
+  .table-marquee-box {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    max-width: 38vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .table-stage {
+    padding: 1rem 0.5rem 8.5rem 0.5rem;
+  }
+  .poker-table-outer {
+    width: 96vw;
+    height: 380px;
+    border-width: 8px;
+    border-radius: 190px;
+  }
+  .poker-player-box {
+    min-width: 82px;
+    padding: 3px 6px;
+    gap: 4px;
+    border-radius: 10px;
+  }
+  .poker-avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+  .poker-username {
+    font-size: 10px;
+    max-width: 55px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .poker-chips {
+    font-size: 9px;
+  }
+  .card-hole {
+    width: 32px !important;
+    height: 46px !important;
+  }
+  .card-community {
+    width: 48px !important;
+    height: 68px !important;
+  }
+  .poker-card-slot {
+    width: 48px !important;
+    height: 68px !important;
+  }
+  .poker-community-cards-row {
+    gap: 4px;
+    padding: 5px 8px;
+    border-radius: 12px;
+  }
+  .poker-pot-display {
+    padding: 3px 10px;
+    margin-bottom: 5px;
+  }
+  .poker-pot-title {
+    font-size: 9px;
+  }
+  .poker-pot-value {
+    font-size: 13px;
+  }
+  .poker-hud-wrapper {
+    bottom: 6px;
+    padding: 0 0.5rem;
+    max-width: 100vw;
+  }
+  .poker-hud-panel {
+    padding: 6px 10px;
+    border-radius: 14px;
+  }
+  .poker-presets-bar {
+    gap: 3px;
+    margin-bottom: 4px;
+  }
+  .poker-preset-btn {
+    font-size: 9px;
+    padding: 3px 2px;
+  }
+  .poker-actions-grid {
+    gap: 5px;
+  }
+  .poker-action-btn {
+    padding: 8px 4px;
+    border-radius: 10px;
+  }
+  .poker-btn-main-text {
+    font-size: 11px;
+  }
+  .poker-btn-sub-text {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .poker-table-outer {
+    height: 350px;
+    border-width: 6px;
+    border-radius: 175px;
+  }
+  .card-community {
+    width: 42px !important;
+    height: 60px !important;
+  }
+  .poker-card-slot {
+    width: 42px !important;
+    height: 60px !important;
+  }
+  .poker-hole-cards-row {
+    margin-bottom: 2px;
+  }
+  .card-hole {
+    width: 28px !important;
+    height: 40px !important;
+  }
+  .poker-player-box {
+    min-width: 72px;
+  }
+}
+
+@media (max-height: 520px) {
+  .table-header-bar {
+    padding: 0.25rem 0.75rem;
+  }
+  .table-stage {
+    padding: 0.25rem 0.5rem 5rem 0.5rem;
+  }
+  .poker-table-outer {
+    height: 260px;
+    border-width: 6px;
+  }
+  .poker-hud-wrapper {
+    bottom: 3px;
+  }
+}

@@ -63,31 +63,22 @@ export const PlayerSeat = ({
       </div>
 
       {/* Hole Cards (Rendered neatly above the player pod) */}
-      <div className="poker-hole-cards-row">
-        {player.cards && player.cards.length >= 2 ? (
-          <>
-            <CardAsset
-              card={player.cards[0]}
-              hidden={!isHero && !player.shownCards}
-              highlight={isWinner}
-              isCommunity={false}
-            />
-            <CardAsset
-              card={player.cards[1]}
-              hidden={!isHero && !player.shownCards}
-              highlight={isWinner}
-              isCommunity={false}
-            />
-          </>
-        ) : (
-          player.status !== 'sitting_out' && (
-            <>
-              <CardAsset hidden={true} isCommunity={false} />
-              <CardAsset hidden={true} isCommunity={false} />
-            </>
-          )
-        )}
-      </div>
+      {player.cards && player.cards.length >= 2 && (
+        <div className="poker-hole-cards-row">
+          <CardAsset
+            card={player.cards[0]}
+            hidden={!isHero && !player.shownCards}
+            highlight={isWinner}
+            isCommunity={false}
+          />
+          <CardAsset
+            card={player.cards[1]}
+            hidden={!isHero && !player.shownCards}
+            highlight={isWinner}
+            isCommunity={false}
+          />
+        </div>
+      )}
 
       {/* Player Information Box (No coins on table felt) */}
       <div className={`poker-player-box ${statusClass}`}>

@@ -76,94 +76,319 @@ export const PokerTable = ({
 
   const channelRef = useRef(null);
   const turnTimerRef = useRef(null);
+  const activeRoomIdRef = useRef(null);
+  const playersRef = useRef(players);
+  const handStateRef = useRef(handState);
+
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
+
+  useEffect(() => {
+    handStateRef.current = handState;
+  }, [handState]);
 
   // Initialize Seated Players & Supabase Realtime Channel
   useEffect(() => {
+    let isMounted = true;
     const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
-    let initialList = [];
 
-    // Current user sits at Seat 0 by default
-    const heroPlayer = {
-      seat_index: 0,
-      user_id: user?.id,
-      username: user?.username || 'Hero',
-      chips: gameRoom?.startingStack || 1500,
-      current_round_bet: 0,
-      total_hand_bet: 0,
-      status: 'active',
-      last_action: null,
-      cards: [],
-      shownCards: true,
-      isBot: false
+    const initTable = async () => {
+      // 1. Solo Practice Mode with Bots
+      if (gameRoom?.isPractice) {
+        let initialList = [
+          {
+            seat_index: 0,
+            user_id: user?.id,
+            username: user?.username || 'Hero',
+            chips: gameRoom?.startingStack || 1500,
+            current_round_bet: 0,
+            total_hand_bet: 0,
+            status: 'active',
+            last_action: null,
+            cards: [],
+            shownCards: true,
+            isBot: false
+          }
+        ];
+        for (let i = 1; i < totalMax; i++) {
+          initialList.push({
+            seat_index: i,
+            username: BOT_NAMES[i - 1] || `Bot ${i + 1}`,
+            chips: gameRoom?.startingStack || 1500,
+            current_round_bet: 0,
+            total_hand_bet: 0,
+            status: 'active',
+            last_action: null,
+            cards: [],
+            shownCards: false,
+            isBot: true
+          });
+        }
+        if (isMounted) {
+          setMySeatIndex(0);
+          setPlayers(initialList);
+          setAnnouncement(`Practice Mode (${totalMax} Players) • Ready to play`);
+        }
+        return;
+      }
+
+      // 2. Live Multiplayer Mode: Resolve Room UUID
+      let rid = gameRoom?.roomId;
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!rid || !uuidPattern.test(rid)) {
+        try {
+          const { data: found } = await supabase
+            .from('poker_rooms')
+            .select('id')
+            .eq('code', gameRoom?.roomCode)
+            .maybeSingle();
+          if (found?.id) rid = found.id;
+        } catch (err) {
+          console.warn('Error resolving room UUID:', err);
+        }
+      }
+      activeRoomIdRef.current = rid;
+
+      // 3. Query existing players already seated at table
+      let existingSeated = [];
+      if (rid) {
+        try {
+          const { data: seatedDb } = await supabase
+            .from('poker_room_players')
+            .select('*')
+            .eq('room_id', rid);
+          if (seatedDb) existingSeated = seatedDb;
+        } catch (err) {
+          console.warn('Error querying seated players:', err);
+        }
+      }
+
+      // 4. Assign seat for current user (auto-fill first available seat)
+      let assignedSeat = 0;
+      const myExisting = existingSeated.find(p => p.username === user.username);
+      if (myExisting) {
+        assignedSeat = myExisting.seat_index;
+      } else {
+        const occupied = existingSeated.map(p => p.seat_index);
+        while (occupied.includes(assignedSeat) && assignedSeat < totalMax) {
+          assignedSeat++;
+        }
+      }
+
+      if (isMounted) {
+        setMySeatIndex(assignedSeat);
+      }
+
+      // 5. Upsert current user into database poker_room_players
+      if (rid) {
+        try {
+          await supabase.from('poker_room_players').upsert({
+            room_id: rid,
+            user_id: user.id || null,
+            username: user.username,
+            seat_index: assignedSeat,
+            chips: myExisting?.chips || gameRoom.startingStack || 1500,
+            current_round_bet: 0,
+            total_hand_bet: 0,
+            status: 'active',
+            is_connected: true
+          }, { onConflict: 'room_id,seat_index' });
+        } catch (err) {
+          console.warn('Error inserting into poker_room_players:', err);
+        }
+      }
+
+      // 6. Build combined players list
+      const heroPlayer = {
+        seat_index: assignedSeat,
+        user_id: user.id,
+        username: user.username,
+        chips: myExisting?.chips || gameRoom.startingStack || 1500,
+        current_round_bet: 0,
+        total_hand_bet: 0,
+        status: 'active',
+        last_action: null,
+        cards: [],
+        shownCards: true,
+        isBot: false
+      };
+
+      let tablePlayers = [heroPlayer];
+      for (const p of existingSeated) {
+        if (p.seat_index !== assignedSeat) {
+          tablePlayers.push({
+            seat_index: p.seat_index,
+            user_id: p.user_id,
+            username: p.username,
+            chips: p.chips || gameRoom.startingStack || 1500,
+            current_round_bet: p.current_round_bet || 0,
+            total_hand_bet: p.total_hand_bet || 0,
+            status: p.status || 'active',
+            last_action: p.last_action || null,
+            cards: [],
+            shownCards: false,
+            isBot: false
+          });
+        }
+      }
+
+      if (isMounted) {
+        setPlayers(tablePlayers);
+        setAnnouncement(`Live Room ${gameRoom?.roomCode} • ${tablePlayers.length} player(s) seated`);
+      }
+
+      // 7. Subscribe to Supabase Realtime Channel
+      const roomCode = gameRoom?.roomCode || 'SOLO';
+      const channel = supabase.channel(`poker_room_${roomCode}`, {
+        config: {
+          broadcast: { self: false },
+          presence: { key: user.username }
+        }
+      });
+
+      channel
+        .on('broadcast', { event: 'PLAYER_JOINED' }, ({ payload }) => {
+          setPlayers((prev) => {
+            if (prev.some(p => p.seat_index === payload.seat_index || p.username === payload.username)) {
+              return prev.map(p => p.username === payload.username ? { ...p, ...payload } : p);
+            }
+            return [...prev, { ...payload, cards: [], shownCards: false }];
+          });
+          setAnnouncement(`👤 ${payload.username} joined the table!`);
+          // Reply with current table state sync
+          channel.send({
+            type: 'broadcast',
+            event: 'SYNC_RESPONSE',
+            payload: {
+              players: playersRef.current,
+              handState: handStateRef.current
+            }
+          });
+        })
+        .on('broadcast', { event: 'SYNC_RESPONSE' }, ({ payload }) => {
+          if (payload.players && payload.players.length > 0) {
+            setPlayers((prev) => {
+              const map = new Map(prev.map(p => [p.seat_index, p]));
+              for (const p of payload.players) {
+                if (p.seat_index !== assignedSeat) {
+                  map.set(p.seat_index, { ...p, shownCards: p.shownCards || false });
+                }
+              }
+              return Array.from(map.values());
+            });
+          }
+          if (payload.handState && payload.handState.phase !== 'waiting') {
+            setHandState(payload.handState);
+          }
+        })
+        .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
+          setPlayers((prev) => {
+            if (prev.some(p => p.seat_index === payload.seat_index)) {
+              return prev.map(p => p.seat_index === payload.seat_index ? { ...p, ...payload } : p);
+            }
+            return [...prev, payload];
+          });
+          setAnnouncement(`👤 ${payload.username} seated at Seat ${payload.seat_index + 1}`);
+        })
+        .on('broadcast', { event: 'PLAYER_LEFT' }, ({ payload }) => {
+          setPlayers((prev) => prev.filter(p => p.username !== payload.username && p.seat_index !== payload.seat_index));
+          setAnnouncement(`${payload.username} left the table`);
+        })
+        .on('broadcast', { event: 'HAND_DEALT' }, ({ payload }) => {
+          playCardDeal();
+          setHandState(payload.handState);
+          setPlayers(payload.players.map(p => ({
+            ...p,
+            shownCards: p.seat_index === assignedSeat
+          })));
+          setWinningCards([]);
+          setAnnouncement(payload.announcement);
+        })
+        .on('broadcast', { event: 'PLAYER_ACTION_EVENT' }, ({ payload }) => {
+          handleReceivedPlayerAction(payload.action, payload.amount, payload.seatIndex);
+        })
+        .on('broadcast', { event: 'PLAYER_SHOW_CARDS' }, ({ payload }) => {
+          setPlayers((prev) =>
+            prev.map((p) =>
+              p.seat_index === payload.seatIndex
+                ? { ...p, shownCards: true, cards: payload.cards || p.cards }
+                : p
+            )
+          );
+          setAnnouncement(`👁️ ${payload.username} revealed their cards!`);
+        });
+
+      if (rid) {
+        channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'poker_room_players', filter: `room_id=eq.${rid}` },
+          async () => {
+            const { data: refreshed } = await supabase
+              .from('poker_room_players')
+              .select('*')
+              .eq('room_id', rid);
+            if (refreshed && isMounted) {
+              setPlayers((prev) => {
+                const map = new Map(prev.map(p => [p.seat_index, p]));
+                for (const rp of refreshed) {
+                  if (rp.seat_index !== assignedSeat) {
+                    const existing = map.get(rp.seat_index) || {};
+                    map.set(rp.seat_index, {
+                      ...existing,
+                      seat_index: rp.seat_index,
+                      user_id: rp.user_id,
+                      username: rp.username,
+                      chips: rp.chips,
+                      status: rp.status,
+                      isBot: false,
+                      shownCards: existing.shownCards || false,
+                      cards: existing.cards || []
+                    });
+                  }
+                }
+                return Array.from(map.values());
+              });
+            }
+          }
+        );
+      }
+
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.send({
+            type: 'broadcast',
+            event: 'PLAYER_JOINED',
+            payload: heroPlayer
+          });
+          await channel.track({
+            username: user.username,
+            seat_index: assignedSeat
+          });
+        }
+      });
+
+      channelRef.current = channel;
     };
 
-    initialList.push(heroPlayer);
-    setMySeatIndex(0);
-
-    if (gameRoom?.isPractice) {
-      // In Practice mode: pre-fill bots for solo training
-      for (let i = 1; i < totalMax; i++) {
-        initialList.push({
-          seat_index: i,
-          username: BOT_NAMES[i - 1] || `Bot ${i + 1}`,
-          chips: gameRoom?.startingStack || 1500,
-          current_round_bet: 0,
-          total_hand_bet: 0,
-          status: 'active',
-          last_action: null,
-          cards: [],
-          shownCards: false,
-          isBot: true
-        });
-      }
-      setAnnouncement(`Practice Mode (${totalMax} Players) • Click "Deal Hand" to start`);
-    } else {
-      setAnnouncement(`Share Code ${gameRoom?.roomCode} • Waiting for players to join`);
-    }
-
-    setPlayers(initialList);
-
-    // Setup Supabase Realtime Broadcast Channel for Live Multiplayer
-    const roomCode = gameRoom?.roomCode || 'SOLO';
-    const channel = supabase.channel(`poker_room_${roomCode}`, {
-      config: { broadcast: { self: false } }
-    });
-
-    channel
-      .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
-        setPlayers((prev) => {
-          if (prev.some(p => p.seat_index === payload.seat_index)) return prev;
-          return [...prev, payload];
-        });
-        setAnnouncement(`${payload.username} joined the table!`);
-      })
-      .on('broadcast', { event: 'HAND_DEALT' }, ({ payload }) => {
-        playCardDeal();
-        setHandState(payload.handState);
-        setPlayers(payload.players);
-        setWinningCards([]);
-        setAnnouncement(payload.announcement);
-      })
-      .on('broadcast', { event: 'PLAYER_ACTION_EVENT' }, ({ payload }) => {
-        handleReceivedPlayerAction(payload.action, payload.amount, payload.seatIndex);
-      })
-      .on('broadcast', { event: 'PLAYER_SHOW_CARDS' }, ({ payload }) => {
-        setPlayers((prev) =>
-          prev.map((p) =>
-            p.seat_index === payload.seatIndex
-              ? { ...p, shownCards: true, cards: payload.cards || p.cards }
-              : p
-          )
-        );
-        setAnnouncement(`👁️ ${payload.username} revealed their cards!`);
-      })
-      .subscribe();
-
-    channelRef.current = channel;
+    initTable();
 
     return () => {
+      isMounted = false;
       if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'PLAYER_LEFT',
+          payload: { username: user?.username }
+        });
         supabase.removeChannel(channelRef.current);
+      }
+      if (activeRoomIdRef.current && !gameRoom?.isPractice) {
+        supabase
+          .from('poker_room_players')
+          .delete()
+          .match({ room_id: activeRoomIdRef.current, username: user?.username })
+          .then(() => {});
       }
     };
   }, [gameRoom, user]);
@@ -436,7 +661,7 @@ export const PokerTable = ({
         status: p.chips - bet === 0 ? 'all_in' : 'active',
         last_action: lastAction,
         cards: [c1, c2],
-        shownCards: p.user_id === user?.id
+        shownCards: p.seat_index === mySeatIndex
       };
     });
 
