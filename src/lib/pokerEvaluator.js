@@ -203,10 +203,11 @@ function evaluate5Cards(cards) {
 }
 
 // Compare two evaluation scores array lexicographically
-function compareScores(scoreA, scoreB) {
-  for (let i = 0; i < Math.max(scoreA.length, scoreB.length); i++) {
-    const a = scoreA[i] || 0;
-    const b = scoreB[i] || 0;
+export function compareScores(scoreA, scoreB) {
+  const maxLen = Math.max(scoreA?.length || 0, scoreB?.length || 0);
+  for (let i = 0; i < maxLen; i++) {
+    const a = scoreA?.[i] || 0;
+    const b = scoreB?.[i] || 0;
     if (a > b) return 1;
     if (a < b) return -1;
   }
@@ -225,7 +226,8 @@ export function evaluateHand(cardStrings) {
           return {
             type: HAND_TYPES.ONE_PAIR,
             name: 'Pocket Pair',
-            description: `Pocket ${RANK_PLURALS[c1.rankValue]}`
+            description: `Pocket ${RANK_PLURALS[c1.rankValue]}`,
+            cards: cardStrings
           };
         }
         const high = Math.max(c1.rankValue, c2.rankValue);
@@ -234,15 +236,16 @@ export function evaluateHand(cardStrings) {
         return {
           type: HAND_TYPES.HIGH_CARD,
           name: 'Starting Hand',
-          description: `${RANK_NAMES[high]}-${RANK_NAMES[low]} ${suited}`
+          description: `${RANK_NAMES[high]}-${RANK_NAMES[low]} ${suited}`,
+          cards: cardStrings
         };
       }
     }
-    return { type: 0, name: '', description: '' };
+    return { type: 0, name: '', description: '', cards: [] };
   }
 
   const parsed = cardStrings.map(parseCard).filter(Boolean);
-  if (parsed.length < 5) return { type: 0, name: '', description: '' };
+  if (parsed.length < 5) return { type: 0, name: '', description: '', cards: [] };
 
   const all5CardCombos = getCombinations(parsed, 5);
   let bestEval = null;
@@ -250,9 +253,13 @@ export function evaluateHand(cardStrings) {
   for (const combo of all5CardCombos) {
     const currentEval = evaluate5Cards(combo);
     if (!bestEval || compareScores(currentEval.score, bestEval.score) > 0) {
-      bestEval = currentEval;
+      bestEval = {
+        ...currentEval,
+        cards: combo.map(c => c.raw)
+      };
     }
   }
 
   return bestEval;
 }
+

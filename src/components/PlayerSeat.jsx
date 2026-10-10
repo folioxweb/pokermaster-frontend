@@ -17,6 +17,7 @@ export const PlayerSeat = ({
   turnTimeLeft = 25,
   turnMaxTime = 25,
   isWinner = false,
+  winningCards = [],
   onSit = null
 }) => {
   // Empty seat state
@@ -79,14 +80,14 @@ export const PlayerSeat = ({
           <CardAsset
             card={isCardVisible ? player.cards?.[0] : null}
             hidden={!isCardVisible}
-            highlight={isWinner && isHandEnded}
+            highlight={Boolean((isWinner && isHandEnded) || (isHandEnded && winningCards && winningCards.includes(player.cards?.[0])))}
             isCommunity={false}
             isHero={isHero}
           />
           <CardAsset
             card={isCardVisible ? player.cards?.[1] : null}
             hidden={!isCardVisible}
-            highlight={isWinner && isHandEnded}
+            highlight={Boolean((isWinner && isHandEnded) || (isHandEnded && winningCards && winningCards.includes(player.cards?.[1])))}
             isCommunity={false}
             isHero={isHero}
           />

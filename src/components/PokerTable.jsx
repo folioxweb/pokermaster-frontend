@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
-import { evaluateHand } from '../lib/pokerEvaluator';
+import { evaluateHand, compareScores } from '../lib/pokerEvaluator';
 import { formatPoints, formatPointsOnly, formatCurrencyOnly } from '../lib/formatters';
 import {
   playCardDeal,
@@ -345,20 +345,22 @@ export const PokerTable = ({
           // 5. Update handState
           setHandState(payload.handState);
 
-          // 6. Update players while preserving Hero's private hole cards
-          const mySeat = mySeatIndexRef.current;
+          // 6. Update players while preserving all hole cards for showdown logic
           const isShowdown = payload.handState.phase === 'showdown' || payload.handState.phase === 'ended';
 
           setPlayers((currentPlayers) => {
             return payload.players.map((incomingP) => {
-              const localHero = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
-              const isHero = incomingP.seat_index === mySeat;
+              const localP = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
+
+              // Maintain card data integrity so showdown and engine have complete hole cards.
+              // Opponent cards privacy during active play is strictly enforced in PlayerSeat.jsx.
+              const effectiveCards = (incomingP.cards && incomingP.cards.length >= 2)
+                ? incomingP.cards
+                : (localP?.cards || incomingP.cards || []);
 
               return {
                 ...incomingP,
-                cards: isHero
-                  ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
-                  : (isShowdown ? (incomingP.cards || []) : []),
+                cards: effectiveCards,
                 shownCards: isShowdown ? Boolean(incomingP.shownCards) : false
               };
             });
@@ -371,17 +373,16 @@ export const PokerTable = ({
           setWinningCards([]);
           if (payload.announcement) setAnnouncement(payload.announcement);
 
-          const mySeat = mySeatIndexRef.current;
           setPlayers((currentPlayers) => {
             return payload.players.map((incomingP) => {
-              const localHero = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
-              const isHero = incomingP.seat_index === mySeat;
+              const localP = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
+              const effectiveCards = (incomingP.cards && incomingP.cards.length >= 2)
+                ? incomingP.cards
+                : (localP?.cards || incomingP.cards || []);
 
               return {
                 ...incomingP,
-                cards: isHero
-                  ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
-                  : [],
+                cards: effectiveCards,
                 shownCards: false
               };
             });
@@ -722,6 +723,11 @@ export const PokerTable = ({
 
   // START HAND (Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
   const startNewHand = () => {
+    // Only allow starting when hand is waiting, ended, or at showdown
+    if (!['waiting', 'ended', 'showdown'].includes(handStateRef.current.phase)) {
+      return;
+    }
+
     const currentPlayers = playersRef.current;
     if (currentPlayers.length < 2) {
       alert('At least 2 players are needed to start a hand. Invite a friend with the room code or click "+ Bot"!');
@@ -984,6 +990,19 @@ export const PokerTable = ({
       return;
     }
 
+    // Check if remaining active contenders can make any further bets (i.e. at least 2 players have chips)
+    const canAnyPlayerBet = resetPlayers.filter((p) => p.status === 'active' && p.chips > 0).length > 1;
+
+    // If at most 1 player has chips left (all others are all-in or folded), run out the remaining board cards to showdown
+    if (!canAnyPlayerBet && nextPhase !== 'river') {
+      while (newCommunity.length < 5 && remainingDeck.length > 0) {
+        remainingDeck.shift(); // burn
+        newCommunity.push(remainingDeck.shift());
+      }
+      resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
+      return;
+    }
+
     // Postflop action starts with first active player clockwise from Dealer Button
     const firstActor = getNextTurnSeat(currentHandState.dealerSeat, resetPlayers);
     const actorPlayer = resetPlayers.find((p) => p.seat_index === firstActor);
@@ -1007,48 +1026,74 @@ export const PokerTable = ({
   const resolveShowdown = (playersList, communityCards, totalPot, actorInfo) => {
     const contenders = playersList.filter((p) => p.status === 'active' || p.status === 'all_in');
 
+    if (contenders.length === 0) return;
+
+    if (contenders.length === 1) {
+      resolveUncontestedWinner(contenders[0], totalPot, playersList, actorInfo);
+      return;
+    }
+
     const evaluations = contenders.map((player) => {
-      const allCards = [...player.cards, ...communityCards];
+      const allCards = [...(player.cards || []), ...communityCards];
       const evaluation = evaluateHand(allCards);
       return { player, evaluation };
     });
 
-    evaluations.sort((a, b) => {
-      const scoreA = a.evaluation?.score || [0];
-      const scoreB = b.evaluation?.score || [0];
-      for (let i = 0; i < Math.max(scoreA.length, scoreB.length); i++) {
-        const valA = scoreA[i] || 0;
-        const valB = scoreB[i] || 0;
-        if (valB !== valA) return valB - valA;
-      }
-      return 0;
-    });
+    evaluations.sort((a, b) => compareScores(b.evaluation?.score || [0], a.evaluation?.score || [0]));
 
-    const winner = evaluations[0]?.player || contenders[0];
+    const bestScore = evaluations[0]?.evaluation?.score || [0];
     const bestEval = evaluations[0]?.evaluation || { name: 'Winning Hand' };
+    const winCards = bestEval.cards || [];
+
+    // All contenders tied for best score
+    const winnersList = evaluations.filter(
+      (e) => compareScores(e.evaluation?.score || [0], bestScore) === 0
+    );
+
+    const splitShare = Math.floor(totalPot / winnersList.length);
+    const remainder = totalPot % winnersList.length;
 
     const revealedPlayers = playersList.map((p) => {
       const isContender = contenders.some((c) => c.seat_index === p.seat_index);
-      if (p.seat_index === winner.seat_index) {
-        return { ...p, chips: p.chips + totalPot, shownCards: true };
+      const winnerIndex = winnersList.findIndex((w) => w.player.seat_index === p.seat_index);
+
+      if (winnerIndex !== -1) {
+        const bonus = splitShare + (winnerIndex === 0 ? remainder : 0);
+        return {
+          ...p,
+          chips: p.chips + bonus,
+          shownCards: true
+        };
       }
       return isContender ? { ...p, shownCards: true } : p;
     });
 
-    const winAnnouncement = `🏆 ${winner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`;
+    let winAnnouncement = '';
+    if (winnersList.length > 1) {
+      const names = winnersList.map((w) => w.player.username).join(' & ');
+      winAnnouncement = `🤝 Split Pot! ${names} each win ${formatPoints(splitShare)} with ${bestEval.name}!`;
+    } else {
+      const singleWinner = winnersList[0].player;
+      winAnnouncement = `🏆 ${singleWinner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`;
+    }
 
     playWinCelebration();
     confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
+    setWinningCards(winCards);
 
     const nextHandState = {
       ...handStateRef.current,
       phase: 'showdown',
       communityCards,
       mainPot: totalPot,
-      winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: bestEval.name }]
+      winners: winnersList.map((w, idx) => ({
+        seat_index: w.player.seat_index,
+        amount: splitShare + (idx === 0 ? remainder : 0),
+        handName: w.evaluation?.name || bestEval.name
+      }))
     };
 
-    broadcastTableState(revealedPlayers, nextHandState, winAnnouncement, [], actorInfo);
+    broadcastTableState(revealedPlayers, nextHandState, winAnnouncement, winCards, actorInfo);
   };
 
   const resolveUncontestedWinner = (winner, totalPot, playersList, actorInfo) => {
@@ -1277,6 +1322,7 @@ export const PokerTable = ({
                     turnTimeLeft={turnTimeLeft}
                     turnMaxTime={turnMaxTime}
                     isWinner={isWinner}
+                    winningCards={winningCards}
                     onSit={handleSitAtSeat}
                   />
                 );
