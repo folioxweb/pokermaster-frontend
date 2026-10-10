@@ -79,6 +79,8 @@ export const PokerTable = ({
   const activeRoomIdRef = useRef(null);
   const playersRef = useRef(players);
   const handStateRef = useRef(handState);
+  const mySeatIndexRef = useRef(mySeatIndex);
+  const announcementRef = useRef(announcement);
 
   useEffect(() => {
     playersRef.current = players;
@@ -87,6 +89,14 @@ export const PokerTable = ({
   useEffect(() => {
     handStateRef.current = handState;
   }, [handState]);
+
+  useEffect(() => {
+    mySeatIndexRef.current = mySeatIndex;
+  }, [mySeatIndex]);
+
+  useEffect(() => {
+    announcementRef.current = announcement;
+  }, [announcement]);
 
   // Initialize Seated Players & Supabase Realtime Channel
   useEffect(() => {
@@ -270,8 +280,9 @@ export const PokerTable = ({
           if (payload.players && payload.players.length > 0) {
             setPlayers((prev) => {
               const map = new Map(prev.map(p => [p.seat_index, p]));
+              const mySeat = mySeatIndexRef.current;
               for (const p of payload.players) {
-                if (p.seat_index !== assignedSeat) {
+                if (p.seat_index !== mySeat) {
                   map.set(p.seat_index, { ...p, shownCards: p.shownCards || false });
                 }
               }
@@ -295,18 +306,79 @@ export const PokerTable = ({
           setPlayers((prev) => prev.filter(p => p.username !== payload.username && p.seat_index !== payload.seat_index));
           setAnnouncement(`${payload.username} left the table`);
         })
+        .on('broadcast', { event: 'TABLE_STATE_SYNC' }, ({ payload }) => {
+          if (!payload || !payload.handState) return;
+
+          // 1. Audio and visual feedback for action
+          if (payload.actor) {
+            if (payload.actor.action === 'fold') playFold();
+            else if (payload.actor.action === 'check') playCheckKnock();
+            else if (['call', 'bet', 'raise'].includes(payload.actor.action)) {
+              playChipClink();
+              triggerChipsFlight(payload.players);
+            }
+          }
+
+          // 2. Audio for new community cards dealt
+          if (payload.handState.phase !== handStateRef.current.phase && ['flop', 'turn', 'river'].includes(payload.handState.phase)) {
+            playCardDeal();
+            triggerChipsFlight(payload.players);
+          }
+
+          // 3. Audio & confetti for showdown or winner
+          if (payload.handState.phase === 'showdown' || payload.handState.winners?.length > 0) {
+            playWinCelebration();
+            confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
+          }
+
+          // 4. Update announcements & winning cards
+          if (payload.announcement) setAnnouncement(payload.announcement);
+          if (payload.winningCards) setWinningCards(payload.winningCards);
+
+          // 5. Update handState
+          setHandState(payload.handState);
+
+          // 6. Update players while preserving Hero's private hole cards
+          const mySeat = mySeatIndexRef.current;
+          const isShowdown = payload.handState.phase === 'showdown' || payload.handState.phase === 'ended';
+
+          setPlayers((currentPlayers) => {
+            return payload.players.map((incomingP) => {
+              const localHero = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
+              const isHero = incomingP.seat_index === mySeat;
+
+              return {
+                ...incomingP,
+                cards: isHero
+                  ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
+                  : incomingP.cards,
+                shownCards: isHero || isShowdown || incomingP.shownCards
+              };
+            });
+          });
+        })
         .on('broadcast', { event: 'HAND_DEALT' }, ({ payload }) => {
+          if (!payload || !payload.handState) return;
           playCardDeal();
           setHandState(payload.handState);
-          setPlayers(payload.players.map(p => ({
-            ...p,
-            shownCards: p.seat_index === assignedSeat
-          })));
           setWinningCards([]);
-          setAnnouncement(payload.announcement);
-        })
-        .on('broadcast', { event: 'PLAYER_ACTION_EVENT' }, ({ payload }) => {
-          handleReceivedPlayerAction(payload.action, payload.amount, payload.seatIndex);
+          if (payload.announcement) setAnnouncement(payload.announcement);
+
+          const mySeat = mySeatIndexRef.current;
+          setPlayers((currentPlayers) => {
+            return payload.players.map((incomingP) => {
+              const localHero = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
+              const isHero = incomingP.seat_index === mySeat;
+
+              return {
+                ...incomingP,
+                cards: isHero
+                  ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
+                  : incomingP.cards,
+                shownCards: isHero
+              };
+            });
+          });
         })
         .on('broadcast', { event: 'PLAYER_SHOW_CARDS' }, ({ payload }) => {
           setPlayers((prev) =>
@@ -445,12 +517,19 @@ export const PokerTable = ({
       return;
     }
 
+    // In multiplayer, only lowest human seat handles bot action
+    const humanPlayers = players.filter((p) => !p.isBot);
+    const lowestHumanSeat = humanPlayers.reduce((min, p) => Math.min(min, p.seat_index), 999);
+    if (mySeatIndex !== lowestHumanSeat && humanPlayers.length > 0) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       executeBotTurn(activePlayer);
-    }, 2200);
+    }, 1800);
 
     return () => clearTimeout(timer);
-  }, [handState.currentTurnSeat, handState.phase, players]);
+  }, [handState.currentTurnSeat, handState.phase, players, mySeatIndex]);
 
   // User Takes an Open Seat (Live Multiplayer)
   const handleSitAtSeat = (seatIndex) => {
@@ -561,22 +640,47 @@ export const PokerTable = ({
     }
   };
 
+  // Broadcast full synchronized table state to all connected players
+  const broadcastTableState = (newPlayers, newHandState, newAnnouncement, winCards = [], actionInfo = null) => {
+    setPlayers(newPlayers);
+    setHandState(newHandState);
+    if (newAnnouncement) setAnnouncement(newAnnouncement);
+    setWinningCards(winCards || []);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'TABLE_STATE_SYNC',
+        payload: {
+          players: newPlayers,
+          handState: newHandState,
+          announcement: newAnnouncement,
+          winningCards: winCards || [],
+          actor: actionInfo
+        }
+      });
+    }
+  };
+
   // Option for Hero to reveal cards at end of hand
   const handleShowHeroCards = () => {
-    const hero = players.find(p => p.seat_index === mySeatIndex);
+    const hero = playersRef.current.find((p) => p.seat_index === mySeatIndexRef.current);
     if (!hero || !hero.cards || hero.cards.length === 0) return;
     setHeroShowCardsClicked(true);
-    setPlayers((prev) =>
-      prev.map((p) => (p.seat_index === mySeatIndex ? { ...p, shownCards: true } : p))
+    const updated = playersRef.current.map((p) =>
+      p.seat_index === mySeatIndexRef.current ? { ...p, shownCards: true } : p
     );
-    setAnnouncement(`👁️ You revealed your cards to the table!`);
+    const announcementMsg = `👁️ ${hero.username} revealed their cards!`;
+
+    setPlayers(updated);
+    setAnnouncement(announcementMsg);
 
     if (channelRef.current) {
       channelRef.current.send({
         type: 'broadcast',
         event: 'PLAYER_SHOW_CARDS',
         payload: {
-          seatIndex: mySeatIndex,
+          seatIndex: mySeatIndexRef.current,
           username: hero.username,
           cards: hero.cards
         }
@@ -601,14 +705,15 @@ export const PokerTable = ({
     return deck;
   };
 
-  // START HAND (Strict Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
+  // START HAND (Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
   const startNewHand = () => {
-    if (players.length < 2) {
-      alert('At least 2 players are needed to start a hand. Invite a friend with the room code or click "+ Add Bot"!');
+    const currentPlayers = playersRef.current;
+    if (currentPlayers.length < 2) {
+      alert('At least 2 players are needed to start a hand. Invite a friend with the room code or click "+ Bot"!');
       return;
     }
 
-    const activeList = players.filter((p) => p.chips > 0);
+    const activeList = currentPlayers.filter((p) => p.chips > 0).sort((a, b) => a.seat_index - b.seat_index);
     if (activeList.length < 2) {
       setAnnouncement('Not enough players with points remaining!');
       return;
@@ -618,24 +723,26 @@ export const PokerTable = ({
     let deckIdx = 0;
 
     // Advance Dealer button 1 active seat clockwise
-    const nextDealerSeat = (handState.dealerSeat + 1) % players.length;
-    
+    const currentDealerIdx = activeList.findIndex((p) => p.seat_index === handStateRef.current.dealerSeat);
+    const nextDealerIdx = currentDealerIdx === -1 ? 0 : (currentDealerIdx + 1) % activeList.length;
+    const nextDealerSeat = activeList[nextDealerIdx].seat_index;
+
     let sbSeat, bbSeat, utgSeat;
-    if (players.length === 2) {
+    if (activeList.length === 2) {
       // Heads-Up: Dealer is Small Blind and acts first pre-flop
       sbSeat = nextDealerSeat;
-      bbSeat = (nextDealerSeat + 1) % 2;
+      bbSeat = activeList[(nextDealerIdx + 1) % 2].seat_index;
       utgSeat = nextDealerSeat;
     } else {
       // 3 to 8 players Ring Game
-      sbSeat = (nextDealerSeat + 1) % players.length;
-      bbSeat = (nextDealerSeat + 2) % players.length;
-      utgSeat = (nextDealerSeat + 3) % players.length;
+      sbSeat = activeList[(nextDealerIdx + 1) % activeList.length].seat_index;
+      bbSeat = activeList[(nextDealerIdx + 2) % activeList.length].seat_index;
+      utgSeat = activeList[(nextDealerIdx + 3) % activeList.length].seat_index;
     }
 
     setHeroShowCardsClicked(false);
 
-    const newHandNum = handState.handNumber + 1;
+    const newHandNum = (handStateRef.current.handNumber || 0) + 1;
     let sbAmount = gameRoom?.smallBlind || 10;
     let bbAmount = gameRoom?.bigBlind || 20;
 
@@ -652,7 +759,7 @@ export const PokerTable = ({
     sbAmount = sbAmount * multiplier;
     bbAmount = bbAmount * multiplier;
 
-    const updatedPlayers = players.map((p) => {
+    const updatedPlayers = currentPlayers.map((p) => {
       if (p.chips <= 0) return { ...p, status: 'sitting_out', cards: [] };
 
       const c1 = deck[deckIdx++];
@@ -676,14 +783,14 @@ export const PokerTable = ({
         status: p.chips - bet === 0 ? 'all_in' : 'active',
         last_action: lastAction,
         cards: [c1, c2],
-        shownCards: p.seat_index === mySeatIndex
+        shownCards: false
       };
     });
 
     playCardDeal();
 
-    const utgPlayer = updatedPlayers.find(p => p.seat_index === utgSeat);
-    const initialAnnouncement = `Hand #${newHandNum} Dealt • Blinds: ${formatPoints(sbAmount)} / ${formatPoints(bbAmount)} • ${utgPlayer?.username}'s Turn`;
+    const utgPlayer = updatedPlayers.find((p) => p.seat_index === utgSeat);
+    const initialAnnouncement = `Hand #${newHandNum} Dealt • Blinds: ${formatPoints(sbAmount)} / ${formatPoints(bbAmount)} • ${utgPlayer?.username || 'Player'}'s Turn`;
 
     const newHandState = {
       handNumber: newHandNum,
@@ -701,59 +808,36 @@ export const PokerTable = ({
       winners: []
     };
 
-    setPlayers(updatedPlayers);
-    setWinningCards([]);
-    setAnnouncement(initialAnnouncement);
-    setHandState(newHandState);
-
-    // Broadcast hand start to all connected live players
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'HAND_DEALT',
-        payload: {
-          handState: newHandState,
-          players: updatedPlayers,
-          announcement: initialAnnouncement
-        }
-      });
-    }
+    broadcastTableState(updatedPlayers, newHandState, initialAnnouncement, []);
   };
 
   // Submit Player Action (Hero or local execution)
   const handlePlayerAction = (action, amount = 0) => {
-    const currentSeat = handState.currentTurnSeat;
+    const currentSeat = handStateRef.current.currentTurnSeat;
     executeActionLogic(action, amount, currentSeat);
-
-    // Broadcast action to other live multiplayer participants
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'PLAYER_ACTION_EVENT',
-        payload: {
-          action,
-          amount,
-          seatIndex: currentSeat
-        }
-      });
-    }
   };
 
-  // Received Action from other player via Realtime
-  const handleReceivedPlayerAction = (action, amount, seatIndex) => {
-    executeActionLogic(action, amount, seatIndex);
-  };
-
-  // Core Betting Logic (Check, Call, Bet, Raise, Fold, Blinds Option)
+  // Core Betting Logic (Check, Call, Bet, Raise, Fold)
   const executeActionLogic = (action, amount, currentSeat) => {
-    const playerIndex = players.findIndex((p) => p.seat_index === currentSeat);
+    const currentPlayers = playersRef.current;
+    const currentHandState = handStateRef.current;
+
+    const playerIndex = currentPlayers.findIndex((p) => p.seat_index === currentSeat);
     if (playerIndex === -1) return;
 
-    const player = players[playerIndex];
-    let updatedPlayers = [...players];
-    let newMainPot = handState.mainPot;
-    let newCurrentBet = handState.currentBet;
-    let newMinRaise = handState.minRaise;
+    const player = currentPlayers[playerIndex];
+    let updatedPlayers = [...currentPlayers];
+    let newMainPot = currentHandState.mainPot;
+    let newCurrentBet = currentHandState.currentBet;
+    let newMinRaise = currentHandState.minRaise;
+    let actionAnnouncement = '';
+
+    const actorInfo = {
+      username: player.username,
+      action,
+      amount,
+      seatIndex: currentSeat
+    };
 
     if (action === 'fold') {
       playFold();
@@ -762,17 +846,17 @@ export const PokerTable = ({
         status: 'folded',
         last_action: 'fold'
       };
-      setAnnouncement(`${player.username} Folded`);
+      actionAnnouncement = `${player.username} Folded`;
     } else if (action === 'check') {
       playCheckKnock();
       updatedPlayers[playerIndex] = {
         ...player,
         last_action: 'check'
       };
-      setAnnouncement(`${player.username} Checked`);
+      actionAnnouncement = `${player.username} Checked`;
     } else if (action === 'call') {
       playChipClink();
-      const callDiff = Math.min(player.chips, handState.currentBet - player.current_round_bet);
+      const callDiff = Math.min(player.chips, currentHandState.currentBet - player.current_round_bet);
       const newChips = player.chips - callDiff;
       newMainPot += callDiff;
 
@@ -784,13 +868,14 @@ export const PokerTable = ({
         status: newChips === 0 ? 'all_in' : 'active',
         last_action: 'call'
       };
-      setAnnouncement(`${player.username} Called ${formatPoints(callDiff)}`);
+      actionAnnouncement = `${player.username} Called ${formatPoints(callDiff)}`;
+      triggerChipsFlight(updatedPlayers);
     } else if (action === 'bet' || action === 'raise') {
       playChipClink();
       const addBet = Math.min(player.chips, amount - player.current_round_bet);
       const newChips = player.chips - addBet;
       newMainPot += addBet;
-      newMinRaise = Math.max(gameRoom?.bigBlind || 20, amount - handState.currentBet);
+      newMinRaise = Math.max(gameRoom?.bigBlind || 20, amount - currentHandState.currentBet);
       newCurrentBet = amount;
 
       updatedPlayers[playerIndex] = {
@@ -801,15 +886,14 @@ export const PokerTable = ({
         status: newChips === 0 ? 'all_in' : 'active',
         last_action: action
       };
-      setAnnouncement(`${player.username} ${action.toUpperCase()} to ${formatPoints(amount)}`);
+      actionAnnouncement = `${player.username} ${action.toUpperCase()} to ${formatPoints(amount)}`;
+      triggerChipsFlight(updatedPlayers);
     }
-
-    setPlayers(updatedPlayers);
 
     // Check for uncontested winner (all folded except one)
     const remainingInHand = updatedPlayers.filter((p) => p.status === 'active' || p.status === 'all_in');
     if (remainingInHand.length === 1) {
-      resolveUncontestedWinner(remainingInHand[0], newMainPot, updatedPlayers);
+      resolveUncontestedWinner(remainingInHand[0], newMainPot, updatedPlayers, actorInfo);
       return;
     }
 
@@ -819,37 +903,44 @@ export const PokerTable = ({
     );
 
     if (needToAct.length === 0) {
-      advanceStreet(updatedPlayers, newMainPot);
+      advanceStreet(updatedPlayers, newMainPot, actorInfo);
     } else {
       const nextSeat = getNextTurnSeat(currentSeat, updatedPlayers);
-      const nextPlayer = updatedPlayers.find(p => p.seat_index === nextSeat);
-      setHandState((prev) => ({
-        ...prev,
+      const nextPlayer = updatedPlayers.find((p) => p.seat_index === nextSeat);
+
+      const nextHandState = {
+        ...currentHandState,
         mainPot: newMainPot,
         currentBet: newCurrentBet,
         minRaise: newMinRaise,
         currentTurnSeat: nextSeat
-      }));
-      setAnnouncement(`${nextPlayer?.username}'s Turn`);
+      };
+
+      const announcementMsg = `${actionAnnouncement} • ${nextPlayer?.username || 'Player'}'s Turn`;
+
+      broadcastTableState(updatedPlayers, nextHandState, announcementMsg, [], actorInfo);
     }
   };
 
   const getNextTurnSeat = (fromSeat, playersList) => {
-    const total = playersList.length;
-    for (let i = 1; i <= total; i++) {
-      const seat = (fromSeat + i) % total;
-      const p = playersList.find((pl) => pl.seat_index === seat);
-      if (p && p.status === 'active' && p.chips > 0) {
-        return seat;
-      }
-    }
-    return (fromSeat + 1) % total;
+    const activeSeats = playersList
+      .filter((p) => p.status === 'active' && p.chips > 0)
+      .map((p) => p.seat_index)
+      .sort((a, b) => a - b);
+
+    if (activeSeats.length === 0) return fromSeat;
+
+    const nextHigher = activeSeats.find((s) => s > fromSeat);
+    if (nextHigher !== undefined) return nextHigher;
+
+    return activeSeats[0];
   };
 
-  const advanceStreet = (playersList, currentPot) => {
+  const advanceStreet = (playersList, currentPot, actorInfo) => {
+    const currentHandState = handStateRef.current;
     let nextPhase = 'flop';
-    let newCommunity = [...handState.communityCards];
-    let remainingDeck = [...handState.deck];
+    let newCommunity = [...currentHandState.communityCards];
+    let remainingDeck = [...currentHandState.deck];
 
     triggerChipsFlight(playersList);
     playCardDeal();
@@ -861,30 +952,29 @@ export const PokerTable = ({
       last_action: p.status === 'folded' ? 'fold' : null
     }));
 
-    if (handState.phase === 'preflop') {
+    if (currentHandState.phase === 'preflop') {
       nextPhase = 'flop';
       remainingDeck.shift(); // burn
       newCommunity.push(remainingDeck.shift(), remainingDeck.shift(), remainingDeck.shift());
-    } else if (handState.phase === 'flop') {
+    } else if (currentHandState.phase === 'flop') {
       nextPhase = 'turn';
       remainingDeck.shift();
       newCommunity.push(remainingDeck.shift());
-    } else if (handState.phase === 'turn') {
+    } else if (currentHandState.phase === 'turn') {
       nextPhase = 'river';
       remainingDeck.shift();
       newCommunity.push(remainingDeck.shift());
-    } else if (handState.phase === 'river') {
-      resolveShowdown(resetPlayers, newCommunity, currentPot);
+    } else if (currentHandState.phase === 'river') {
+      resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
       return;
     }
 
-    // Postflop action starts with first active player clockwise from Dealer Button (typically SB)
-    const firstActor = getNextTurnSeat(handState.dealerSeat, resetPlayers);
-    const actorPlayer = resetPlayers.find(p => p.seat_index === firstActor);
+    // Postflop action starts with first active player clockwise from Dealer Button
+    const firstActor = getNextTurnSeat(currentHandState.dealerSeat, resetPlayers);
+    const actorPlayer = resetPlayers.find((p) => p.seat_index === firstActor);
 
-    setPlayers(resetPlayers);
-    setHandState((prev) => ({
-      ...prev,
+    const nextHandState = {
+      ...currentHandState,
       phase: nextPhase,
       communityCards: newCommunity,
       deck: remainingDeck,
@@ -892,11 +982,14 @@ export const PokerTable = ({
       minRaise: gameRoom?.bigBlind || 20,
       mainPot: currentPot,
       currentTurnSeat: firstActor
-    }));
-    setAnnouncement(`${nextPhase.toUpperCase()} Dealt • ${actorPlayer?.username}'s Turn`);
+    };
+
+    const nextAnnouncement = `${nextPhase.toUpperCase()} Dealt • ${actorPlayer?.username || 'Hero'}'s Turn`;
+
+    broadcastTableState(resetPlayers, nextHandState, nextAnnouncement, [], actorInfo);
   };
 
-  const resolveShowdown = (playersList, communityCards, totalPot) => {
+  const resolveShowdown = (playersList, communityCards, totalPot, actorInfo) => {
     const contenders = playersList.filter((p) => p.status === 'active' || p.status === 'all_in');
 
     const evaluations = contenders.map((player) => {
@@ -916,8 +1009,8 @@ export const PokerTable = ({
       return 0;
     });
 
-    const winner = evaluations[0].player;
-    const bestEval = evaluations[0].evaluation;
+    const winner = evaluations[0]?.player || contenders[0];
+    const bestEval = evaluations[0]?.evaluation || { name: 'Winning Hand' };
 
     const revealedPlayers = playersList.map((p) => {
       const isContender = contenders.some((c) => c.seat_index === p.seat_index);
@@ -927,24 +1020,23 @@ export const PokerTable = ({
       return isContender ? { ...p, shownCards: true } : p;
     });
 
-    setPlayers(revealedPlayers);
-    setAnnouncement(`🏆 ${winner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`);
+    const winAnnouncement = `🏆 ${winner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`;
+
     playWinCelebration();
+    confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
 
-    confetti({
-      particleCount: 90,
-      spread: 75,
-      origin: { y: 0.6 }
-    });
-
-    setHandState((prev) => ({
-      ...prev,
+    const nextHandState = {
+      ...handStateRef.current,
       phase: 'showdown',
+      communityCards,
+      mainPot: totalPot,
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: bestEval.name }]
-    }));
+    };
+
+    broadcastTableState(revealedPlayers, nextHandState, winAnnouncement, [], actorInfo);
   };
 
-  const resolveUncontestedWinner = (winner, totalPot, playersList) => {
+  const resolveUncontestedWinner = (winner, totalPot, playersList, actorInfo) => {
     triggerChipsFlight(playersList);
 
     const updated = playersList.map((p) => {
@@ -954,44 +1046,49 @@ export const PokerTable = ({
       return p;
     });
 
-    setPlayers(updated);
-    setAnnouncement(`🏆 ${winner.username} takes ${formatPoints(totalPot)} (All folded)`);
-    playWinCelebration();
+    const winAnnouncement = `🏆 ${winner.username} takes ${formatPoints(totalPot)} (All folded)`;
 
-    let finalCommunity = [...handState.communityCards];
+    playWinCelebration();
+    confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+
+    let finalCommunity = [...handStateRef.current.communityCards];
     if (gameRoom?.showRemainingRiverCards && finalCommunity.length < 5) {
-      const remainingDeck = [...handState.deck];
+      const remainingDeck = [...handStateRef.current.deck];
       const needed = 5 - finalCommunity.length;
       finalCommunity = [...finalCommunity, ...remainingDeck.slice(0, needed)];
     }
 
-    setHandState((prev) => ({
-      ...prev,
+    const nextHandState = {
+      ...handStateRef.current,
       phase: 'ended',
       communityCards: finalCommunity,
+      mainPot: totalPot,
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: 'Uncontested' }]
-    }));
+    };
+
+    broadcastTableState(updated, nextHandState, winAnnouncement, [], actorInfo);
   };
 
   const executeBotTurn = (bot) => {
-    const toCall = handState.currentBet - bot.current_round_bet;
-    const pot = handState.mainPot;
+    const currentHandState = handStateRef.current;
+    const toCall = currentHandState.currentBet - bot.current_round_bet;
+    const pot = currentHandState.mainPot;
     const potOdds = toCall / (pot + toCall || 1);
 
-    const allCards = [...bot.cards, ...handState.communityCards];
+    const allCards = [...bot.cards, ...currentHandState.communityCards];
     const handEval = evaluateHand(allCards);
     const handStrengthTier = handEval.type;
 
     if (toCall === 0) {
       if (handStrengthTier >= 3 && Math.random() > 0.4) {
-        handlePlayerAction('bet', Math.min(bot.chips, handState.currentBet + (gameRoom?.bigBlind || 20) * 2));
+        handlePlayerAction('bet', Math.min(bot.chips, currentHandState.currentBet + (gameRoom?.bigBlind || 20) * 2));
       } else {
         handlePlayerAction('check', 0);
       }
     } else {
       if (handStrengthTier >= 4 || (handStrengthTier >= 2 && potOdds < 0.35)) {
         if (handStrengthTier >= 6 && Math.random() > 0.5) {
-          handlePlayerAction('raise', Math.min(bot.chips, handState.currentBet + handState.minRaise * 2));
+          handlePlayerAction('raise', Math.min(bot.chips, currentHandState.currentBet + currentHandState.minRaise * 2));
         } else {
           handlePlayerAction('call', toCall);
         }
@@ -1004,10 +1101,12 @@ export const PokerTable = ({
   };
 
   const handleTurnTimeout = () => {
-    const currentP = players.find((p) => p.seat_index === handState.currentTurnSeat);
+    if (handStateRef.current.currentTurnSeat !== mySeatIndexRef.current) return;
+
+    const currentP = playersRef.current.find((p) => p.seat_index === mySeatIndexRef.current);
     if (!currentP) return;
 
-    if (currentP.current_round_bet === handState.currentBet) {
+    if (currentP.current_round_bet === handStateRef.current.currentBet) {
       handlePlayerAction('check', 0);
     } else {
       handlePlayerAction('fold', 0);
