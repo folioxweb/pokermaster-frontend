@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
   Plus,
@@ -39,6 +39,7 @@ export const LobbyPage = ({
   const [startingStack, setStartingStack] = useState(1500);
   const [turnTime, setTurnTime] = useState(25);
   const [creatingTable, setCreatingTable] = useState(false);
+  const isCreatingRef = useRef(false);
 
   // Join Code State
   const [joinCode, setJoinCode] = useState('');
@@ -53,27 +54,53 @@ export const LobbyPage = ({
   const [allInMinRaiseException, setAllInMinRaiseException] = useState(true);
   const [showRemainingRiverCards, setShowRemainingRiverCards] = useState(false);
 
-  // Fetch Active Rooms
+  // Fetch Active Rooms & Auto-Prune Abandoned Empty Tables
   const fetchRooms = async () => {
     setLoadingRooms(true);
     setErrorMsg(null);
     try {
       const { data, error } = await supabase.rpc('get_active_poker_rooms');
-      if (error) {
+      let roomList = [];
+      if (!error && Array.isArray(data)) {
+        roomList = data;
+      } else {
         // Fallback direct table query
-        const { data: directData, error: dirErr } = await supabase
+        const { data: directData } = await supabase
           .from('poker_rooms')
           .select('*')
           .neq('status', 'closed')
           .neq('status', 'ended')
           .order('created_at', { ascending: false });
-        if (!dirErr && directData) {
-          setRooms(directData);
+        if (directData) roomList = directData;
+      }
+
+      const now = Date.now();
+      const validRooms = [];
+      const staleEmptyIds = [];
+
+      for (const r of roomList) {
+        if (r.status === 'closed' || r.status === 'ended') continue;
+        const pCount = Number(r.player_count || 0);
+        const ageMs = r.created_at ? (now - new Date(r.created_at).getTime()) : 0;
+
+        // Any table with 0 players that has been open for > 60 seconds is treated as abandoned.
+        // It is omitted from the public lobby and marked closed.
+        if (pCount === 0 && ageMs > 60000) {
+          staleEmptyIds.push(r.id);
         } else {
-          setRooms([]);
+          validRooms.push(r);
         }
-      } else if (data) {
-        setRooms((data || []).filter((r) => r.status !== 'closed' && r.status !== 'ended'));
+      }
+
+      setRooms(validRooms);
+
+      // Silently close abandoned 0-player tables in Supabase in background
+      if (staleEmptyIds.length > 0) {
+        supabase
+          .from('poker_rooms')
+          .update({ status: 'closed' })
+          .in('id', staleEmptyIds)
+          .then(() => {});
       }
     } catch (err) {
       console.warn('Failed to fetch rooms:', err);
@@ -105,7 +132,6 @@ export const LobbyPage = ({
       alert('No empty tables to clean up.');
       return;
     }
-    if (!window.confirm(`Close ${emptyRooms.length} empty table(s)?`)) return;
     try {
       const emptyIds = emptyRooms.map((r) => r.id);
       await supabase
@@ -126,15 +152,18 @@ export const LobbyPage = ({
 
   // Handle Create Room
   const handleCreateTable = async (e) => {
-    e.preventDefault();
-    if (creatingTable) return;
+    if (e) e.preventDefault();
+    if (isCreatingRef.current || creatingTable) return;
+    isCreatingRef.current = true;
     setCreatingTable(true);
     setErrorMsg(null);
+
+    const cleanTableName = (tableName || '').trim() || 'Championship Ring';
 
     try {
       const generatedCode = 'PK-' + Math.floor(1000 + Math.random() * 9000);
       const { data: roomId, error } = await supabase.rpc('create_poker_room', {
-        p_name: tableName || 'Ring Game',
+        p_name: cleanTableName,
         p_code: generatedCode,
         p_max_players: maxPlayers,
         p_starting_stack: startingStack,
@@ -145,6 +174,7 @@ export const LobbyPage = ({
 
       if (error) {
         setErrorMsg('Failed to create room: ' + error.message);
+        isCreatingRef.current = false;
         setCreatingTable(false);
         return;
       }
@@ -152,7 +182,7 @@ export const LobbyPage = ({
       onJoinGame({
         roomId: roomId || generatedCode,
         roomCode: generatedCode,
-        roomName: tableName,
+        roomName: cleanTableName,
         isPractice: false,
         maxPlayers,
         startingStack,
@@ -171,7 +201,7 @@ export const LobbyPage = ({
       onJoinGame({
         roomId: localCode,
         roomCode: localCode,
-        roomName: tableName,
+        roomName: cleanTableName,
         isPractice: false,
         maxPlayers,
         startingStack,
@@ -184,6 +214,7 @@ export const LobbyPage = ({
         showRemainingRiverCards
       });
     } finally {
+      isCreatingRef.current = false;
       setCreatingTable(false);
     }
   };
@@ -442,6 +473,7 @@ export const LobbyPage = ({
                     type="text"
                     value={tableName}
                     onChange={(e) => setTableName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     maxLength={30}
                     required
                     className="lobby-form-input"

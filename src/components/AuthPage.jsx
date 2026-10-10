@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ShieldCheck, User, Lock, LogIn, UserPlus, Sparkles, AlertCircle } from 'lucide-react';
+import { ShieldCheck, User, Lock, LogIn, UserPlus, Sparkles, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export const AuthPage = ({ onAuthSuccess }) => {
   const [tab, setTab] = useState('login'); // 'login' | 'register'
@@ -9,6 +9,42 @@ export const AuthPage = ({ onAuthSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState('idle'); // 'idle' | 'checking' | 'available' | 'taken'
+
+  // Real-time username check on register tab
+  React.useEffect(() => {
+    if (tab !== 'register') {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    const cleanUsername = username.trim();
+    if (cleanUsername.length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    setUsernameStatus('checking');
+    const timer = setTimeout(async () => {
+      try {
+        const { data, error: queryErr } = await supabase
+          .from('poker_users')
+          .select('id, username')
+          .ilike('username', cleanUsername)
+          .maybeSingle();
+
+        if (!queryErr && data) {
+          setUsernameStatus('taken');
+        } else {
+          setUsernameStatus('available');
+        }
+      } catch (e) {
+        setUsernameStatus('idle');
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username, tab]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,13 +73,39 @@ export const AuthPage = ({ onAuthSuccess }) => {
 
     try {
       if (tab === 'register') {
+        // 1. Direct pre-check for existing username in poker_users
+        const { data: existingUser } = await supabase
+          .from('poker_users')
+          .select('id, username')
+          .ilike('username', cleanUsername)
+          .maybeSingle();
+
+        if (existingUser) {
+          setError(`Username "${cleanUsername}" already exists. Please choose a different username or switch to Sign In.`);
+          setUsernameStatus('taken');
+          setLoading(false);
+          return;
+        }
+
+        // 2. Call register RPC
         const { data, error: rpcError } = await supabase.rpc('register_poker_user', {
           p_username: cleanUsername,
           p_password: password
         });
 
         if (rpcError) {
-          setError(rpcError.message);
+          const msg = rpcError.message || '';
+          if (
+            msg.toLowerCase().includes('already taken') ||
+            msg.toLowerCase().includes('already exist') ||
+            rpcError.code === 'P0001' ||
+            rpcError.code === '23505'
+          ) {
+            setError(`Username "${cleanUsername}" already exists. Please choose a different username or switch to Sign In.`);
+            setUsernameStatus('taken');
+          } else {
+            setError(msg || 'Registration failed. Please try again.');
+          }
           setLoading(false);
           return;
         }
@@ -52,7 +114,7 @@ export const AuthPage = ({ onAuthSuccess }) => {
           localStorage.setItem('pokermaster_user', JSON.stringify(data.user));
           onAuthSuccess(data.user);
         } else {
-          setError('Registration failed. Please try again.');
+          setError(data?.message || 'Registration failed. Please try again.');
         }
       } else {
         const { data, error: rpcError } = await supabase.rpc('login_poker_user', {
@@ -61,7 +123,7 @@ export const AuthPage = ({ onAuthSuccess }) => {
         });
 
         if (rpcError) {
-          setError(rpcError.message);
+          setError(rpcError.message || 'Login failed. Please verify credentials.');
           setLoading(false);
           return;
         }
@@ -74,16 +136,13 @@ export const AuthPage = ({ onAuthSuccess }) => {
         }
       }
     } catch (err) {
-      // Fallback for offline or local preview mode
-      console.warn('Supabase auth RPC fallback:', err);
-      const guestUser = {
-        id: 'guest_' + Math.random().toString(36).substring(2, 9),
-        username: cleanUsername,
-        chips: 5000,
-        isGuest: true
-      };
-      localStorage.setItem('pokermaster_user', JSON.stringify(guestUser));
-      onAuthSuccess(guestUser);
+      console.error('Auth error:', err);
+      // Explicit error presentation - never silently convert registration to guest!
+      if (tab === 'register') {
+        setError(err.message || 'Registration failed. Please choose another username.');
+      } else {
+        setError(err.message || 'Login failed. Please verify credentials.');
+      }
     } finally {
       setLoading(false);
     }
@@ -166,7 +225,29 @@ export const AuthPage = ({ onAuthSuccess }) => {
               />
             </div>
             {tab === 'register' && (
-              <span className="auth-field-hint">Your unique identity at the poker tables</span>
+              <div style={{ marginTop: '6px' }}>
+                {usernameStatus === 'checking' && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                    <span>Checking availability...</span>
+                  </span>
+                )}
+                {usernameStatus === 'taken' && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#f87171', fontWeight: 700 }}>
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span>Username "{username.trim()}" already exists! Please choose another.</span>
+                  </span>
+                )}
+                {usernameStatus === 'available' && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#34d399', fontWeight: 700 }}>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>Username is available!</span>
+                  </span>
+                )}
+                {usernameStatus === 'idle' && (
+                  <span className="auth-field-hint">Your unique identity at the poker tables</span>
+                )}
+              </div>
             )}
           </div>
 

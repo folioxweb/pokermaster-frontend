@@ -193,6 +193,13 @@ export const PokerTable = ({
       // 5. Upsert current user into database poker_room_players
       if (rid) {
         try {
+          // Delete any existing seat for this user in this room first to guarantee no duplicate seats
+          await supabase
+            .from('poker_room_players')
+            .delete()
+            .eq('room_id', rid)
+            .eq('username', user.username);
+
           await supabase.from('poker_room_players').upsert({
             room_id: rid,
             user_id: user.id || null,
@@ -459,7 +466,8 @@ export const PokerTable = ({
         supabase
           .from('poker_room_players')
           .delete()
-          .match({ room_id: activeRoomIdRef.current, username: user?.username })
+          .eq('room_id', activeRoomIdRef.current)
+          .eq('username', user?.username)
           .then(async () => {
             try {
               const { count } = await supabase
