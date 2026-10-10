@@ -1,0 +1,1196 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <defs>
+    <!-- Card Back -->
+    <g id="back-classic">
+      <rect width="100" height="140" rx="8" fill="#0f172a" stroke="#d4af37" stroke-width="2.5" />
+      <rect x="5" y="5" width="90" height="130" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="0.75" stroke-dasharray="2,2" />
+      <pattern id="card-lattice" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M 0 5 L 5 0 L 10 5 L 5 10 Z" fill="none" stroke="#d4af37" stroke-width="0.6" opacity="0.4" />
+      </pattern>
+      <rect x="8" y="8" width="84" height="124" rx="4" fill="url(#card-lattice)" />
+      <circle cx="50" cy="70" r="18" fill="#0f172a" stroke="#d4af37" stroke-width="1.5" />
+      <polygon points="50,58 54,66 62,70 54,74 50,82 46,74 38,70 46,66" fill="#d4af37" />
+    </g>
+
+    <!-- Card 2s -->
+    <g id="s_2">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">2</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">2</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="2_s">
+      <use href="#s_2" />
+    </g>
+    
+    <!-- Card 3s -->
+    <g id="s_3">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">3</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">3</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="3_s">
+      <use href="#s_3" />
+    </g>
+    
+    <!-- Card 4s -->
+    <g id="s_4">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">4</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">4</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="4_s">
+      <use href="#s_4" />
+    </g>
+    
+    <!-- Card 5s -->
+    <g id="s_5">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">5</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">5</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="5_s">
+      <use href="#s_5" />
+    </g>
+    
+    <!-- Card 6s -->
+    <g id="s_6">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">6</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">6</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="6_s">
+      <use href="#s_6" />
+    </g>
+    
+    <!-- Card 7s -->
+    <g id="s_7">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">7</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">7</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="7_s">
+      <use href="#s_7" />
+    </g>
+    
+    <!-- Card 8s -->
+    <g id="s_8">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">8</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">8</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="8_s">
+      <use href="#s_8" />
+    </g>
+    
+    <!-- Card 9s -->
+    <g id="s_9">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">9</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">9</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="9_s">
+      <use href="#s_9" />
+    </g>
+    
+    <!-- Card Ts -->
+    <g id="s_T">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">10</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">10</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="T_s">
+      <use href="#s_T" />
+    </g>
+    
+    <!-- Card Js -->
+    <g id="s_J">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="J_s">
+      <use href="#s_J" />
+    </g>
+    
+    <!-- Card Qs -->
+    <g id="s_Q">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">Q</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="Q_s">
+      <use href="#s_Q" />
+    </g>
+    
+    <!-- Card Ks -->
+    <g id="s_K">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="K_s">
+      <use href="#s_K" />
+    </g>
+    
+    <!-- Card As -->
+    <g id="s_A">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">A</text>
+      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#111827" font-family="system-ui, sans-serif">♠</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, sans-serif">A</text>
+        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      </g>
+    </g>
+    <g id="A_s">
+      <use href="#s_A" />
+    </g>
+    
+    <!-- Card 2h -->
+    <g id="h_2">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">2</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">2</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="2_h">
+      <use href="#h_2" />
+    </g>
+    
+    <!-- Card 3h -->
+    <g id="h_3">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">3</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">3</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="3_h">
+      <use href="#h_3" />
+    </g>
+    
+    <!-- Card 4h -->
+    <g id="h_4">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">4</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">4</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="4_h">
+      <use href="#h_4" />
+    </g>
+    
+    <!-- Card 5h -->
+    <g id="h_5">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">5</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">5</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="5_h">
+      <use href="#h_5" />
+    </g>
+    
+    <!-- Card 6h -->
+    <g id="h_6">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">6</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">6</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="6_h">
+      <use href="#h_6" />
+    </g>
+    
+    <!-- Card 7h -->
+    <g id="h_7">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">7</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">7</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="7_h">
+      <use href="#h_7" />
+    </g>
+    
+    <!-- Card 8h -->
+    <g id="h_8">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">8</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">8</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="8_h">
+      <use href="#h_8" />
+    </g>
+    
+    <!-- Card 9h -->
+    <g id="h_9">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">9</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">9</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="9_h">
+      <use href="#h_9" />
+    </g>
+    
+    <!-- Card Th -->
+    <g id="h_T">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">10</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">10</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="T_h">
+      <use href="#h_T" />
+    </g>
+    
+    <!-- Card Jh -->
+    <g id="h_J">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#f43f5e" opacity="0.12" stroke="#e11d48" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#f43f5e" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#e11d48" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#e11d48">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="J_h">
+      <use href="#h_J" />
+    </g>
+    
+    <!-- Card Qh -->
+    <g id="h_Q">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">Q</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#f43f5e" opacity="0.12" stroke="#e11d48" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#f43f5e" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#e11d48" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#e11d48">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="Q_h">
+      <use href="#h_Q" />
+    </g>
+    
+    <!-- Card Kh -->
+    <g id="h_K">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#f43f5e" opacity="0.12" stroke="#e11d48" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#f43f5e" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#e11d48" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#e11d48">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="K_h">
+      <use href="#h_K" />
+    </g>
+    
+    <!-- Card Ah -->
+    <g id="h_A">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">A</text>
+      <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#e11d48" font-family="system-ui, sans-serif">♥</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#e11d48" font-family="Outfit, Inter, sans-serif">A</text>
+        <text x="10" y="36" font-size="13" fill="#e11d48">♥</text>
+      </g>
+    </g>
+    <g id="A_h">
+      <use href="#h_A" />
+    </g>
+    
+    <!-- Card 2d -->
+    <g id="d_2">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">2</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">2</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="2_d">
+      <use href="#d_2" />
+    </g>
+    
+    <!-- Card 3d -->
+    <g id="d_3">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">3</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">3</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="3_d">
+      <use href="#d_3" />
+    </g>
+    
+    <!-- Card 4d -->
+    <g id="d_4">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">4</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">4</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="4_d">
+      <use href="#d_4" />
+    </g>
+    
+    <!-- Card 5d -->
+    <g id="d_5">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">5</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">5</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="5_d">
+      <use href="#d_5" />
+    </g>
+    
+    <!-- Card 6d -->
+    <g id="d_6">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">6</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">6</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="6_d">
+      <use href="#d_6" />
+    </g>
+    
+    <!-- Card 7d -->
+    <g id="d_7">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">7</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">7</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="7_d">
+      <use href="#d_7" />
+    </g>
+    
+    <!-- Card 8d -->
+    <g id="d_8">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">8</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">8</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="8_d">
+      <use href="#d_8" />
+    </g>
+    
+    <!-- Card 9d -->
+    <g id="d_9">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">9</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">9</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="9_d">
+      <use href="#d_9" />
+    </g>
+    
+    <!-- Card Td -->
+    <g id="d_T">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">10</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">10</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="T_d">
+      <use href="#d_T" />
+    </g>
+    
+    <!-- Card Jd -->
+    <g id="d_J">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#38bdf8" opacity="0.12" stroke="#0284c7" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#38bdf8" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#0284c7" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#0284c7">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="J_d">
+      <use href="#d_J" />
+    </g>
+    
+    <!-- Card Qd -->
+    <g id="d_Q">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">Q</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#38bdf8" opacity="0.12" stroke="#0284c7" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#38bdf8" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#0284c7" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#0284c7">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="Q_d">
+      <use href="#d_Q" />
+    </g>
+    
+    <!-- Card Kd -->
+    <g id="d_K">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#38bdf8" opacity="0.12" stroke="#0284c7" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#38bdf8" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#0284c7" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#0284c7">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="K_d">
+      <use href="#d_K" />
+    </g>
+    
+    <!-- Card Ad -->
+    <g id="d_A">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">A</text>
+      <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#0284c7" font-family="system-ui, sans-serif">♦</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#0284c7" font-family="Outfit, Inter, sans-serif">A</text>
+        <text x="10" y="36" font-size="13" fill="#0284c7">♦</text>
+      </g>
+    </g>
+    <g id="A_d">
+      <use href="#d_A" />
+    </g>
+    
+    <!-- Card 2c -->
+    <g id="c_2">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">2</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">2</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="2_c">
+      <use href="#c_2" />
+    </g>
+    
+    <!-- Card 3c -->
+    <g id="c_3">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">3</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">3</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="3_c">
+      <use href="#c_3" />
+    </g>
+    
+    <!-- Card 4c -->
+    <g id="c_4">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">4</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">4</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="4_c">
+      <use href="#c_4" />
+    </g>
+    
+    <!-- Card 5c -->
+    <g id="c_5">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">5</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">5</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="5_c">
+      <use href="#c_5" />
+    </g>
+    
+    <!-- Card 6c -->
+    <g id="c_6">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">6</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">6</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="6_c">
+      <use href="#c_6" />
+    </g>
+    
+    <!-- Card 7c -->
+    <g id="c_7">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">7</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">7</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="7_c">
+      <use href="#c_7" />
+    </g>
+    
+    <!-- Card 8c -->
+    <g id="c_8">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">8</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">8</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="8_c">
+      <use href="#c_8" />
+    </g>
+    
+    <!-- Card 9c -->
+    <g id="c_9">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">9</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">9</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="9_c">
+      <use href="#c_9" />
+    </g>
+    
+    <!-- Card Tc -->
+    <g id="c_T">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">10</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">10</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="T_c">
+      <use href="#c_T" />
+    </g>
+    
+    <!-- Card Jc -->
+    <g id="c_J">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#10b981" opacity="0.12" stroke="#059669" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#10b981" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#059669" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#059669">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="J_c">
+      <use href="#c_J" />
+    </g>
+    
+    <!-- Card Qc -->
+    <g id="c_Q">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">Q</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#10b981" opacity="0.12" stroke="#059669" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#10b981" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#059669" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#059669">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">Q</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="Q_c">
+      <use href="#c_Q" />
+    </g>
+    
+    <!-- Card Kc -->
+    <g id="c_K">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <rect x="26" y="42" width="48" height="56" rx="4" fill="#10b981" opacity="0.12" stroke="#059669" stroke-width="0.8" />
+        <circle cx="50" cy="62" r="14" fill="#10b981" opacity="0.25" />
+        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#059669" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#059669">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="K_c">
+      <use href="#c_K" />
+    </g>
+    
+    <!-- Card Ac -->
+    <g id="c_A">
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+      <!-- Top Left Rank & Pip -->
+      <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">A</text>
+      <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      
+      <!-- Center Art -->
+      
+        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#059669" font-family="system-ui, sans-serif">♣</text>
+      
+
+      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <g transform="rotate(180 50 70)">
+        <text x="10" y="22" font-size="16" font-weight="800" fill="#059669" font-family="Outfit, Inter, sans-serif">A</text>
+        <text x="10" y="36" font-size="13" fill="#059669">♣</text>
+      </g>
+    </g>
+    <g id="A_c">
+      <use href="#c_A" />
+    </g>
+    
+  </defs>
+</svg>
