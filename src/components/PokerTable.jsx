@@ -388,7 +388,22 @@ export const PokerTable = ({
           .from('poker_room_players')
           .delete()
           .match({ room_id: activeRoomIdRef.current, username: user?.username })
-          .then(() => {});
+          .then(async () => {
+            try {
+              const { count } = await supabase
+                .from('poker_room_players')
+                .select('*', { count: 'exact', head: true })
+                .eq('room_id', activeRoomIdRef.current);
+              if (count === 0) {
+                await supabase
+                  .from('poker_rooms')
+                  .update({ status: 'closed' })
+                  .eq('id', activeRoomIdRef.current);
+              }
+            } catch (err) {
+              console.warn('Error auto-closing empty table:', err);
+            }
+          });
       }
     };
   }, [gameRoom, user]);

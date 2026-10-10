@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Shuffle
+  Shuffle,
+  Trash2
 } from 'lucide-react';
 
 import { formatPoints, formatPointsOnly } from '../lib/formatters';
@@ -63,6 +64,8 @@ export const LobbyPage = ({
         const { data: directData, error: dirErr } = await supabase
           .from('poker_rooms')
           .select('*')
+          .neq('status', 'closed')
+          .neq('status', 'ended')
           .order('created_at', { ascending: false });
         if (!dirErr && directData) {
           setRooms(directData);
@@ -70,13 +73,48 @@ export const LobbyPage = ({
           setRooms([]);
         }
       } else if (data) {
-        setRooms(data);
+        setRooms((data || []).filter((r) => r.status !== 'closed' && r.status !== 'ended'));
       }
     } catch (err) {
       console.warn('Failed to fetch rooms:', err);
       setRooms([]);
     } finally {
       setLoadingRooms(false);
+    }
+  };
+
+  // Close / Delete a Table
+  const handleCloseRoom = async (roomId, e) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm('Are you sure you want to close and remove this table?')) return;
+    try {
+      await supabase
+        .from('poker_rooms')
+        .update({ status: 'closed' })
+        .eq('id', roomId);
+      fetchRooms();
+    } catch (err) {
+      console.warn('Error closing room:', err);
+    }
+  };
+
+  // Clean all empty tables with 0 players
+  const handleCleanEmptyRooms = async () => {
+    const emptyRooms = rooms.filter((r) => (r.player_count || 0) === 0);
+    if (emptyRooms.length === 0) {
+      alert('No empty tables to clean up.');
+      return;
+    }
+    if (!window.confirm(`Close ${emptyRooms.length} empty table(s)?`)) return;
+    try {
+      const emptyIds = emptyRooms.map((r) => r.id);
+      await supabase
+        .from('poker_rooms')
+        .update({ status: 'closed' })
+        .in('id', emptyIds);
+      fetchRooms();
+    } catch (err) {
+      console.warn('Error cleaning empty rooms:', err);
     }
   };
 
@@ -89,6 +127,7 @@ export const LobbyPage = ({
   // Handle Create Room
   const handleCreateTable = async (e) => {
     e.preventDefault();
+    if (creatingTable) return;
     setCreatingTable(true);
     setErrorMsg(null);
 
@@ -291,14 +330,27 @@ export const LobbyPage = ({
                 <h2 className="lobby-section-title">Public Poker Tables</h2>
                 <p className="lobby-section-desc">Join an existing ring table or create your own</p>
               </div>
-              <button
-                onClick={fetchRooms}
-                className="lobby-refresh-btn"
-                title="Refresh Table List"
-              >
-                <RefreshCw className={`w-4 h-4 ${loadingRooms ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {rooms.some((r) => (r.player_count || 0) === 0) && (
+                  <button
+                    onClick={handleCleanEmptyRooms}
+                    className="lobby-refresh-btn"
+                    style={{ borderColor: '#ef4444', color: '#f87171' }}
+                    title="Close all empty tables"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clean Empty ({rooms.filter((r) => (r.player_count || 0) === 0).length})</span>
+                  </button>
+                )}
+                <button
+                  onClick={fetchRooms}
+                  className="lobby-refresh-btn"
+                  title="Refresh Table List"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingRooms ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
 
             {rooms.length === 0 ? (
@@ -325,15 +377,26 @@ export const LobbyPage = ({
                         <h4 className="lobby-room-name">{r.name}</h4>
                         <span className="lobby-room-code">Code: {r.code}</span>
                       </div>
-                      <span className={`lobby-room-status-badge ${r.status === 'in_progress' ? 'live' : 'waiting'}`}>
-                        {r.status === 'in_progress' ? 'Live Hand' : 'Open Seats'}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className={`lobby-room-status-badge ${(r.player_count || 0) > 0 ? (r.status === 'in_progress' ? 'live' : 'waiting') : 'empty'}`}>
+                          {(r.player_count || 0) > 0
+                            ? (r.status === 'in_progress' ? 'Live Hand' : 'Open Seats')
+                            : 'Empty'}
+                        </span>
+                        <button
+                          onClick={(e) => handleCloseRoom(r.id, e)}
+                          className="lobby-room-delete-btn"
+                          title="Close / Delete Table"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-400" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="lobby-room-stats">
                       <div className="lobby-stat-item">
                         <Users className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Seats: {r.player_count || 1} / {r.max_players || 6}</span>
+                        <span>Seats: {r.player_count ?? 0} / {r.max_players || 6}</span>
                       </div>
                       <div className="lobby-stat-item">
                         <Coins className="w-3.5 h-3.5 text-amber-400" />
