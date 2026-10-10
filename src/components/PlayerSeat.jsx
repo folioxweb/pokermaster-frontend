@@ -9,6 +9,7 @@ export const PlayerSeat = ({
   seatIndex = 0,
   position = { left: '50%', top: '50%' },
   isHero = false,
+  isHandEnded = false,
   isDealer = false,
   isSB = false,
   isBB = false,
@@ -39,6 +40,16 @@ export const PlayerSeat = ({
 
   const isFolded = player.status === 'folded';
   const isAllIn = player.status === 'all_in';
+  const isSittingOut = player.status === 'sitting_out';
+
+  // CRITICAL POKER SECURITY: Opponent hole cards are STRICTLY protected.
+  // ONLY visible if:
+  // 1. It is Hero's own seat (isHero), OR
+  // 2. The hand has ended at showdown (isHandEnded) AND (player won at showdown OR player explicitly revealed cards)
+  const isCardVisible = Boolean(isHero || (isHandEnded && (isWinner || player.shownCards)));
+
+  // Show hole cards if player has cards or is active in the hand
+  const hasCards = (player.cards && player.cards.length >= 2) || (!isSittingOut && !isHandEnded && !isFolded);
 
   // SVG turn timer circle stroke dashoffset
   const progressRatio = Math.max(0, Math.min(1, turnTimeLeft / turnMaxTime));
@@ -63,19 +74,19 @@ export const PlayerSeat = ({
       </div>
 
       {/* Hole Cards (Rendered neatly above the player pod) */}
-      {player.cards && player.cards.length >= 2 && (
+      {hasCards && (
         <div className={`poker-hole-cards-row ${isHero ? 'hero-cards-row' : ''}`}>
           <CardAsset
-            card={player.cards[0]}
-            hidden={!isHero && !player.shownCards}
-            highlight={isWinner}
+            card={isCardVisible ? player.cards?.[0] : null}
+            hidden={!isCardVisible}
+            highlight={isWinner && isHandEnded}
             isCommunity={false}
             isHero={isHero}
           />
           <CardAsset
-            card={player.cards[1]}
-            hidden={!isHero && !player.shownCards}
-            highlight={isWinner}
+            card={isCardVisible ? player.cards?.[1] : null}
+            hidden={!isCardVisible}
+            highlight={isWinner && isHandEnded}
             isCommunity={false}
             isHero={isHero}
           />

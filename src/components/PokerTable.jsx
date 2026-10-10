@@ -227,7 +227,7 @@ export const PokerTable = ({
         status: 'active',
         last_action: null,
         cards: [],
-        shownCards: true,
+        shownCards: false,
         isBot: false
       };
 
@@ -358,8 +358,8 @@ export const PokerTable = ({
                 ...incomingP,
                 cards: isHero
                   ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
-                  : incomingP.cards,
-                shownCards: isHero || isShowdown || incomingP.shownCards
+                  : (isShowdown ? (incomingP.cards || []) : []),
+                shownCards: isShowdown ? Boolean(incomingP.shownCards) : false
               };
             });
           });
@@ -381,8 +381,8 @@ export const PokerTable = ({
                 ...incomingP,
                 cards: isHero
                   ? (incomingP.cards?.length ? incomingP.cards : localHero?.cards || [])
-                  : incomingP.cards,
-                shownCards: isHero
+                  : [],
+                shownCards: false
               };
             });
           });
@@ -650,7 +650,14 @@ export const PokerTable = ({
 
   // Broadcast full synchronized table state to all connected players
   const broadcastTableState = (newPlayers, newHandState, newAnnouncement, winCards = [], actionInfo = null) => {
-    setPlayers(newPlayers);
+    const isShowdown = newHandState.phase === 'showdown' || newHandState.phase === 'ended';
+    // Strictly ensure shownCards is false during all active betting rounds
+    const sanitizedPlayers = newPlayers.map((p) => ({
+      ...p,
+      shownCards: isShowdown ? Boolean(p.shownCards) : false
+    }));
+
+    setPlayers(sanitizedPlayers);
     setHandState(newHandState);
     if (newAnnouncement) setAnnouncement(newAnnouncement);
     setWinningCards(winCards || []);
@@ -660,7 +667,7 @@ export const PokerTable = ({
         type: 'broadcast',
         event: 'TABLE_STATE_SYNC',
         payload: {
-          players: newPlayers,
+          players: sanitizedPlayers,
           handState: newHandState,
           announcement: newAnnouncement,
           winningCards: winCards || [],
@@ -1262,6 +1269,7 @@ export const PokerTable = ({
                     seatIndex={player.seat_index}
                     position={pos}
                     isHero={player.seat_index === mySeatIndex}
+                    isHandEnded={isWaitingOrEnded}
                     isDealer={player.seat_index === handState.dealerSeat}
                     isSB={player.seat_index === handState.sbSeat}
                     isBB={player.seat_index === handState.bbSeat}
