@@ -6,6 +6,7 @@ export const CardAsset = ({
   suit = null,
   hidden = false,
   highlight = false,
+  isCommunity = false,  // true for 5 community cards, false for hole cards
   className = '',
   style = {}
 }) => {
@@ -17,12 +18,13 @@ export const CardAsset = ({
     s = card[1].toLowerCase();
   }
 
-  const highlightClass = highlight ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-500/50 scale-105' : '';
+  const sizeClass = isCommunity ? 'card-community' : 'card-hole';
+  const highlightClass = highlight ? 'card-highlight' : '';
 
   if (hidden || (!r && !s)) {
     return (
-      <div className={`card-wrapper select-none transition-transform duration-200 ${highlightClass} ${className}`} style={style}>
-        <svg className="card-svg w-full h-full drop-shadow-md rounded-[7px]" viewBox="0 0 100 140">
+      <div className={`card-wrapper ${sizeClass} ${highlightClass} ${className}`} style={style}>
+        <svg className="card-svg" viewBox="0 0 100 140">
           <use href="/assets/cards/cards-deck.svg#back-classic" />
         </svg>
       </div>
@@ -30,8 +32,8 @@ export const CardAsset = ({
   }
 
   return (
-    <div className={`card-wrapper select-none transition-transform duration-200 ${highlightClass} ${className}`} style={style}>
-      <svg className="card-svg w-full h-full drop-shadow-md rounded-[7px]" viewBox="0 0 100 140">
+    <div className={`card-wrapper ${sizeClass} ${highlightClass} ${className}`} style={style}>
+      <svg className="card-svg" viewBox="0 0 100 140">
         <use href={`/assets/cards/cards-deck.svg#${s}_${r}`} />
       </svg>
     </div>

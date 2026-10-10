@@ -4,11 +4,12 @@ import { playChipClink } from '../lib/soundEffects';
 export const PlayerHUD = ({
   isMyTurn = false,
   heroPlayer = null,
+  currentTurnPlayerName = '',
   currentBet = 0,
   minRaise = 20,
   bigBlind = 20,
   mainPot = 0,
-  handRank = null, // e.g. { name: 'Two Pair', description: 'Two Pair, Kings and Eights' }
+  handRank = null, // { name: 'Two Pair', description: 'Two Pair, Kings and Queens' }
   onAction = null  // (action, amount) => void
 }) => {
   if (!heroPlayer || heroPlayer.status === 'folded' || heroPlayer.status === 'sitting_out') {
@@ -32,7 +33,6 @@ export const PlayerHUD = ({
     playChipClink();
   };
 
-  // Quick Bet Presets
   const applyPreset = (type) => {
     let amt = minBetAllowed;
     if (type === 'min') {
@@ -53,80 +53,40 @@ export const PlayerHUD = ({
   };
 
   return (
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-40 select-none">
-      {/* Hero Hand Rank Badge */}
+    <div className="poker-hud-wrapper">
+      {/* Hero Hand Rank Preview Pill */}
       {handRank && handRank.description && (
-        <div className="flex justify-center mb-2">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-slate-900/95 border border-indigo-500/50 shadow-xl backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs font-black tracking-wide text-indigo-300 uppercase">
+        <div className="poker-hand-rank-pill">
+          <div className="poker-hand-rank-content">
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
+            <span style={{ fontWeight: 900, color: '#a5b4fc', textTransform: 'uppercase' }}>
               {handRank.name}:
             </span>
-            <span className="text-xs font-bold text-white">
+            <span style={{ fontWeight: 700, color: '#ffffff' }}>
               {handRank.description}
             </span>
           </div>
         </div>
       )}
 
-      {/* Main Action HUD Panel */}
-      <div
-        className={`rounded-2xl p-3 backdrop-blur-xl border transition-all duration-300 shadow-2xl ${
-          isMyTurn
-            ? 'bg-slate-950/95 border-amber-500/70 shadow-amber-500/20 ring-1 ring-amber-400/40'
-            : 'bg-slate-950/80 border-slate-800/80 opacity-75'
-        }`}
-      >
+      {/* Main HUD Panel */}
+      <div className={`poker-hud-panel ${isMyTurn ? 'active' : ''}`}>
         {isMyTurn ? (
-          <div className="flex flex-col space-y-2.5">
+          <div>
             {/* Quick Raise Presets Bar & Slider */}
             {heroPlayer.chips > callAmount && (
-              <div className="flex flex-col space-y-1.5 pt-0.5">
-                {/* Presets */}
-                <div className="grid grid-cols-6 gap-1.5">
-                  <button
-                    onClick={() => applyPreset('min')}
-                    className="py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                  >
-                    Min
-                  </button>
-                  <button
-                    onClick={() => applyPreset('2.5bb')}
-                    className="py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                  >
-                    2.5x BB
-                  </button>
-                  <button
-                    onClick={() => applyPreset('3bb')}
-                    className="py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                  >
-                    3x BB
-                  </button>
-                  <button
-                    onClick={() => applyPreset('half_pot')}
-                    className="py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                  >
-                    1/2 Pot
-                  </button>
-                  <button
-                    onClick={() => applyPreset('pot')}
-                    className="py-1 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
-                  >
-                    Pot
-                  </button>
-                  <button
-                    onClick={() => applyPreset('all_in')}
-                    className="py-1 rounded-lg text-[10px] font-extrabold bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700/60 transition cursor-pointer"
-                  >
-                    All-In
-                  </button>
+              <div>
+                <div className="poker-presets-bar">
+                  <button type="button" onClick={() => applyPreset('min')} className="poker-preset-btn">Min</button>
+                  <button type="button" onClick={() => applyPreset('2.5bb')} className="poker-preset-btn">2.5x</button>
+                  <button type="button" onClick={() => applyPreset('3bb')} className="poker-preset-btn">3x</button>
+                  <button type="button" onClick={() => applyPreset('half_pot')} className="poker-preset-btn">1/2 Pot</button>
+                  <button type="button" onClick={() => applyPreset('pot')} className="poker-preset-btn">Pot</button>
+                  <button type="button" onClick={() => applyPreset('all_in')} className="poker-preset-btn" style={{ background: '#881337', color: '#fecdd3', borderColor: '#be123c' }}>All-In</button>
                 </div>
 
-                {/* Slider with Bet Counter */}
-                <div className="flex items-center space-x-3 px-1">
-                  <span className="text-[11px] font-bold text-slate-400">
-                    ${minBetAllowed}
-                  </span>
+                <div className="poker-slider-row">
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8' }}>${minBetAllowed}</span>
                   <input
                     type="range"
                     min={minBetAllowed}
@@ -134,74 +94,81 @@ export const PlayerHUD = ({
                     step={bigBlind}
                     value={betAmount}
                     onChange={handleSliderChange}
-                    className="flex-1 h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                    className="poker-slider"
                   />
-                  <span className="text-[11px] font-bold text-amber-300">
-                    ${betAmount}
-                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 900, color: '#fbbf24' }}>${betAmount}</span>
                 </div>
               </div>
             )}
 
-            {/* Core Action Buttons: Fold, Check/Call, Bet/Raise */}
-            <div className="grid grid-cols-3 gap-2.5">
+            {/* 3 Core Action Buttons: Fold, Check/Call, Bet/Raise */}
+            <div className="poker-actions-grid">
               {/* FOLD */}
               <button
+                type="button"
                 onClick={() => onAction && onAction('fold', 0)}
-                className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white font-extrabold shadow-lg shadow-rose-900/40 border border-rose-400/40 active:scale-95 transition cursor-pointer"
+                className="poker-action-btn fold"
               >
-                <span className="text-sm tracking-wide">FOLD</span>
-                <span className="text-[10px] opacity-80">Give up hand</span>
+                <span className="poker-btn-main-text">FOLD</span>
+                <span className="poker-btn-sub-text">Give up hand</span>
               </button>
 
               {/* CHECK or CALL */}
               {canCheck ? (
                 <button
+                  type="button"
                   onClick={() => onAction && onAction('check', 0)}
-                  className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white font-extrabold shadow-lg shadow-emerald-900/40 border border-emerald-400/40 active:scale-95 transition cursor-pointer"
+                  className="poker-action-btn check"
                 >
-                  <span className="text-sm tracking-wide">CHECK</span>
-                  <span className="text-[10px] opacity-80">Pass action</span>
+                  <span className="poker-btn-main-text">CHECK</span>
+                  <span className="poker-btn-sub-text">Pass action</span>
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => onAction && onAction('call', callAmount)}
-                  className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-gradient-to-b from-sky-600 to-sky-800 hover:from-sky-500 hover:to-sky-700 text-white font-extrabold shadow-lg shadow-sky-900/40 border border-sky-400/40 active:scale-95 transition cursor-pointer"
+                  className="poker-action-btn call"
                 >
-                  <span className="text-sm tracking-wide">CALL</span>
-                  <span className="text-[10px] opacity-80">${Math.min(heroPlayer.chips, callAmount)}</span>
+                  <span className="poker-btn-main-text">CALL ${Math.min(heroPlayer.chips, callAmount)}</span>
+                  <span className="poker-btn-sub-text">Match bet</span>
                 </button>
               )}
 
               {/* BET or RAISE */}
               {heroPlayer.chips > callAmount ? (
                 <button
+                  type="button"
                   onClick={() => onAction && onAction(currentBet === 0 ? 'bet' : 'raise', betAmount)}
-                  className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-slate-950 font-black shadow-lg shadow-amber-900/40 border border-amber-300 active:scale-95 transition cursor-pointer"
+                  className="poker-action-btn raise"
                 >
-                  <span className="text-sm tracking-wide">
-                    {currentBet === 0 ? 'BET' : 'RAISE'}
+                  <span className="poker-btn-main-text">
+                    {currentBet === 0 ? 'BET' : 'RAISE TO'} ${betAmount}
                   </span>
-                  <span className="text-[10px] font-bold opacity-90">${betAmount}</span>
+                  <span className="poker-btn-sub-text">Increase stakes</span>
                 </button>
               ) : (
                 <button
+                  type="button"
                   disabled
-                  className="flex flex-col items-center justify-center py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold border border-slate-700 cursor-not-allowed"
+                  className="poker-action-btn"
+                  style={{ background: '#1e293b', color: '#64748b', cursor: 'not-allowed', border: '1px solid #334155' }}
                 >
-                  <span className="text-sm tracking-wide">RAISE</span>
-                  <span className="text-[10px]">No chips</span>
+                  <span className="poker-btn-main-text">ALL IN</span>
+                  <span className="poker-btn-sub-text">No chips left</span>
                 </button>
               )}
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between px-2 py-1">
-            <span className="text-xs font-bold text-slate-400">
-              Waiting for other players...
-            </span>
-            <span className="text-xs font-extrabold text-amber-300">
-              Stack: ${heroPlayer.chips?.toLocaleString()}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1' }}>
+                Waiting for {currentTurnPlayerName || 'other players'} to act...
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', fontWeight: 900, color: '#fbbf24' }}>
+              Your Stack: ${heroPlayer.chips?.toLocaleString()}
             </span>
           </div>
         )}

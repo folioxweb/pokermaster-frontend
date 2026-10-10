@@ -6,6 +6,8 @@ import {
   ArrowLeft,
   Copy,
   Check,
+  Play,
+  UserPlus,
   RefreshCw,
   Users
 } from 'lucide-react';
@@ -32,25 +34,27 @@ export const PokerTable = ({
   user,
   onLeaveTable
 }) => {
-  const [feltTheme, setFeltTheme] = useState('emerald'); // 'emerald' | 'midnight'
+  const [feltTheme, setFeltTheme] = useState('emerald');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [copiedCode, setCopiedCode] = useState(false);
   const heroSeatIndex = 0;
 
-  // Core Game State
+  // Players at Table (Initially only the user, or practice bots if Practice Mode)
   const [players, setPlayers] = useState([]);
+  
+  // Game State
   const [handState, setHandState] = useState({
-    handNumber: 1,
-    phase: 'preflop', // preflop, flop, turn, river, showdown, ended
+    handNumber: 0,
+    phase: 'waiting', // 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'ended'
     communityCards: [],
     deck: [],
     currentTurnSeat: 0,
     dealerSeat: 0,
     sbSeat: 1,
     bbSeat: 2,
-    currentBet: gameRoom?.bigBlind || 20,
+    currentBet: 0,
     minRaise: gameRoom?.bigBlind || 20,
-    mainPot: (gameRoom?.smallBlind || 10) + (gameRoom?.bigBlind || 20),
+    mainPot: 0,
     sidePots: [],
     winners: []
   });
@@ -58,17 +62,17 @@ export const PokerTable = ({
   const [turnTimeLeft, setTurnTimeLeft] = useState(gameRoom?.turnTime || 25);
   const turnMaxTime = gameRoom?.turnTime || 25;
   const [winningCards, setWinningCards] = useState([]);
-  const [announcement, setAnnouncement] = useState('New Hand Started');
+  const [announcement, setAnnouncement] = useState('Waiting for host to start hand');
 
   const turnTimerRef = useRef(null);
 
-  // Initialize Players on Load
+  // Initialize Seated Players
   useEffect(() => {
-    const total = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
-    const initialPlayers = [];
+    const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
+    const initialList = [];
 
-    // Hero player
-    initialPlayers.push({
+    // Seat 0: The User (Hero)
+    initialList.push({
       seat_index: 0,
       username: user?.username || 'Hero',
       chips: gameRoom?.startingStack || 1500,
@@ -81,29 +85,35 @@ export const PokerTable = ({
       isBot: false
     });
 
-    // Other seated players (or Bots in practice / initial room)
-    for (let i = 1; i < total; i++) {
-      initialPlayers.push({
-        seat_index: i,
-        username: BOT_NAMES[i - 1] || `Player ${i + 1}`,
-        chips: gameRoom?.startingStack || 1500,
-        current_round_bet: 0,
-        total_hand_bet: 0,
-        status: 'active',
-        last_action: null,
-        cards: [],
-        shownCards: false,
-        isBot: true
-      });
+    if (gameRoom?.isPractice) {
+      // In Practice mode: pre-fill bots for quick solo play
+      for (let i = 1; i < totalMax; i++) {
+        initialList.push({
+          seat_index: i,
+          username: BOT_NAMES[i - 1] || `Player ${i + 1}`,
+          chips: gameRoom?.startingStack || 1500,
+          current_round_bet: 0,
+          total_hand_bet: 0,
+          status: 'active',
+          last_action: null,
+          cards: [],
+          shownCards: false,
+          isBot: true
+        });
+      }
+      setAnnouncement('Practice Mode: Click "Deal Hand" to play');
+    } else {
+      setAnnouncement(`Table Created! Share Code: ${gameRoom?.roomCode || 'PK-CODE'}`);
     }
 
-    setPlayers(initialPlayers);
-    startNewHand(initialPlayers, 0, 1);
+    setPlayers(initialList);
   }, [gameRoom, user]);
 
   // Turn Countdown Timer
   useEffect(() => {
-    if (handState.phase === 'ended' || handState.phase === 'showdown') return;
+    if (handState.phase === 'waiting' || handState.phase === 'ended' || handState.phase === 'showdown') {
+      return;
+    }
 
     if (turnTimerRef.current) clearInterval(turnTimerRef.current);
     setTurnTimeLeft(turnMaxTime);
@@ -125,21 +135,59 @@ export const PokerTable = ({
     return () => clearInterval(turnTimerRef.current);
   }, [handState.currentTurnSeat, handState.phase]);
 
-  // Bot Turn Execution
+  // AI Bot Turn Execution (With deliberate, human-readable 2.5s pacing)
   useEffect(() => {
-    const activePlayer = players.find((p) => p.seat_index === handState.currentTurnSeat);
-    if (!activePlayer || !activePlayer.isBot || handState.phase === 'ended' || handState.phase === 'showdown') {
+    if (handState.phase === 'waiting' || handState.phase === 'ended' || handState.phase === 'showdown') {
       return;
     }
 
+    const activePlayer = players.find((p) => p.seat_index === handState.currentTurnSeat);
+    if (!activePlayer || !activePlayer.isBot) {
+      return;
+    }
+
+    // Give human time to observe the table
     const timer = setTimeout(() => {
       executeBotTurn(activePlayer);
-    }, 1200 + Math.random() * 800);
+    }, 2200);
 
     return () => clearTimeout(timer);
   }, [handState.currentTurnSeat, handState.phase, players]);
 
-  // Generate and Shuffle Deck
+  // Host Adds an AI Bot to an open seat
+  const handleAddBot = () => {
+    const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
+    if (players.length >= totalMax) {
+      alert('Table is full!');
+      return;
+    }
+
+    // Find next unoccupied seat index
+    const occupiedSeats = players.map(p => p.seat_index);
+    let openSeat = 1;
+    while (occupiedSeats.includes(openSeat) && openSeat < totalMax) {
+      openSeat++;
+    }
+
+    const botName = BOT_NAMES[(openSeat - 1) % BOT_NAMES.length];
+    const newBot = {
+      seat_index: openSeat,
+      username: botName,
+      chips: gameRoom?.startingStack || 1500,
+      current_round_bet: 0,
+      total_hand_bet: 0,
+      status: 'active',
+      last_action: null,
+      cards: [],
+      shownCards: false,
+      isBot: true
+    };
+
+    setPlayers([...players, newBot]);
+    setAnnouncement(`Added ${botName} to Seat ${openSeat + 1}`);
+  };
+
+  // Helper to shuffle standard deck
   const generateDeck = () => {
     const suits = ['s', 'h', 'd', 'c'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
@@ -156,26 +204,31 @@ export const PokerTable = ({
     return deck;
   };
 
-  // Start New Hand
-  const startNewHand = (currentPlayersList, prevDealerSeat = 0, handNum = 1) => {
-    const activeList = currentPlayersList.filter((p) => p.chips > 0);
+  // START HAND (Triggered only when host clicks "Deal Hand")
+  const startNewHand = () => {
+    if (players.length < 2) {
+      alert('At least 2 players are needed to deal a hand. Click "+ Add Bot" or invite a friend!');
+      return;
+    }
+
+    const activeList = players.filter((p) => p.chips > 0);
     if (activeList.length < 2) {
-      setAnnouncement('Game Over! Not enough players with chips.');
+      setAnnouncement('Not enough players with chips remaining!');
       return;
     }
 
     const deck = generateDeck();
     let deckIdx = 0;
 
-    const nextDealerSeat = (prevDealerSeat + 1) % currentPlayersList.length;
-    const sbSeat = (nextDealerSeat + 1) % currentPlayersList.length;
-    const bbSeat = (nextDealerSeat + 2) % currentPlayersList.length;
-    const utgSeat = (nextDealerSeat + 3) % currentPlayersList.length;
+    const nextDealerSeat = (handState.dealerSeat + 1) % players.length;
+    const sbSeat = (nextDealerSeat + 1) % players.length;
+    const bbSeat = (nextDealerSeat + 2) % players.length;
+    const utgSeat = (nextDealerSeat + 3) % players.length;
 
     const sbAmount = gameRoom?.smallBlind || 10;
     const bbAmount = gameRoom?.bigBlind || 20;
 
-    const updatedPlayers = currentPlayersList.map((p) => {
+    const updatedPlayers = players.map((p) => {
       if (p.chips <= 0) return { ...p, status: 'sitting_out', cards: [] };
 
       const c1 = deck[deckIdx++];
@@ -205,12 +258,15 @@ export const PokerTable = ({
 
     playCardDeal();
 
+    const newHandNum = handState.handNumber + 1;
     setPlayers(updatedPlayers);
     setWinningCards([]);
-    setAnnouncement(`Hand #${handNum} Started (Blinds $${sbAmount}/$${bbAmount})`);
+
+    const utgPlayer = updatedPlayers.find(p => p.seat_index === utgSeat);
+    setAnnouncement(`Hand #${newHandNum} Dealt • ${utgPlayer?.username}'s Turn`);
 
     setHandState({
-      handNumber: handNum,
+      handNumber: newHandNum,
       phase: 'preflop',
       communityCards: [],
       deck: deck.slice(deckIdx),
@@ -289,7 +345,7 @@ export const PokerTable = ({
 
     setPlayers(updatedPlayers);
 
-    // Check if uncontested
+    // Check if uncontested winner
     const remainingInHand = updatedPlayers.filter((p) => p.status === 'active' || p.status === 'all_in');
     if (remainingInHand.length === 1) {
       resolveUncontestedWinner(remainingInHand[0], newMainPot, updatedPlayers);
@@ -305,6 +361,7 @@ export const PokerTable = ({
       advanceStreet(updatedPlayers, newMainPot);
     } else {
       const nextSeat = getNextTurnSeat(currentSeat, updatedPlayers);
+      const nextPlayer = updatedPlayers.find(p => p.seat_index === nextSeat);
       setHandState((prev) => ({
         ...prev,
         mainPot: newMainPot,
@@ -312,6 +369,7 @@ export const PokerTable = ({
         minRaise: newMinRaise,
         currentTurnSeat: nextSeat
       }));
+      setAnnouncement(`${nextPlayer?.username}'s Turn`);
     }
   };
 
@@ -342,7 +400,7 @@ export const PokerTable = ({
 
     if (handState.phase === 'preflop') {
       nextPhase = 'flop';
-      remainingDeck.shift(); // burn 1
+      remainingDeck.shift(); // burn
       newCommunity.push(remainingDeck.shift(), remainingDeck.shift(), remainingDeck.shift());
     } else if (handState.phase === 'flop') {
       nextPhase = 'turn';
@@ -358,6 +416,7 @@ export const PokerTable = ({
     }
 
     const firstActor = getNextTurnSeat(handState.dealerSeat, resetPlayers);
+    const actorPlayer = resetPlayers.find(p => p.seat_index === firstActor);
 
     setPlayers(resetPlayers);
     setHandState((prev) => ({
@@ -370,7 +429,7 @@ export const PokerTable = ({
       mainPot: currentPot,
       currentTurnSeat: firstActor
     }));
-    setAnnouncement(`Phase: ${nextPhase.toUpperCase()}`);
+    setAnnouncement(`${nextPhase.toUpperCase()} Dealt • ${actorPlayer?.username}'s Turn`);
   };
 
   const resolveShowdown = (playersList, communityCards, totalPot) => {
@@ -419,10 +478,6 @@ export const PokerTable = ({
       phase: 'showdown',
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: bestEval.name }]
     }));
-
-    setTimeout(() => {
-      startNewHand(revealedPlayers, handState.dealerSeat, handState.handNumber + 1);
-    }, 4500);
   };
 
   const resolveUncontestedWinner = (winner, totalPot, playersList) => {
@@ -442,10 +497,6 @@ export const PokerTable = ({
       phase: 'ended',
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: 'Uncontested' }]
     }));
-
-    setTimeout(() => {
-      startNewHand(updated, handState.dealerSeat, handState.handNumber + 1);
-    }, 3500);
   };
 
   const executeBotTurn = (bot) => {
@@ -502,11 +553,14 @@ export const PokerTable = ({
     ? evaluateHand([...heroPlayer.cards, ...handState.communityCards])
     : null;
 
+  const currentTurnPlayer = players.find((p) => p.seat_index === handState.currentTurnSeat);
+  const isWaitingOrEnded = handState.phase === 'waiting' || handState.phase === 'ended' || handState.phase === 'showdown';
+
   return (
     <div className="table-viewport-container">
       {/* Top Table Header */}
       <header className="table-header-bar">
-        <div className="flex items-center space-x-3">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             onClick={onLeaveTable}
             className="table-nav-btn table-back-btn"
@@ -516,14 +570,14 @@ export const PokerTable = ({
             <span>Lobby</span>
           </button>
 
-          <div className="flex items-center space-x-2">
-            <h2 className="text-sm font-extrabold text-white truncate max-w-[140px]">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#ffffff' }}>
               {gameRoom?.roomName || 'Poker Room'}
             </h2>
             <button
               onClick={copyRoomCode}
               className="table-code-badge"
-              title="Click to copy code"
+              title="Click to copy room code"
             >
               <span>{gameRoom?.roomCode || 'CODE'}</span>
               {copiedCode ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
@@ -533,12 +587,38 @@ export const PokerTable = ({
 
         {/* Live Announcement Center Banner */}
         <div className="table-marquee-box">
-          <span className="text-amber-400 mr-2 font-black">●</span>
+          <span style={{ color: '#f59e0b', marginRight: '6px' }}>●</span>
           <span>{announcement}</span>
         </div>
 
-        {/* Utility Controls */}
-        <div className="flex items-center space-x-2">
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Host buttons: Add Bot & Start Hand */}
+          {isWaitingOrEnded && (
+            <>
+              {players.length < (gameRoom?.maxPlayers || 6) && (
+                <button
+                  onClick={handleAddBot}
+                  className="table-nav-btn"
+                  style={{ background: '#1e293b', borderColor: '#475569' }}
+                  title="Add AI Player"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>+ Bot</span>
+                </button>
+              )}
+
+              <button
+                onClick={startNewHand}
+                className="table-nav-btn"
+                style={{ background: '#059669', borderColor: '#34d399', color: '#ffffff', fontWeight: 900 }}
+              >
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>{handState.handNumber === 0 ? 'Deal Hand' : 'Next Hand'}</span>
+              </button>
+            </>
+          )}
+
           <button
             onClick={() => setFeltTheme(feltTheme === 'emerald' ? 'midnight' : 'emerald')}
             className="table-nav-btn"
@@ -550,7 +630,7 @@ export const PokerTable = ({
           <button
             onClick={() => setSoundOn(toggleSound())}
             className="table-nav-btn"
-            title="Toggle Sound"
+            title="Toggle Audio"
           >
             {soundOn ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
           </button>
@@ -559,16 +639,49 @@ export const PokerTable = ({
 
       {/* Main Table Felt Stage */}
       <main className="table-stage">
-        {/* Real Oval Table Outer Border */}
         <div className="poker-table-outer">
-          {/* Brass Bevel Rim */}
           <div className="poker-table-brass-rim">
-            {/* The Actual Felt Canvas */}
             <div className={`poker-table-felt-canvas ${feltTheme === 'emerald' ? 'felt-emerald' : 'felt-midnight'}`}>
-              {/* Inner Betting Line */}
               <div className="poker-betting-line" />
 
-              {/* Center Community Area */}
+              {/* Waiting For Players / Host Deal Overlay Banner */}
+              {isWaitingOrEnded && (
+                <div className="poker-host-deal-banner">
+                  <span style={{ fontSize: '11px', fontWeight: 900, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {handState.handNumber === 0 ? 'TABLE READY' : 'HAND COMPLETE'}
+                  </span>
+                  <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                    {players.length < 2
+                      ? 'Waiting for at least 2 players to start'
+                      : handState.handNumber === 0
+                      ? 'Ready to deal cards!'
+                      : 'Ready for the next hand!'}
+                  </h3>
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                    {players.length < (gameRoom?.maxPlayers || 6) && (
+                      <button
+                        onClick={handleAddBot}
+                        className="table-nav-btn"
+                        style={{ padding: '10px 16px', fontSize: '13px' }}
+                      >
+                        <UserPlus className="w-4 h-4 text-indigo-400" />
+                        <span>Add AI Bot</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={startNewHand}
+                      className="poker-deal-btn"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      <span>{handState.handNumber === 0 ? 'DEAL FIRST HAND' : 'DEAL NEXT HAND'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Center Community Cards Area */}
               <CommunityArea
                 communityCards={handState.communityCards}
                 mainPot={handState.mainPot}
@@ -577,9 +690,9 @@ export const PokerTable = ({
                 winningCards={winningCards}
               />
 
-              {/* Seated Players Distributed via Elliptical Math */}
+              {/* Seated Players (Clean fixed-size pods, properly positioned) */}
               {players.map((player) => {
-                const pos = getSeatCoordinates(player.seat_index, players.length, heroSeatIndex);
+                const pos = getSeatCoordinates(player.seat_index, Math.max(players.length, gameRoom?.maxPlayers || 6), heroSeatIndex);
                 const isWinner = handState.winners.some((w) => w.seat_index === player.seat_index);
 
                 return (
@@ -592,7 +705,7 @@ export const PokerTable = ({
                     isDealer={player.seat_index === handState.dealerSeat}
                     isSB={player.seat_index === handState.sbSeat}
                     isBB={player.seat_index === handState.bbSeat}
-                    isCurrentTurn={player.seat_index === handState.currentTurnSeat}
+                    isCurrentTurn={player.seat_index === handState.currentTurnSeat && !isWaitingOrEnded}
                     turnTimeLeft={turnTimeLeft}
                     turnMaxTime={turnMaxTime}
                     isWinner={isWinner}
@@ -605,16 +718,19 @@ export const PokerTable = ({
       </main>
 
       {/* Bottom Action HUD */}
-      <PlayerHUD
-        isMyTurn={handState.currentTurnSeat === heroSeatIndex}
-        heroPlayer={heroPlayer}
-        currentBet={handState.currentBet}
-        minRaise={handState.minRaise}
-        bigBlind={gameRoom?.bigBlind || 20}
-        mainPot={handState.mainPot}
-        handRank={heroHandRank}
-        onAction={handlePlayerAction}
-      />
+      {!isWaitingOrEnded && (
+        <PlayerHUD
+          isMyTurn={handState.currentTurnSeat === heroSeatIndex}
+          heroPlayer={heroPlayer}
+          currentTurnPlayerName={currentTurnPlayer?.username}
+          currentBet={handState.currentBet}
+          minRaise={handState.minRaise}
+          bigBlind={gameRoom?.bigBlind || 20}
+          mainPot={handState.mainPot}
+          handRank={heroHandRank}
+          onAction={handlePlayerAction}
+        />
+      )}
     </div>
   );
 };
