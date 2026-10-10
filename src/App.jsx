@@ -1,78 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { AuthPage } from './components/AuthPage';
+import { LobbyPage } from './components/LobbyPage';
 import { PokerTable } from './components/PokerTable';
-import { LobbyModal } from './components/LobbyModal';
-import { supabase } from './lib/supabaseClient';
 
 export default function App() {
-  const [isLobbyOpen, setIsLobbyOpen] = useState(false);
-  const [gameConfig, setGameConfig] = useState({
-    username: 'Parth',
-    playerCount: 6,
-    startingStack: 1500
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activeGameRoom, setActiveGameRoom] = useState(null); // null when in lobby
+  const [loadingInitial, setLoadingInitial] = useState(true);
 
-  const handleStartSimulation = (config) => {
-    setGameConfig(config);
-    setIsLobbyOpen(false);
+  // Check persisted user on boot
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('pokermaster_user');
+      if (stored) {
+        setCurrentUser(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.warn('Failed to parse user session:', e);
+    } finally {
+      setLoadingInitial(false);
+    }
+  }, []);
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    setActiveGameRoom(null);
   };
 
-  const handleCreateRoom = async ({ username, name, startingStack }) => {
-    try {
-      const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const { data, error } = await supabase.rpc('create_poker_room', {
-        p_name: name || 'Championship Table',
-        p_code: randomCode,
-        p_starting_stack: startingStack || 1500,
-        p_small_blind: 10,
-        p_big_blind: 20,
-        p_turn_time: 25
-      });
+  const handleLogout = () => {
+    localStorage.removeItem('pokermaster_user');
+    setCurrentUser(null);
+    setActiveGameRoom(null);
+  };
 
-      if (error) {
-        alert('Supabase error: ' + error.message);
-        return;
-      }
+  const handleJoinGame = (roomConfig) => {
+    setActiveGameRoom(roomConfig);
+  };
 
-      alert(`Room created successfully! Room Code: ${randomCode}`);
-      setIsLobbyOpen(false);
-    } catch (err) {
-      alert('Error creating room: ' + err.message);
+  const handleLeaveTable = () => {
+    if (window.confirm('Leave table and return to lobby?')) {
+      setActiveGameRoom(null);
     }
   };
 
-  const handleJoinRoom = async ({ username, code }) => {
-    try {
-      const { data, error } = await supabase
-        .from('poker_rooms')
-        .select('*')
-        .eq('code', code.toUpperCase())
-        .single();
+  if (loadingInitial) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen bg-slate-950 text-white font-sans">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Loading PokerMaster...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
-      if (error || !data) {
-        alert('Room not found! Check code or test in Practice mode.');
-        return;
-      }
+  // View 1: Auth Screen (Login / Register unique username & password)
+  if (!currentUser) {
+    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+  }
 
-      alert(`Joined room ${data.name}! Starting table...`);
-      setIsLobbyOpen(false);
-    } catch (err) {
-      alert('Error joining room: ' + err.message);
-    }
-  };
-
-  return (
-    <div className="w-full h-full min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden">
+  // View 2: Active Poker Table
+  if (activeGameRoom) {
+    return (
       <PokerTable
-        gameConfig={gameConfig}
-        onOpenLobby={() => setIsLobbyOpen(true)}
+        gameRoom={activeGameRoom}
+        user={currentUser}
+        onLeaveTable={handleLeaveTable}
       />
+    );
+  }
 
-      <LobbyModal
-        isOpen={isLobbyOpen}
-        onStartSimulation={handleStartSimulation}
-        onCreateRoom={handleCreateRoom}
-        onJoinRoom={handleJoinRoom}
-      />
-    </div>
+  // View 3: Structured Start / Lobby Page
+  return (
+    <LobbyPage
+      user={currentUser}
+      onLogout={handleLogout}
+      onJoinGame={handleJoinGame}
+    />
   );
 }
