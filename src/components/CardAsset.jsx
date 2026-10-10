@@ -7,6 +7,7 @@ export const CardAsset = ({
   hidden = false,
   highlight = false,
   isCommunity = false,  // true for 5 community cards, false for hole cards
+  isHero = false,       // true for player's own cards
   className = '',
   style = {}
 }) => {
@@ -18,7 +19,7 @@ export const CardAsset = ({
     s = card[1].toLowerCase();
   }
 
-  const sizeClass = isCommunity ? 'card-community' : 'card-hole';
+  const sizeClass = isCommunity ? 'card-community' : (isHero ? 'card-hero' : 'card-hole');
   const highlightClass = highlight ? 'card-highlight' : '';
 
   if (hidden || (!r && !s)) {

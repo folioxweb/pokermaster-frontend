@@ -64,18 +64,20 @@ export const PlayerSeat = ({
 
       {/* Hole Cards (Rendered neatly above the player pod) */}
       {player.cards && player.cards.length >= 2 && (
-        <div className="poker-hole-cards-row">
+        <div className={`poker-hole-cards-row ${isHero ? 'hero-cards-row' : ''}`}>
           <CardAsset
             card={player.cards[0]}
             hidden={!isHero && !player.shownCards}
             highlight={isWinner}
             isCommunity={false}
+            isHero={isHero}
           />
           <CardAsset
             card={player.cards[1]}
             hidden={!isHero && !player.shownCards}
             highlight={isWinner}
             isCommunity={false}
+            isHero={isHero}
           />
         </div>
       )}

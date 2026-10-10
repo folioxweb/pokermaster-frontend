@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { playChipClink } from '../lib/soundEffects';
 import { formatPoints, formatPointsOnly } from '../lib/formatters';
+import { Coins, Clock } from 'lucide-react';
 
 export const PlayerHUD = ({
   isMyTurn = false,
@@ -11,6 +12,8 @@ export const PlayerHUD = ({
   bigBlind = 20,
   mainPot = 0,
   handRank = null, // { name: 'Two Pair', description: 'Two Pair, Kings and Queens' }
+  turnTimeLeft = 25,
+  turnMaxTime = 25,
   onAction = null  // (action, amount) => void
 }) => {
   if (!heroPlayer || heroPlayer.status === 'folded' || heroPlayer.status === 'sitting_out') {
@@ -72,6 +75,35 @@ export const PlayerHUD = ({
 
       {/* Main Action HUD Panel */}
       <div className={`poker-hud-panel ${isMyTurn ? 'active' : ''}`}>
+        {/* Hero Identity & Live Countdown Timer Bar */}
+        <div className="poker-hud-hero-bar">
+          <div className="poker-hud-hero-left">
+            <div className="poker-hud-avatar">
+              {heroPlayer.username ? heroPlayer.username.slice(0, 2).toUpperCase() : 'ME'}
+            </div>
+            <div className="poker-hud-info">
+              <span className="poker-hud-username">
+                {heroPlayer.username} <span className="poker-hud-you-tag">YOU</span>
+              </span>
+              <span className="poker-hud-points">
+                <Coins className="w-3.5 h-3.5 text-amber-400" />
+                <span>{formatPoints(heroPlayer.chips || 0)}</span>
+              </span>
+            </div>
+          </div>
+
+          {isMyTurn ? (
+            <div className={`poker-hud-timer-badge ${turnTimeLeft <= 5 ? 'urgent' : ''}`}>
+              <Clock className="w-3.5 h-3.5" />
+              <span>YOUR TURN: <strong>{turnTimeLeft}s</strong></span>
+            </div>
+          ) : (
+            <div className="poker-hud-waiting-badge">
+              <span>Waiting for {currentTurnPlayerName || 'turn'}...</span>
+            </div>
+          )}
+        </div>
+
         {isMyTurn ? (
           <div>
             {/* Quick Raise Presets Bar & Slider */}

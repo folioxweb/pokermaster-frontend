@@ -11,8 +11,8 @@ export function getSeatCoordinates(seatIndex, totalSeats = 6, heroSeatIndex = 0)
   const angle = (2 * Math.PI * relativeIndex) / totalSeats + Math.PI / 2;
   
   // Ellipse radii positioned along the OUTER edge / rail of the table
-  const radiusX = 52.0; // 52.0% from center horizontally (sits along outer bumper)
-  const radiusY = 53.0; // 53.0% from center vertically (sits along outer rail)
+  const radiusX = 47.5; // Sits along outer bumper without overflowing screen
+  const radiusY = 46.5; // Sits neatly along outer rail cushion without hanging too far below
   
   const left = 50 + radiusX * Math.cos(angle);
   const top = 50 + radiusY * Math.sin(angle);

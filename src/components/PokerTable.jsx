@@ -1289,6 +1289,8 @@ export const PokerTable = ({
           bigBlind={gameRoom?.bigBlind || 20}
           mainPot={handState.mainPot}
           handRank={heroHandRank}
+          turnTimeLeft={turnTimeLeft}
+          turnMaxTime={turnMaxTime}
           onAction={handlePlayerAction}
         />
       ) : (
