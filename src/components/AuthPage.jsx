@@ -210,7 +210,7 @@ export const AuthPage = ({ onAuthSuccess }) => {
             {loading ? (
               <span>Authenticating...</span>
             ) : tab === 'register' ? (
-              <span>CREATE ACCOUNT ($5,000 CHIPS)</span>
+              <span>CREATE ACCOUNT (5,000 PTS)</span>
             ) : (
               <span>ENTER POKER LOBBY</span>
             )}

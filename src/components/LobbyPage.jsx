@@ -12,8 +12,13 @@ import {
   Shield,
   Layers,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Shuffle
 } from 'lucide-react';
+
+import { formatPoints, formatPointsOnly } from '../lib/formatters';
 
 export const LobbyPage = ({
   user,
@@ -39,6 +44,13 @@ export const LobbyPage = ({
 
   // Practice State
   const [practiceSeats, setPracticeSeats] = useState(6);
+
+  // Custom Game Options (matching Image 2)
+  const [customOptionsOpen, setCustomOptionsOpen] = useState(true);
+  const [gameEnd, setGameEnd] = useState('winner_takes_all');
+  const [blindsFrequency, setBlindsFrequency] = useState('fast_5');
+  const [allInMinRaiseException, setAllInMinRaiseException] = useState(true);
+  const [showRemainingRiverCards, setShowRemainingRiverCards] = useState(false);
 
   // Fetch Active Rooms
   const fetchRooms = async () => {
@@ -107,7 +119,11 @@ export const LobbyPage = ({
         startingStack,
         smallBlind,
         bigBlind,
-        turnTime
+        turnTime,
+        gameEnd,
+        blindsFrequency,
+        allInMinRaiseException,
+        showRemainingRiverCards
       });
     } catch (err) {
       console.warn('Fallback room creation:', err);
@@ -122,7 +138,11 @@ export const LobbyPage = ({
         startingStack,
         smallBlind,
         bigBlind,
-        turnTime
+        turnTime,
+        gameEnd,
+        blindsFrequency,
+        allInMinRaiseException,
+        showRemainingRiverCards
       });
     } finally {
       setCreatingTable(false);
@@ -171,10 +191,14 @@ export const LobbyPage = ({
       roomName: 'Solo Training Ring',
       isPractice: true,
       maxPlayers: practiceSeats,
-      startingStack: 1500,
+      startingStack: startingStack || 1500,
       smallBlind: 10,
       bigBlind: 20,
-      turnTime: 20
+      turnTime: 20,
+      gameEnd,
+      blindsFrequency,
+      allInMinRaiseException,
+      showRemainingRiverCards
     });
   };
 
@@ -200,7 +224,7 @@ export const LobbyPage = ({
               <span className="lobby-user-name">{user.username}</span>
               <span className="lobby-user-chips">
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
-                <span>${(user.chips || 5000).toLocaleString()}</span>
+                <span>{formatPoints(user.chips || 5000)}</span>
               </span>
             </div>
           </div>
@@ -313,7 +337,7 @@ export const LobbyPage = ({
                       </div>
                       <div className="lobby-stat-item">
                         <Coins className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Blinds: ${r.small_blind || 10} / ${r.big_blind || 20}</span>
+                        <span>Blinds: {formatPoints(r.small_blind || 10)} / {formatPoints(r.big_blind || 20)}</span>
                       </div>
                     </div>
 
@@ -394,9 +418,9 @@ export const LobbyPage = ({
                       }}
                       className="lobby-form-select"
                     >
-                      <option value="10/20">$10 / $20 (Standard)</option>
-                      <option value="25/50">$25 / $50 (Mid Stakes)</option>
-                      <option value="50/100">$50 / $100 (High Stakes)</option>
+                      <option value="10/20">{formatPoints(10)} / {formatPoints(20)} (Standard)</option>
+                      <option value="25/50">{formatPoints(25)} / {formatPoints(50)} (Mid Stakes)</option>
+                      <option value="50/100">{formatPoints(50)} / {formatPoints(100)} (High Stakes)</option>
                     </select>
                   </div>
 
@@ -407,9 +431,9 @@ export const LobbyPage = ({
                       onChange={(e) => setStartingStack(Number(e.target.value))}
                       className="lobby-form-select"
                     >
-                      <option value={1000}>$1,000 (Turbo)</option>
-                      <option value={1500}>$1,500 (Deep 75BB)</option>
-                      <option value={3000}>$3,000 (Championship)</option>
+                      <option value={1000}>{formatPoints(1000)} (Turbo)</option>
+                      <option value={1500}>{formatPoints(1500)} (Deep 75BB)</option>
+                      <option value={3000}>{formatPoints(3000)} (Championship)</option>
                     </select>
                   </div>
                 </div>
@@ -432,6 +456,148 @@ export const LobbyPage = ({
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Custom Options Accordion (matching user screenshot) */}
+                <div className="custom-options-container">
+                  <button
+                    type="button"
+                    onClick={() => setCustomOptionsOpen(!customOptionsOpen)}
+                    className="custom-options-header"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {customOptionsOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                      <span style={{ fontWeight: 800, fontSize: '13px', color: '#f1f5f9' }}>Custom options</span>
+                    </div>
+                    <span style={{ color: '#94a3b8', fontSize: '16px', fontWeight: 900 }}>+</span>
+                  </button>
+
+                  {customOptionsOpen && (
+                    <div className="custom-options-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {/* Game end */}
+                      <div className="custom-option-item">
+                        <label className="custom-option-label">Game end</label>
+                        <div className="custom-select-row">
+                          <select
+                            value={gameEnd}
+                            onChange={(e) => setGameEnd(e.target.value)}
+                            className="custom-option-select"
+                          >
+                            <option value="winner_takes_all">Winner takes all</option>
+                            <option value="chips_limit">Chips limit (5,000 PTS)</option>
+                            <option value="hand_limit">Hand limit (25 hands)</option>
+                          </select>
+                          <button type="button" className="custom-shuffle-btn" title="Option selected">
+                            <Shuffle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Blinds increase frequency */}
+                      <div className="custom-option-item">
+                        <label className="custom-option-label">Blinds increase frequency</label>
+                        <div className="custom-select-row">
+                          <select
+                            value={blindsFrequency}
+                            onChange={(e) => setBlindsFrequency(e.target.value)}
+                            className="custom-option-select"
+                          >
+                            <option value="fast_5">Fast - every 5 hands</option>
+                            <option value="standard_10">Standard - every 10 hands</option>
+                            <option value="slow_15">Slow - every 15 hands</option>
+                            <option value="never">No increase (Constant blinds)</option>
+                          </select>
+                          <button type="button" className="custom-shuffle-btn" title="Option selected">
+                            <Shuffle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <p className="custom-option-desc">
+                          {blindsFrequency === 'fast_5'
+                            ? 'Blinds start at 10/20 and double every 5 hands or when a player is eliminated'
+                            : blindsFrequency === 'standard_10'
+                            ? 'Blinds start at 10/20 and double every 10 hands'
+                            : blindsFrequency === 'slow_15'
+                            ? 'Tournament structure: blinds double every 15 hands'
+                            : 'Blinds remain constant throughout all hands'}
+                        </p>
+                      </div>
+
+                      {/* Initial amount of chips */}
+                      <div className="custom-option-item">
+                        <label className="custom-option-label">Initial amount of chips</label>
+                        <div className="custom-select-row">
+                          <select
+                            value={startingStack}
+                            onChange={(e) => setStartingStack(Number(e.target.value))}
+                            className="custom-option-select"
+                          >
+                            <option value={1000}>1000 total value per player</option>
+                            <option value={1500}>1500 total value per player</option>
+                            <option value={3000}>3000 total value per player</option>
+                            <option value={5000}>5000 total value per player</option>
+                          </select>
+                          <button type="button" className="custom-shuffle-btn" title="Option selected">
+                            <Shuffle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <p className="custom-option-desc">
+                          Each player starts with a total chips value of {startingStack}.
+                        </p>
+                      </div>
+
+                      {/* All in minimum raise exception */}
+                      <div className="custom-toggle-card">
+                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={allInMinRaiseException}
+                            onChange={(e) => setAllInMinRaiseException(e.target.checked)}
+                            style={{ width: '16px', height: '16px', accentColor: '#10b981', marginTop: '2px', cursor: 'pointer' }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#f8fafc' }}>
+                                All in minimum raise exception
+                              </span>
+                              <button type="button" className="custom-shuffle-btn" style={{ width: '28px', height: '28px' }} title="Toggle">
+                                <Shuffle className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <p className="custom-option-desc" style={{ marginTop: '4px' }}>
+                              The All In action is NOT subject to the minimum raise amount rule. Players can go all in to raise a bet even if they don't have enough chips to raise by the current minimum bet or raise amount.
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+
+                      {/* Show remaining river cards */}
+                      <div className="custom-toggle-card">
+                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={showRemainingRiverCards}
+                            onChange={(e) => setShowRemainingRiverCards(e.target.checked)}
+                            style={{ width: '16px', height: '16px', accentColor: '#10b981', marginTop: '2px', cursor: 'pointer' }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#f8fafc' }}>
+                                Show remaining river cards
+                              </span>
+                              <button type="button" className="custom-shuffle-btn" style={{ width: '28px', height: '28px' }} title="Toggle">
+                                <Shuffle className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <p className="custom-option-desc" style={{ marginTop: '4px' }}>
+                              {showRemainingRiverCards
+                                ? 'Remaining community cards will be revealed if all players fold early.'
+                                : 'Regular rule: if all players but one have folded, the remaining river cards are not revealed.'}
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button

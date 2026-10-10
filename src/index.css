@@ -653,6 +653,108 @@ button, input, select {
 }
 
 /* ==============================================================================
+   CUSTOM TABLE OPTIONS ACCORDION (MATCHING DESIGN IN USER SCREENSHOT)
+   ============================================================================== */
+
+.custom-options-container {
+  margin-top: 1rem;
+  border-radius: 0.875rem;
+  background-color: #0b0f19;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+}
+
+.custom-options-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: #0f172a;
+  border: none;
+  border-bottom: 1px solid #1e293b;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.custom-options-header:hover {
+  background-color: #1e293b;
+}
+
+.custom-options-body {
+  padding: 0.875rem;
+}
+
+.custom-option-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.custom-option-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.custom-select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-option-select {
+  flex: 1;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.75rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.custom-option-select:focus {
+  border-color: #f59e0b;
+}
+
+.custom-shuffle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.15s;
+}
+
+.custom-shuffle-btn:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.custom-option-desc {
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.custom-toggle-card {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: #131b2e;
+  border: 1px solid #1e293b;
+}
+
+/* ==============================================================================
    3. POKER TABLE, CARDS & SEATS (CRITICAL PROPER STYLING)
    ============================================================================== */
 
@@ -732,17 +834,17 @@ button, input, select {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.5rem 5rem 1.5rem;
-  overflow: hidden;
+  padding: 2rem 4rem 10.5rem 4rem;
+  overflow: visible;
 }
 
 /* REAL OVAL TABLE CONTAINER */
 .poker-table-outer {
   position: relative;
-  width: 92vw;
-  max-width: 1040px;
-  height: 520px;
-  border-radius: 260px;
+  width: 86vw;
+  max-width: 960px;
+  height: 470px;
+  border-radius: 235px;
   background: linear-gradient(180deg, #3d2314 0%, #24140b 50%, #150a05 100%);
   border: 14px solid #4a2813;
   box-shadow: 0 35px 80px rgba(0, 0, 0, 0.95), inset 0 2px 8px rgba(245, 158, 11, 0.25);
@@ -750,6 +852,7 @@ button, input, select {
   align-items: center;
   justify-content: center;
   padding: 8px;
+  overflow: visible;
 }
 
 @media (max-height: 720px) {
@@ -816,10 +919,10 @@ button, input, select {
   height: 62px;
 }
 
-/* Community Cards (Center Flop/Turn/River) */
+/* Community Cards (Center Flop/Turn/River) - Large, prominent, and clearly visible */
 .card-community {
-  width: 52px;
-  height: 74px;
+  width: 70px;
+  height: 98px;
 }
 
 @media (min-width: 768px) {
@@ -828,8 +931,8 @@ button, input, select {
     height: 68px;
   }
   .card-community {
-    width: 58px;
-    height: 82px;
+    width: 82px;
+    height: 115px;
   }
 }
 
@@ -1072,18 +1175,18 @@ button, input, select {
 .poker-community-cards-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  backdrop-filter: blur(6px);
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(8px);
 }
 
 .poker-card-slot {
-  width: 52px;
-  height: 74px;
-  border-radius: 6px;
+  width: 70px;
+  height: 98px;
+  border-radius: 8px;
   border: 2px dashed rgba(16, 185, 129, 0.25);
   background: rgba(6, 78, 59, 0.15);
   display: flex;
@@ -1093,9 +1196,48 @@ button, input, select {
 
 @media (min-width: 768px) {
   .poker-card-slot {
-    width: 58px;
-    height: 82px;
+    width: 82px;
+    height: 115px;
   }
+}
+
+/* ==============================================================================
+   CHIP FLIGHT TO CENTER POT ANIMATION
+   ============================================================================== */
+
+@keyframes chipFlyToCenterPot {
+  0% {
+    transform: translate(var(--startX), var(--startY)) scale(1.05);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(0, 0) scale(0.9);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(0, 0) scale(0.65);
+    opacity: 0;
+  }
+}
+
+.flying-chip-particle {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 60;
+  animation: chipFlyToCenterPot 0.7s cubic-bezier(0.2, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes potPulseAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); box-shadow: 0 0 30px rgba(245, 158, 11, 0.8); }
+  100% { transform: scale(1); }
+}
+
+.pot-pulse {
+  animation: potPulseAnim 0.5s ease-out;
 }
 
 .poker-phase-tag {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { playChipClink } from '../lib/soundEffects';
+import { formatPoints, formatPointsOnly } from '../lib/formatters';
 
 export const PlayerHUD = ({
   isMyTurn = false,
@@ -69,7 +70,7 @@ export const PlayerHUD = ({
         </div>
       )}
 
-      {/* Main HUD Panel */}
+      {/* Main Action HUD Panel */}
       <div className={`poker-hud-panel ${isMyTurn ? 'active' : ''}`}>
         {isMyTurn ? (
           <div>
@@ -78,15 +79,17 @@ export const PlayerHUD = ({
               <div>
                 <div className="poker-presets-bar">
                   <button type="button" onClick={() => applyPreset('min')} className="poker-preset-btn">Min</button>
-                  <button type="button" onClick={() => applyPreset('2.5bb')} className="poker-preset-btn">2.5x</button>
-                  <button type="button" onClick={() => applyPreset('3bb')} className="poker-preset-btn">3x</button>
+                  <button type="button" onClick={() => applyPreset('2.5bb')} className="poker-preset-btn">2.5x BB</button>
+                  <button type="button" onClick={() => applyPreset('3bb')} className="poker-preset-btn">3x BB</button>
                   <button type="button" onClick={() => applyPreset('half_pot')} className="poker-preset-btn">1/2 Pot</button>
                   <button type="button" onClick={() => applyPreset('pot')} className="poker-preset-btn">Pot</button>
                   <button type="button" onClick={() => applyPreset('all_in')} className="poker-preset-btn" style={{ background: '#881337', color: '#fecdd3', borderColor: '#be123c' }}>All-In</button>
                 </div>
 
                 <div className="poker-slider-row">
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8' }}>${minBetAllowed}</span>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8' }}>
+                    {formatPointsOnly(minBetAllowed)}
+                  </span>
                   <input
                     type="range"
                     min={minBetAllowed}
@@ -96,7 +99,9 @@ export const PlayerHUD = ({
                     onChange={handleSliderChange}
                     className="poker-slider"
                   />
-                  <span style={{ fontSize: '12px', fontWeight: 900, color: '#fbbf24' }}>${betAmount}</span>
+                  <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24' }}>
+                    {formatPoints(betAmount)}
+                  </span>
                 </div>
               </div>
             )}
@@ -129,8 +134,10 @@ export const PlayerHUD = ({
                   onClick={() => onAction && onAction('call', callAmount)}
                   className="poker-action-btn call"
                 >
-                  <span className="poker-btn-main-text">CALL ${Math.min(heroPlayer.chips, callAmount)}</span>
-                  <span className="poker-btn-sub-text">Match bet</span>
+                  <span className="poker-btn-main-text">
+                    CALL {formatPoints(Math.min(heroPlayer.chips, callAmount))}
+                  </span>
+                  <span className="poker-btn-sub-text">Match current bet</span>
                 </button>
               )}
 
@@ -142,7 +149,7 @@ export const PlayerHUD = ({
                   className="poker-action-btn raise"
                 >
                   <span className="poker-btn-main-text">
-                    {currentBet === 0 ? 'BET' : 'RAISE TO'} ${betAmount}
+                    {currentBet === 0 ? 'BET' : 'RAISE TO'} {formatPoints(betAmount)}
                   </span>
                   <span className="poker-btn-sub-text">Increase stakes</span>
                 </button>
@@ -168,7 +175,7 @@ export const PlayerHUD = ({
               </span>
             </div>
             <span style={{ fontSize: '12px', fontWeight: 900, color: '#fbbf24' }}>
-              Your Stack: ${heroPlayer.chips?.toLocaleString()}
+              Your Stack: {formatPoints(heroPlayer.chips || 0)}
             </span>
           </div>
         )}

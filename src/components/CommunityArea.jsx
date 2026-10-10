@@ -1,12 +1,14 @@
 import React from 'react';
 import { CardAsset } from './CardAsset';
+import { formatPoints } from '../lib/formatters';
 
 export const CommunityArea = ({
   communityCards = [],
   mainPot = 0,
   sidePots = [],
   phase = 'preflop',
-  winningCards = []
+  winningCards = [],
+  isPotPulsing = false
 }) => {
   const cardSlots = [0, 1, 2, 3, 4];
 
@@ -17,10 +19,12 @@ export const CommunityArea = ({
         POKERMASTER
       </span>
 
-      {/* Total Pot Display */}
-      <div className="poker-pot-display">
+      {/* Total Pot Display in Points */}
+      <div className={`poker-pot-display ${isPotPulsing ? 'pot-pulse' : ''}`}>
         <span className="poker-pot-title">TOTAL POT:</span>
-        <span className="poker-pot-value">${mainPot.toLocaleString()}</span>
+        <span className="poker-pot-value">
+          {formatPoints(mainPot)}
+        </span>
       </div>
 
       {/* Side Pots if any */}
@@ -29,9 +33,9 @@ export const CommunityArea = ({
           {sidePots.map((sp, idx) => (
             <span
               key={idx}
-              style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', background: 'rgba(120, 53, 15, 0.7)', color: '#fde68a', border: '1px solid rgba(217, 119, 6, 0.4)' }}
+              style={{ fontSize: '9px', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: 'rgba(120, 53, 15, 0.85)', color: '#fde68a', border: '1px solid rgba(217, 119, 6, 0.5)' }}
             >
-              Side Pot {idx + 1}: ${sp.amount}
+              Side Pot {idx + 1}: {formatPoints(sp.amount)}
             </span>
           ))}
         </div>

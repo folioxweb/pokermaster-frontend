@@ -11,8 +11,10 @@ import {
   RefreshCw,
   Users
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
 import { evaluateHand } from '../lib/pokerEvaluator';
+import { formatPoints, formatPointsOnly, formatCurrencyOnly } from '../lib/formatters';
 import {
   playCardDeal,
   playChipClink,
@@ -26,6 +28,7 @@ import {
 import { PlayerSeat } from './PlayerSeat';
 import { CommunityArea } from './CommunityArea';
 import { PlayerHUD } from './PlayerHUD';
+import { PokerChipSVG } from './ChipStack';
 
 const BOT_NAMES = ['Viper', 'AceHigh', 'BluffKing', 'Maverick', 'ChipLeader', 'LadyLuck', 'RiverRat'];
 
@@ -37,12 +40,14 @@ export const PokerTable = ({
   const [feltTheme, setFeltTheme] = useState('emerald');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [copiedCode, setCopiedCode] = useState(false);
-  const heroSeatIndex = 0;
 
-  // Players at Table (Initially only the user, or practice bots if Practice Mode)
+  // Identify Hero seat (dynamically matches logged-in user handle)
+  const [mySeatIndex, setMySeatIndex] = useState(0);
+
+  // Players seated at table
   const [players, setPlayers] = useState([]);
-  
-  // Game State
+
+  // Game Hand State
   const [handState, setHandState] = useState({
     handNumber: 0,
     phase: 'waiting', // 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' | 'ended'
@@ -64,16 +69,23 @@ export const PokerTable = ({
   const [winningCards, setWinningCards] = useState([]);
   const [announcement, setAnnouncement] = useState('Waiting for host to start hand');
 
+  // Animation & Interaction states
+  const [flyingChips, setFlyingChips] = useState([]);
+  const [isPotPulsing, setIsPotPulsing] = useState(false);
+  const [heroShowCardsClicked, setHeroShowCardsClicked] = useState(false);
+
+  const channelRef = useRef(null);
   const turnTimerRef = useRef(null);
 
-  // Initialize Seated Players
+  // Initialize Seated Players & Supabase Realtime Channel
   useEffect(() => {
     const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
-    const initialList = [];
+    let initialList = [];
 
-    // Seat 0: The User (Hero)
-    initialList.push({
+    // Current user sits at Seat 0 by default
+    const heroPlayer = {
       seat_index: 0,
+      user_id: user?.id,
       username: user?.username || 'Hero',
       chips: gameRoom?.startingStack || 1500,
       current_round_bet: 0,
@@ -83,14 +95,17 @@ export const PokerTable = ({
       cards: [],
       shownCards: true,
       isBot: false
-    });
+    };
+
+    initialList.push(heroPlayer);
+    setMySeatIndex(0);
 
     if (gameRoom?.isPractice) {
-      // In Practice mode: pre-fill bots for quick solo play
+      // In Practice mode: pre-fill bots for solo training
       for (let i = 1; i < totalMax; i++) {
         initialList.push({
           seat_index: i,
-          username: BOT_NAMES[i - 1] || `Player ${i + 1}`,
+          username: BOT_NAMES[i - 1] || `Bot ${i + 1}`,
           chips: gameRoom?.startingStack || 1500,
           current_round_bet: 0,
           total_hand_bet: 0,
@@ -101,12 +116,56 @@ export const PokerTable = ({
           isBot: true
         });
       }
-      setAnnouncement('Practice Mode: Click "Deal Hand" to play');
+      setAnnouncement(`Practice Mode (${totalMax} Players) • Click "Deal Hand" to start`);
     } else {
-      setAnnouncement(`Table Created! Share Code: ${gameRoom?.roomCode || 'PK-CODE'}`);
+      setAnnouncement(`Share Code ${gameRoom?.roomCode} • Waiting for players to join`);
     }
 
     setPlayers(initialList);
+
+    // Setup Supabase Realtime Broadcast Channel for Live Multiplayer
+    const roomCode = gameRoom?.roomCode || 'SOLO';
+    const channel = supabase.channel(`poker_room_${roomCode}`, {
+      config: { broadcast: { self: false } }
+    });
+
+    channel
+      .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
+        setPlayers((prev) => {
+          if (prev.some(p => p.seat_index === payload.seat_index)) return prev;
+          return [...prev, payload];
+        });
+        setAnnouncement(`${payload.username} joined the table!`);
+      })
+      .on('broadcast', { event: 'HAND_DEALT' }, ({ payload }) => {
+        playCardDeal();
+        setHandState(payload.handState);
+        setPlayers(payload.players);
+        setWinningCards([]);
+        setAnnouncement(payload.announcement);
+      })
+      .on('broadcast', { event: 'PLAYER_ACTION_EVENT' }, ({ payload }) => {
+        handleReceivedPlayerAction(payload.action, payload.amount, payload.seatIndex);
+      })
+      .on('broadcast', { event: 'PLAYER_SHOW_CARDS' }, ({ payload }) => {
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p.seat_index === payload.seatIndex
+              ? { ...p, shownCards: true, cards: payload.cards || p.cards }
+              : p
+          )
+        );
+        setAnnouncement(`👁️ ${payload.username} revealed their cards!`);
+      })
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
   }, [gameRoom, user]);
 
   // Turn Countdown Timer
@@ -135,7 +194,7 @@ export const PokerTable = ({
     return () => clearInterval(turnTimerRef.current);
   }, [handState.currentTurnSeat, handState.phase]);
 
-  // AI Bot Turn Execution (With deliberate, human-readable 2.5s pacing)
+  // AI Bot Turn Execution (in Practice mode or when testing with bots)
   useEffect(() => {
     if (handState.phase === 'waiting' || handState.phase === 'ended' || handState.phase === 'showdown') {
       return;
@@ -146,7 +205,6 @@ export const PokerTable = ({
       return;
     }
 
-    // Give human time to observe the table
     const timer = setTimeout(() => {
       executeBotTurn(activePlayer);
     }, 2200);
@@ -154,7 +212,42 @@ export const PokerTable = ({
     return () => clearTimeout(timer);
   }, [handState.currentTurnSeat, handState.phase, players]);
 
-  // Host Adds an AI Bot to an open seat
+  // User Takes an Open Seat (Live Multiplayer)
+  const handleSitAtSeat = (seatIndex) => {
+    if (players.some(p => p.username === user.username)) {
+      alert('You are already seated at the table!');
+      return;
+    }
+
+    const newSeated = {
+      seat_index: seatIndex,
+      user_id: user.id,
+      username: user.username,
+      chips: gameRoom?.startingStack || 1500,
+      current_round_bet: 0,
+      total_hand_bet: 0,
+      status: 'active',
+      last_action: null,
+      cards: [],
+      shownCards: true,
+      isBot: false
+    };
+
+    setMySeatIndex(seatIndex);
+    const updated = [...players, newSeated];
+    setPlayers(updated);
+
+    // Broadcast seat to other connected clients
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'SEAT_TAKEN',
+        payload: newSeated
+      });
+    }
+  };
+
+  // Host Adds an AI Bot to fill an open seat
   const handleAddBot = () => {
     const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
     if (players.length >= totalMax) {
@@ -162,7 +255,6 @@ export const PokerTable = ({
       return;
     }
 
-    // Find next unoccupied seat index
     const occupiedSeats = players.map(p => p.seat_index);
     let openSeat = 1;
     while (occupiedSeats.includes(openSeat) && openSeat < totalMax) {
@@ -183,11 +275,76 @@ export const PokerTable = ({
       isBot: true
     };
 
-    setPlayers([...players, newBot]);
+    const updated = [...players, newBot];
+    setPlayers(updated);
     setAnnouncement(`Added ${botName} to Seat ${openSeat + 1}`);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'SEAT_TAKEN',
+        payload: newBot
+      });
+    }
   };
 
-  // Helper to shuffle standard deck
+  // Trigger flying chips animation from all players with bets to the center pot
+  const triggerChipsFlight = (playersWithBets) => {
+    const totalSeats = Math.max(players.length, gameRoom?.maxPlayers || 6);
+    const flying = playersWithBets
+      .filter((p) => p.current_round_bet > 0)
+      .map((p) => {
+        const coords = getSeatCoordinates(p.seat_index, totalSeats, mySeatIndex);
+        const leftNum = parseFloat(coords.left) || 50;
+        const topNum = parseFloat(coords.top) || 50;
+        const dx = (leftNum - 50) * 4.6;
+        const dy = (topNum - 45) * 2.8;
+        return {
+          id: `${p.seat_index}-${Date.now()}-${Math.random()}`,
+          seatIndex: p.seat_index,
+          amount: p.current_round_bet,
+          startX: `${dx}px`,
+          startY: `${dy}px`
+        };
+      });
+
+    if (flying.length > 0) {
+      setFlyingChips(flying);
+      setTimeout(() => {
+        playChipClink();
+        setIsPotPulsing(true);
+      }, 500);
+      setTimeout(() => {
+        setFlyingChips([]);
+        setIsPotPulsing(false);
+      }, 750);
+    }
+  };
+
+  // Option for Hero to reveal cards at end of hand
+  const handleShowHeroCards = () => {
+    const hero = players.find(p => p.seat_index === mySeatIndex);
+    if (!hero || !hero.cards || hero.cards.length === 0) return;
+    setHeroShowCardsClicked(true);
+    setPlayers((prev) =>
+      prev.map((p) => (p.seat_index === mySeatIndex ? { ...p, shownCards: true } : p))
+    );
+    setAnnouncement(`👁️ You revealed your cards to the table!`);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'PLAYER_SHOW_CARDS',
+        payload: {
+          seatIndex: mySeatIndex,
+          username: hero.username,
+          cards: hero.cards
+        }
+      });
+    }
+  };
+
+  // Helper: Deck generator
   const generateDeck = () => {
     const suits = ['s', 'h', 'd', 'c'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
@@ -204,29 +361,56 @@ export const PokerTable = ({
     return deck;
   };
 
-  // START HAND (Triggered only when host clicks "Deal Hand")
+  // START HAND (Strict Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
   const startNewHand = () => {
     if (players.length < 2) {
-      alert('At least 2 players are needed to deal a hand. Click "+ Add Bot" or invite a friend!');
+      alert('At least 2 players are needed to start a hand. Invite a friend with the room code or click "+ Add Bot"!');
       return;
     }
 
     const activeList = players.filter((p) => p.chips > 0);
     if (activeList.length < 2) {
-      setAnnouncement('Not enough players with chips remaining!');
+      setAnnouncement('Not enough players with points remaining!');
       return;
     }
 
     const deck = generateDeck();
     let deckIdx = 0;
 
+    // Advance Dealer button 1 active seat clockwise
     const nextDealerSeat = (handState.dealerSeat + 1) % players.length;
-    const sbSeat = (nextDealerSeat + 1) % players.length;
-    const bbSeat = (nextDealerSeat + 2) % players.length;
-    const utgSeat = (nextDealerSeat + 3) % players.length;
+    
+    let sbSeat, bbSeat, utgSeat;
+    if (players.length === 2) {
+      // Heads-Up: Dealer is Small Blind and acts first pre-flop
+      sbSeat = nextDealerSeat;
+      bbSeat = (nextDealerSeat + 1) % 2;
+      utgSeat = nextDealerSeat;
+    } else {
+      // 3 to 8 players Ring Game
+      sbSeat = (nextDealerSeat + 1) % players.length;
+      bbSeat = (nextDealerSeat + 2) % players.length;
+      utgSeat = (nextDealerSeat + 3) % players.length;
+    }
 
-    const sbAmount = gameRoom?.smallBlind || 10;
-    const bbAmount = gameRoom?.bigBlind || 20;
+    setHeroShowCardsClicked(false);
+
+    const newHandNum = handState.handNumber + 1;
+    let sbAmount = gameRoom?.smallBlind || 10;
+    let bbAmount = gameRoom?.bigBlind || 20;
+
+    // Apply blinds escalation frequency from custom options
+    const freq = gameRoom?.blindsFrequency || 'fast_5';
+    let multiplier = 1;
+    if (freq === 'fast_5' && newHandNum > 1) {
+      multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 5));
+    } else if (freq === 'standard_10' && newHandNum > 1) {
+      multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 10));
+    } else if (freq === 'slow_15' && newHandNum > 1) {
+      multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 15));
+    }
+    sbAmount = sbAmount * multiplier;
+    bbAmount = bbAmount * multiplier;
 
     const updatedPlayers = players.map((p) => {
       if (p.chips <= 0) return { ...p, status: 'sitting_out', cards: [] };
@@ -252,20 +436,16 @@ export const PokerTable = ({
         status: p.chips - bet === 0 ? 'all_in' : 'active',
         last_action: lastAction,
         cards: [c1, c2],
-        shownCards: p.seat_index === heroSeatIndex
+        shownCards: p.user_id === user?.id
       };
     });
 
     playCardDeal();
 
-    const newHandNum = handState.handNumber + 1;
-    setPlayers(updatedPlayers);
-    setWinningCards([]);
-
     const utgPlayer = updatedPlayers.find(p => p.seat_index === utgSeat);
-    setAnnouncement(`Hand #${newHandNum} Dealt • ${utgPlayer?.username}'s Turn`);
+    const initialAnnouncement = `Hand #${newHandNum} Dealt • Blinds: ${formatPoints(sbAmount)} / ${formatPoints(bbAmount)} • ${utgPlayer?.username}'s Turn`;
 
-    setHandState({
+    const newHandState = {
       handNumber: newHandNum,
       phase: 'preflop',
       communityCards: [],
@@ -279,12 +459,53 @@ export const PokerTable = ({
       mainPot: sbAmount + bbAmount,
       sidePots: [],
       winners: []
-    });
+    };
+
+    setPlayers(updatedPlayers);
+    setWinningCards([]);
+    setAnnouncement(initialAnnouncement);
+    setHandState(newHandState);
+
+    // Broadcast hand start to all connected live players
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'HAND_DEALT',
+        payload: {
+          handState: newHandState,
+          players: updatedPlayers,
+          announcement: initialAnnouncement
+        }
+      });
+    }
   };
 
-  // Submit Player Action
+  // Submit Player Action (Hero or local execution)
   const handlePlayerAction = (action, amount = 0) => {
     const currentSeat = handState.currentTurnSeat;
+    executeActionLogic(action, amount, currentSeat);
+
+    // Broadcast action to other live multiplayer participants
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'PLAYER_ACTION_EVENT',
+        payload: {
+          action,
+          amount,
+          seatIndex: currentSeat
+        }
+      });
+    }
+  };
+
+  // Received Action from other player via Realtime
+  const handleReceivedPlayerAction = (action, amount, seatIndex) => {
+    executeActionLogic(action, amount, seatIndex);
+  };
+
+  // Core Betting Logic (Check, Call, Bet, Raise, Fold, Blinds Option)
+  const executeActionLogic = (action, amount, currentSeat) => {
     const playerIndex = players.findIndex((p) => p.seat_index === currentSeat);
     if (playerIndex === -1) return;
 
@@ -323,7 +544,7 @@ export const PokerTable = ({
         status: newChips === 0 ? 'all_in' : 'active',
         last_action: 'call'
       };
-      setAnnouncement(`${player.username} Called $${callDiff}`);
+      setAnnouncement(`${player.username} Called ${formatPoints(callDiff)}`);
     } else if (action === 'bet' || action === 'raise') {
       playChipClink();
       const addBet = Math.min(player.chips, amount - player.current_round_bet);
@@ -340,19 +561,19 @@ export const PokerTable = ({
         status: newChips === 0 ? 'all_in' : 'active',
         last_action: action
       };
-      setAnnouncement(`${player.username} ${action.toUpperCase()} to $${amount}`);
+      setAnnouncement(`${player.username} ${action.toUpperCase()} to ${formatPoints(amount)}`);
     }
 
     setPlayers(updatedPlayers);
 
-    // Check if uncontested winner
+    // Check for uncontested winner (all folded except one)
     const remainingInHand = updatedPlayers.filter((p) => p.status === 'active' || p.status === 'all_in');
     if (remainingInHand.length === 1) {
       resolveUncontestedWinner(remainingInHand[0], newMainPot, updatedPlayers);
       return;
     }
 
-    // Check if betting round complete
+    // Check if betting round complete (everyone matched currentBet or is all-in)
     const needToAct = updatedPlayers.filter(
       (p) => p.status === 'active' && (p.current_round_bet < newCurrentBet || !p.last_action)
     );
@@ -390,8 +611,10 @@ export const PokerTable = ({
     let newCommunity = [...handState.communityCards];
     let remainingDeck = [...handState.deck];
 
+    triggerChipsFlight(playersList);
     playCardDeal();
 
+    // Reset round bets
     const resetPlayers = playersList.map((p) => ({
       ...p,
       current_round_bet: 0,
@@ -415,6 +638,7 @@ export const PokerTable = ({
       return;
     }
 
+    // Postflop action starts with first active player clockwise from Dealer Button (typically SB)
     const firstActor = getNextTurnSeat(handState.dealerSeat, resetPlayers);
     const actorPlayer = resetPlayers.find(p => p.seat_index === firstActor);
 
@@ -464,7 +688,7 @@ export const PokerTable = ({
     });
 
     setPlayers(revealedPlayers);
-    setAnnouncement(`🏆 ${winner.username} Wins $${totalPot} with ${bestEval.name}!`);
+    setAnnouncement(`🏆 ${winner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`);
     playWinCelebration();
 
     confetti({
@@ -481,6 +705,8 @@ export const PokerTable = ({
   };
 
   const resolveUncontestedWinner = (winner, totalPot, playersList) => {
+    triggerChipsFlight(playersList);
+
     const updated = playersList.map((p) => {
       if (p.seat_index === winner.seat_index) {
         return { ...p, chips: p.chips + totalPot };
@@ -489,12 +715,20 @@ export const PokerTable = ({
     });
 
     setPlayers(updated);
-    setAnnouncement(`🏆 ${winner.username} takes the pot of $${totalPot} (All folded)`);
+    setAnnouncement(`🏆 ${winner.username} takes ${formatPoints(totalPot)} (All folded)`);
     playWinCelebration();
+
+    let finalCommunity = [...handState.communityCards];
+    if (gameRoom?.showRemainingRiverCards && finalCommunity.length < 5) {
+      const remainingDeck = [...handState.deck];
+      const needed = 5 - finalCommunity.length;
+      finalCommunity = [...finalCommunity, ...remainingDeck.slice(0, needed)];
+    }
 
     setHandState((prev) => ({
       ...prev,
       phase: 'ended',
+      communityCards: finalCommunity,
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: 'Uncontested' }]
     }));
   };
@@ -548,7 +782,7 @@ export const PokerTable = ({
     }
   };
 
-  const heroPlayer = players.find((p) => p.seat_index === heroSeatIndex);
+  const heroPlayer = players.find((p) => p.seat_index === mySeatIndex);
   const heroHandRank = heroPlayer?.cards?.length
     ? evaluateHand([...heroPlayer.cards, ...handState.communityCards])
     : null;
@@ -558,7 +792,7 @@ export const PokerTable = ({
 
   return (
     <div className="table-viewport-container">
-      {/* Top Table Header */}
+      {/* Top Table Header Bar */}
       <header className="table-header-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
@@ -585,15 +819,14 @@ export const PokerTable = ({
           </div>
         </div>
 
-        {/* Live Announcement Center Banner */}
+        {/* Live Announcement Center Marquee */}
         <div className="table-marquee-box">
           <span style={{ color: '#f59e0b', marginRight: '6px' }}>●</span>
           <span>{announcement}</span>
         </div>
 
-        {/* Controls */}
+        {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Host buttons: Add Bot & Start Hand */}
           {isWaitingOrEnded && (
             <>
               {players.length < (gameRoom?.maxPlayers || 6) && (
@@ -601,7 +834,7 @@ export const PokerTable = ({
                   onClick={handleAddBot}
                   className="table-nav-btn"
                   style={{ background: '#1e293b', borderColor: '#475569' }}
-                  title="Add AI Player"
+                  title="Add Practice Bot"
                 >
                   <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
                   <span>+ Bot</span>
@@ -639,47 +872,25 @@ export const PokerTable = ({
 
       {/* Main Table Felt Stage */}
       <main className="table-stage">
+        {/* Real Oval Table Outer Border */}
         <div className="poker-table-outer">
           <div className="poker-table-brass-rim">
             <div className={`poker-table-felt-canvas ${feltTheme === 'emerald' ? 'felt-emerald' : 'felt-midnight'}`}>
               <div className="poker-betting-line" />
 
-              {/* Waiting For Players / Host Deal Overlay Banner */}
-              {isWaitingOrEnded && (
-                <div className="poker-host-deal-banner">
-                  <span style={{ fontSize: '11px', fontWeight: 900, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    {handState.handNumber === 0 ? 'TABLE READY' : 'HAND COMPLETE'}
-                  </span>
-                  <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                    {players.length < 2
-                      ? 'Waiting for at least 2 players to start'
-                      : handState.handNumber === 0
-                      ? 'Ready to deal cards!'
-                      : 'Ready for the next hand!'}
-                  </h3>
-
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                    {players.length < (gameRoom?.maxPlayers || 6) && (
-                      <button
-                        onClick={handleAddBot}
-                        className="table-nav-btn"
-                        style={{ padding: '10px 16px', fontSize: '13px' }}
-                      >
-                        <UserPlus className="w-4 h-4 text-indigo-400" />
-                        <span>Add AI Bot</span>
-                      </button>
-                    )}
-
-                    <button
-                      onClick={startNewHand}
-                      className="poker-deal-btn"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      <span>{handState.handNumber === 0 ? 'DEAL FIRST HAND' : 'DEAL NEXT HAND'}</span>
-                    </button>
-                  </div>
+              {/* Flying Chip Animation towards Center Pot */}
+              {flyingChips.map((fc) => (
+                <div
+                  key={fc.id}
+                  className="flying-chip-particle"
+                  style={{
+                    '--startX': fc.startX,
+                    '--startY': fc.startY
+                  }}
+                >
+                  <PokerChipSVG value={20} size={28} />
                 </div>
-              )}
+              ))}
 
               {/* Center Community Cards Area */}
               <CommunityArea
@@ -688,11 +899,13 @@ export const PokerTable = ({
                 sidePots={handState.sidePots}
                 phase={handState.phase}
                 winningCards={winningCards}
+                isPotPulsing={isPotPulsing}
               />
 
-              {/* Seated Players (Clean fixed-size pods, properly positioned) */}
+              {/* Seated Players: Positioned on the OUTER RAIL of the table */}
               {players.map((player) => {
-                const pos = getSeatCoordinates(player.seat_index, Math.max(players.length, gameRoom?.maxPlayers || 6), heroSeatIndex);
+                const totalSeats = Math.max(players.length, gameRoom?.maxPlayers || 6);
+                const pos = getSeatCoordinates(player.seat_index, totalSeats, mySeatIndex);
                 const isWinner = handState.winners.some((w) => w.seat_index === player.seat_index);
 
                 return (
@@ -701,7 +914,7 @@ export const PokerTable = ({
                     player={player}
                     seatIndex={player.seat_index}
                     position={pos}
-                    isHero={player.seat_index === heroSeatIndex}
+                    isHero={player.seat_index === mySeatIndex}
                     isDealer={player.seat_index === handState.dealerSeat}
                     isSB={player.seat_index === handState.sbSeat}
                     isBB={player.seat_index === handState.bbSeat}
@@ -709,6 +922,7 @@ export const PokerTable = ({
                     turnTimeLeft={turnTimeLeft}
                     turnMaxTime={turnMaxTime}
                     isWinner={isWinner}
+                    onSit={handleSitAtSeat}
                   />
                 );
               })}
@@ -717,10 +931,10 @@ export const PokerTable = ({
         </div>
       </main>
 
-      {/* Bottom Action HUD */}
-      {!isWaitingOrEnded && (
+      {/* Bottom Action HUD or Waiting / Hand Completed Controls (No center popup) */}
+      {!isWaitingOrEnded ? (
         <PlayerHUD
-          isMyTurn={handState.currentTurnSeat === heroSeatIndex}
+          isMyTurn={handState.currentTurnSeat === mySeatIndex}
           heroPlayer={heroPlayer}
           currentTurnPlayerName={currentTurnPlayer?.username}
           currentBet={handState.currentBet}
@@ -730,6 +944,79 @@ export const PokerTable = ({
           handRank={heroHandRank}
           onAction={handlePlayerAction}
         />
+      ) : (
+        /* Sleek Bottom Control Bar (Replaces Center Popup, Felt Remains 100% Clean) */
+        <div className="poker-hud-wrapper">
+          <div
+            className="poker-hud-panel"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              padding: '10px 16px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                {handState.handNumber === 0 ? 'TABLE READY' : 'HAND COMPLETED'}
+              </span>
+              <span style={{ fontSize: '11px', color: '#cbd5e1' }}>•</span>
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                {players.length < 2 ? 'Waiting for players' : announcement}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Option to show cards at end of hand */}
+              {heroPlayer?.cards?.length >= 2 && !heroPlayer.shownCards && !heroShowCardsClicked && (
+                <button
+                  type="button"
+                  onClick={handleShowHeroCards}
+                  className="table-nav-btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
+                    borderColor: '#818cf8',
+                    color: '#ffffff',
+                    fontWeight: 900,
+                    padding: '8px 14px'
+                  }}
+                  title="Reveal your cards to the table"
+                >
+                  <span>👁️ SHOW CARDS</span>
+                </button>
+              )}
+
+              {players.length < (gameRoom?.maxPlayers || 6) && (
+                <button
+                  type="button"
+                  onClick={handleAddBot}
+                  className="table-nav-btn"
+                  style={{ background: '#1e293b', borderColor: '#475569', padding: '8px 12px' }}
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>+ Bot</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={startNewHand}
+                className="table-nav-btn"
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                  borderColor: '#34d399',
+                  color: '#ffffff',
+                  fontWeight: 900,
+                  padding: '8px 16px'
+                }}
+              >
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>{handState.handNumber === 0 ? 'DEAL FIRST HAND' : 'NEXT HAND'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

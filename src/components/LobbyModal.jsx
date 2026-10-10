@@ -111,9 +111,9 @@ export const LobbyModal = ({
                 onChange={(e) => setStartingStack(Number(e.target.value))}
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-emerald-400"
               >
-                <option value={1000}>$1,000 (Fast Turbo)</option>
-                <option value={1500}>$1,500 (Standard Deep)</option>
-                <option value={3000}>$3,000 (Championship)</option>
+                <option value={1000}>1,000 PTS - Fast Turbo</option>
+                <option value={1500}>1,500 PTS - Standard Deep</option>
+                <option value={3000}>3,000 PTS - Championship</option>
               </select>
             </div>
 
