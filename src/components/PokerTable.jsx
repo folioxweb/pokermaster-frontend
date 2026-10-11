@@ -1212,7 +1212,7 @@ export const PokerTable = ({
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#ffffff' }}>
+            <h2 className="table-room-title">
               {gameRoom?.roomName || 'Poker Room'}
             </h2>
             <button
@@ -1237,8 +1237,7 @@ export const PokerTable = ({
           {onOpenSocial && (
             <button
               onClick={onOpenSocial}
-              className="table-nav-btn"
-              style={{ background: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#f59e0b', fontWeight: 700 }}
+              className="table-nav-btn table-invite-btn"
               title="Invite Online Friends to Table"
             >
               <Users className="w-3.5 h-3.5" />
@@ -1391,11 +1390,11 @@ export const PokerTable = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 900, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <span className="table-status-label">
                 {handState.handNumber === 0 ? 'TABLE READY' : 'HAND COMPLETED'}
               </span>
-              <span style={{ fontSize: '11px', color: '#cbd5e1' }}>•</span>
-              <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+              <span className="table-status-dot">•</span>
+              <span className="table-status-desc">
                 {players.length < 2 ? 'Waiting for players' : announcement}
               </span>
             </div>

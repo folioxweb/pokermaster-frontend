@@ -400,9 +400,9 @@ export const LobbyPage = ({
 
             {rooms.length === 0 ? (
               <div className="lobby-empty-card">
-                <Layers className="w-10 h-10 text-slate-500 mb-3" />
-                <h3 className="text-base font-bold text-white mb-1">No Active Tables</h3>
-                <p className="text-xs text-slate-400 mb-4 max-w-sm">
+                <Layers className="w-10 h-10 text-slate-400 mb-3" />
+                <h3 className="lobby-empty-title">No Active Tables</h3>
+                <p className="lobby-empty-desc">
                   There are no open tables currently. Be the first to create a table and invite your friends!
                 </p>
                 <button
@@ -498,7 +498,7 @@ export const LobbyPage = ({
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <label className="lobby-form-label" style={{ margin: 0 }}>Table Capacity</label>
-                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <span className="table-badge-capacity">
                       {maxPlayers} Max Players
                     </span>
                   </div>
@@ -540,7 +540,7 @@ export const LobbyPage = ({
                       <option value="100/200">{formatPoints(100)} / {formatPoints(200)} (High Roller)</option>
                       <option value="250/500">{formatPoints(250)} / {formatPoints(500)} (Championship)</option>
                     </select>
-                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
+                    <span className="lobby-field-desc">
                       Initial Small / Big blind per hand
                     </span>
                   </div>
@@ -561,7 +561,7 @@ export const LobbyPage = ({
                       <option value={5000}>{formatPoints(5000)} (High Roller)</option>
                       <option value={10000}>{formatPoints(10000)} (Championship)</option>
                     </select>
-                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
+                    <span className="lobby-field-desc">
                       Initial chips per seated player
                     </span>
                   </div>
@@ -570,7 +570,7 @@ export const LobbyPage = ({
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <label className="lobby-form-label" style={{ margin: 0 }}>Shot Clock (Turn Timer)</label>
-                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                    <span className="table-badge-shotclock">
                       {turnTime >= 60 ? `${turnTime / 60} Min` : `${turnTime}s`} per turn
                     </span>
                   </div>
@@ -603,10 +603,10 @@ export const LobbyPage = ({
                     className="custom-options-header"
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {customOptionsOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-                      <span style={{ fontWeight: 800, fontSize: '13px', color: '#f1f5f9' }}>Custom options</span>
+                      {customOptionsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      <span className="custom-options-title">Custom options</span>
                     </div>
-                    <span style={{ color: '#94a3b8', fontSize: '16px', fontWeight: 900 }}>+</span>
+                    <span className="custom-options-plus">+</span>
                   </button>
 
                   {customOptionsOpen && (
@@ -666,7 +666,7 @@ export const LobbyPage = ({
                       <div className="custom-option-item">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <label className="custom-option-label" style={{ margin: 0 }}>Starting Stack (Initial Chips)</label>
-                          <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                          <span className="custom-option-badge">
                             {formatPoints(startingStack)}
                           </span>
                         </div>
@@ -686,7 +686,7 @@ export const LobbyPage = ({
                           />
                           <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#f8fafc' }}>
+                              <span className="custom-toggle-title">
                                 All in minimum raise exception
                               </span>
                               <button type="button" className="custom-shuffle-btn" style={{ width: '28px', height: '28px' }} title="Toggle">
@@ -711,7 +711,7 @@ export const LobbyPage = ({
                           />
                           <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#f8fafc' }}>
+                              <span className="custom-toggle-title">
                                 Show remaining river cards
                               </span>
                               <button type="button" className="custom-shuffle-btn" style={{ width: '28px', height: '28px' }} title="Toggle">
