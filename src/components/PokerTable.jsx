@@ -1250,8 +1250,7 @@ export const PokerTable = ({
               {players.length < (gameRoom?.maxPlayers || 6) && (
                 <button
                   onClick={handleAddBot}
-                  className="table-nav-btn"
-                  style={{ background: '#1e293b', borderColor: '#475569' }}
+                  className="table-nav-btn table-bot-btn"
                   title="Add Practice Bot"
                 >
                   <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
@@ -1423,8 +1422,8 @@ export const PokerTable = ({
                 <button
                   type="button"
                   onClick={handleAddBot}
-                  className="table-nav-btn"
-                  style={{ background: '#1e293b', borderColor: '#475569', padding: '8px 12px' }}
+                  className="table-nav-btn table-bot-btn"
+                  style={{ padding: '8px 12px' }}
                 >
                   <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
                   <span>+ Bot</span>

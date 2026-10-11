@@ -11,12 +11,12 @@ export default function App() {
   const [activeGameRoom, setActiveGameRoom] = useState(null); // null when in lobby
   const [loadingInitial, setLoadingInitial] = useState(true);
 
-  // Theme State: 'dark' (default) | 'light'
+  // Theme State: 'light' (default for new users) | 'dark'
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem('pokermaster-theme') || 'dark';
+      return localStorage.getItem('pokermaster-theme') || 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 

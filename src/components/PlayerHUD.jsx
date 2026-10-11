@@ -63,10 +63,10 @@ export const PlayerHUD = ({
         <div className="poker-hand-rank-pill">
           <div className="poker-hand-rank-content">
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-            <span style={{ fontWeight: 900, color: '#a5b4fc', textTransform: 'uppercase' }}>
+            <span className="poker-hand-rank-tag">
               {handRank.name}:
             </span>
-            <span style={{ fontWeight: 700, color: '#ffffff' }}>
+            <span className="poker-hand-rank-text">
               {handRank.description}
             </span>
           </div>
@@ -119,7 +119,7 @@ export const PlayerHUD = ({
                 </div>
 
                 <div className="poker-slider-row">
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8' }}>
+                  <span className="poker-slider-minmax">
                     {formatPointsOnly(minBetAllowed)}
                   </span>
                   <input
@@ -131,7 +131,7 @@ export const PlayerHUD = ({
                     onChange={handleSliderChange}
                     className="poker-slider"
                   />
-                  <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24' }}>
+                  <span className="poker-slider-val">
                     {formatPoints(betAmount)}
                   </span>
                 </div>

@@ -268,21 +268,21 @@ button, input, select {
   padding: 0.75rem 1rem;
   margin-top: 0.5rem;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border: 1px solid #fbbf24;
-  color: #020617;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid #34d399;
+  color: #ffffff;
   font-family: var(--font-display);
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.05em;
-  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .auth-submit-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.5);
 }
 
 .auth-divider {
@@ -1083,11 +1083,14 @@ button, input, select {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #060913;
+  background-color: #05070d;
   background-image: 
-    radial-gradient(ellipse 95% 80% at 50% 48%, rgba(26, 38, 65, 0.6) 0%, rgba(10, 16, 28, 0.9) 55%, #02050c 100%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cpath d='M22 2 L42 22 L22 42 L2 22 Z' fill='none' stroke='rgba(255,255,255,0.038)' stroke-width='1'/%3E%3Cpath d='M22 10 L34 22 L22 34 L10 22 Z' fill='none' stroke='rgba(255,255,255,0.022)' stroke-width='0.75'/%3E%3Ccircle cx='22' cy='22' r='2' fill='rgba(255,255,255,0.055)'/%3E%3Cpath d='M0 0 L4 4 M44 0 L40 4 M0 44 L4 40 M44 44 L40 40' stroke='rgba(255,255,255,0.028)' stroke-width='0.75'/%3E%3C/svg%3E");
-  background-size: auto, 44px 44px;
+    radial-gradient(ellipse 95% 85% at 50% 48%, rgba(6, 9, 19, 0.45) 0%, rgba(2, 4, 10, 0.88) 60%, #010307 100%),
+    url('/assets/table_bg_dark.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
   overflow-y: auto;
   overflow-x: hidden;
   user-select: none;
@@ -1109,6 +1112,12 @@ button, input, select {
   border-color: rgba(59, 130, 246, 0.4) !important;
   color: #60a5fa !important;
   font-weight: 700 !important;
+}
+
+.table-bot-btn {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
 }
 
 .table-status-label {
@@ -1764,15 +1773,26 @@ button, input, select {
   color: #fbbf24;
 }
 
+.poker-hand-rank-tag {
+  font-weight: 900;
+  color: #a5b4fc;
+  text-transform: uppercase;
+}
+
+.poker-hand-rank-text {
+  font-weight: 700;
+  color: #ffffff;
+}
+
 .poker-hud-timer-badge {
   display: flex;
   align-items: center;
   gap: 5px;
   padding: 3px 8px;
   border-radius: 9999px;
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid #f59e0b;
-  color: #fde68a;
+  background: rgba(37, 99, 235, 0.2);
+  border: 1px solid #3b82f6;
+  color: #93c5fd;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -1838,8 +1858,20 @@ button, input, select {
   height: 6px;
   background: #1e293b;
   border-radius: 6px;
-  accent-color: #f59e0b;
+  accent-color: #2563eb;
   cursor: pointer;
+}
+
+.poker-slider-minmax {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.poker-slider-val {
+  font-size: 11px;
+  font-weight: 900;
+  color: #60a5fa;
 }
 
 /* Main Action Buttons Grid */
@@ -1884,9 +1916,9 @@ button, input, select {
 }
 
 .poker-action-btn.raise {
-  background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
-  border-color: #fbbf24;
-  color: #020617;
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #3b82f6;
+  color: #ffffff;
 }
 
 .poker-btn-main-text {
@@ -3142,16 +3174,23 @@ button, input, select {
 /* Auth Page in Light Mode */
 [data-theme="light"] .auth-container,
 .light-theme .auth-container {
-  background-color: #f1f5f9;
-  background-image: radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+  background-color: #f8fafc;
+  background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.06) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
 }
 
 [data-theme="light"] .auth-card,
 .light-theme .auth-card {
-  background-color: rgba(255, 255, 255, 0.98);
+  background-color: #ffffff;
   border-color: #e2e8f0;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), 0 0 25px rgba(245, 158, 11, 0.06);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08), 0 0 25px rgba(37, 99, 235, 0.04);
+}
+
+[data-theme="light"] .auth-badge,
+.light-theme .auth-badge {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
 [data-theme="light"] .auth-title,
@@ -3164,8 +3203,8 @@ button, input, select {
   color: #64748b;
 }
 
-[data-theme="light"] .auth-tabs,
-.light-theme .auth-tabs {
+[data-theme="light"] .auth-tab-bar,
+.light-theme .auth-tab-bar {
   background-color: #f1f5f9;
   border-color: #e2e8f0;
 }
@@ -3190,7 +3229,7 @@ button, input, select {
 
 [data-theme="light"] .auth-input,
 .light-theme .auth-input {
-  background-color: #f8fafc;
+  background-color: #ffffff;
   border-color: #cbd5e1;
   color: #0f172a;
 }
@@ -3200,6 +3239,30 @@ button, input, select {
   background-color: #ffffff;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+[data-theme="light"] .auth-submit-btn,
+.light-theme .auth-submit-btn {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+}
+
+[data-theme="light"] .auth-submit-btn:hover,
+.light-theme .auth-submit-btn:hover {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+[data-theme="light"] .auth-divider::before,
+.light-theme .auth-divider::before {
+  background-color: #e2e8f0;
+}
+
+[data-theme="light"] .auth-divider span,
+.light-theme .auth-divider span {
+  background-color: #ffffff;
+  color: #64748b;
 }
 
 [data-theme="light"] .auth-guest-btn,
@@ -3213,6 +3276,11 @@ button, input, select {
 .light-theme .auth-guest-btn:hover {
   background-color: #e2e8f0;
   color: #0f172a;
+}
+
+[data-theme="light"] .auth-footer-note,
+.light-theme .auth-footer-note {
+  color: #64748b;
 }
 
 [data-theme="light"] .auth-theme-toggle,
@@ -3349,37 +3417,79 @@ button, input, select {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-[data-theme="light"] .room-card,
-.light-theme .room-card {
-  background: #ffffff;
+[data-theme="light"] .lobby-room-card,
+.light-theme .lobby-room-card {
+  background-color: #ffffff;
   border-color: #e2e8f0;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
 }
 
-[data-theme="light"] .room-card:hover,
-.light-theme .room-card:hover {
+[data-theme="light"] .lobby-room-card:hover,
+.light-theme .lobby-room-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
 }
 
-[data-theme="light"] .room-card-name,
-.light-theme .room-card-name {
+[data-theme="light"] .lobby-room-name,
+.light-theme .lobby-room-name {
   color: #0f172a;
 }
 
-[data-theme="light"] .room-card-desc,
-.light-theme .room-card-desc {
+[data-theme="light"] .lobby-room-code,
+.light-theme .lobby-room-code {
   color: #64748b;
 }
 
-[data-theme="light"] .room-stat-val,
-.light-theme .room-stat-val {
-  color: #0f172a;
+[data-theme="light"] .lobby-stat-item,
+.light-theme .lobby-stat-item {
+  color: #475569;
 }
 
-[data-theme="light"] .room-stat-label,
-.light-theme .room-stat-label {
+[data-theme="light"] .lobby-room-join-btn,
+.light-theme .lobby-room-join-btn {
+  background-color: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme="light"] .lobby-room-join-btn:hover,
+.light-theme .lobby-room-join-btn:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+}
+
+[data-theme="light"] .lobby-room-delete-btn,
+.light-theme .lobby-room-delete-btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .lobby-room-delete-btn:hover,
+.light-theme .lobby-room-delete-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+[data-theme="light"] .lobby-room-status-badge.empty,
+.light-theme .lobby-room-status-badge.empty {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
   color: #64748b;
+}
+
+[data-theme="light"] .lobby-room-status-badge.waiting,
+.light-theme .lobby-room-status-badge.waiting {
+  background-color: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: #2563eb;
+}
+
+[data-theme="light"] .lobby-room-status-badge.live,
+.light-theme .lobby-room-status-badge.live {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
 }
 
 /* Modern Segment Pills (Capacity & Shot Clock) in Light Mode */
@@ -3707,23 +3817,26 @@ button, input, select {
   color: #0f172a;
 }
 
-/* Poker Table Surround in Light Mode - Luxury Casino Textured Room Ambiance */
+/* Poker Table Surround in Light Mode - High-Resolution Real Luxury Casino Wallpaper Asset */
 [data-theme="light"] .table-viewport-container,
 .light-theme .table-viewport-container {
-  background-color: #eaeff5;
+  background-color: #f1ede8;
   background-image: 
-    radial-gradient(ellipse 95% 82% at 50% 48%, rgba(255, 255, 255, 0.96) 0%, rgba(241, 245, 249, 0.88) 42%, rgba(219, 228, 238, 0.94) 80%, #cbd5e1 100%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cpath d='M22 2 L42 22 L22 42 L2 22 Z' fill='none' stroke='rgba(15,23,42,0.055)' stroke-width='1'/%3E%3Cpath d='M22 10 L34 22 L22 34 L10 22 Z' fill='none' stroke='rgba(15,23,42,0.035)' stroke-width='0.75'/%3E%3Ccircle cx='22' cy='22' r='2' fill='rgba(15,23,42,0.05)'/%3E%3Cpath d='M0 0 L4 4 M44 0 L40 4 M0 44 L4 40 M44 44 L40 40' stroke='rgba(15,23,42,0.04)' stroke-width='0.75'/%3E%3C/svg%3E");
-  background-size: auto, 44px 44px;
+    radial-gradient(ellipse 95% 85% at 50% 48%, rgba(255, 255, 255, 0.55) 0%, rgba(245, 240, 235, 0.72) 50%, rgba(215, 205, 195, 0.88) 100%),
+    url('/assets/table_bg_light.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 [data-theme="light"] .poker-table-outer,
 .light-theme .poker-table-outer {
   box-shadow: 
-    0 45px 95px -15px rgba(15, 23, 42, 0.42),
-    0 25px 45px -10px rgba(15, 23, 42, 0.25),
-    0 0 0 1px rgba(15, 23, 42, 0.15),
-    inset 0 2px 6px rgba(255, 255, 255, 0.22);
+    0 45px 95px -15px rgba(15, 23, 42, 0.45),
+    0 25px 45px -10px rgba(15, 23, 42, 0.28),
+    0 0 0 1px rgba(15, 23, 42, 0.18),
+    inset 0 2px 6px rgba(255, 255, 255, 0.25);
 }
 
 [data-theme="light"] .table-header-bar,
@@ -3753,6 +3866,20 @@ button, input, select {
 .light-theme .table-nav-btn:hover {
   background-color: #f8fafc;
   border-color: #94a3b8;
+}
+
+[data-theme="light"] .table-bot-btn,
+.light-theme .table-bot-btn {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .table-bot-btn:hover,
+.light-theme .table-bot-btn:hover {
+  background-color: #f8fafc !important;
+  border-color: #94a3b8 !important;
 }
 
 [data-theme="light"] .table-invite-btn,
@@ -3806,6 +3933,58 @@ button, input, select {
 
 [data-theme="light"] .poker-hud-username,
 .light-theme .poker-hud-username {
+  color: #0f172a;
+}
+
+[data-theme="light"] .poker-hud-points,
+.light-theme .poker-hud-points {
+  color: #0f172a;
+}
+
+[data-theme="light"] .poker-hud-timer-badge,
+.light-theme .poker-hud-timer-badge {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .poker-slider,
+.light-theme .poker-slider {
+  background: #cbd5e1;
+  accent-color: #2563eb;
+}
+
+[data-theme="light"] .poker-slider-minmax,
+.light-theme .poker-slider-minmax {
+  color: #64748b;
+}
+
+[data-theme="light"] .poker-slider-val,
+.light-theme .poker-slider-val {
+  color: #0f172a;
+}
+
+[data-theme="light"] .poker-action-btn.raise,
+.light-theme .poker-action-btn.raise {
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="light"] .poker-hand-rank-content,
+.light-theme .poker-hand-rank-content {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .poker-hand-rank-tag,
+.light-theme .poker-hand-rank-tag {
+  color: #4338ca;
+}
+
+[data-theme="light"] .poker-hand-rank-text,
+.light-theme .poker-hand-rank-text {
   color: #0f172a;
 }
 
