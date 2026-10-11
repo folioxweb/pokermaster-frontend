@@ -58,24 +58,9 @@ export const PlayerHUD = ({
 
   return (
     <div className="poker-hud-wrapper">
-      {/* Hero Hand Rank Preview Pill */}
-      {handRank && handRank.description && (
-        <div className="poker-hand-rank-pill">
-          <div className="poker-hand-rank-content">
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-            <span className="poker-hand-rank-tag">
-              {handRank.name}:
-            </span>
-            <span className="poker-hand-rank-text">
-              {handRank.description}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Main Action HUD Panel */}
       <div className={`poker-hud-panel ${isMyTurn ? 'active' : ''}`}>
-        {/* Hero Identity & Live Countdown Timer Bar */}
+        {/* Hero Identity, Hand Rank & Live Countdown Timer Bar */}
         <div className="poker-hud-hero-bar">
           <div className="poker-hud-hero-left">
             <div className="poker-hud-avatar">
@@ -91,6 +76,15 @@ export const PlayerHUD = ({
               </span>
             </div>
           </div>
+
+          {/* Integrated Hand Rank Status Tag (Center) */}
+          {handRank && handRank.description && (
+            <div className="poker-hud-hand-badge" title={`${handRank.name}: ${handRank.description}`}>
+              <span className="poker-hud-hand-dot" />
+              <span className="poker-hud-hand-name">{handRank.name}:</span>
+              <span className="poker-hud-hand-desc">{handRank.description}</span>
+            </div>
+          )}
 
           {isMyTurn ? (
             <div className={`poker-hud-timer-badge ${turnTimeLeft <= 5 ? 'urgent' : ''}`}>
@@ -198,19 +192,7 @@ export const PlayerHUD = ({
               )}
             </div>
           </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 1.5s infinite' }} />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1' }}>
-                Waiting for {currentTurnPlayerName || 'other players'} to act...
-              </span>
-            </div>
-            <span style={{ fontSize: '12px', fontWeight: 900, color: '#fbbf24' }}>
-              Your Stack: {formatPoints(heroPlayer.chips || 0)}
-            </span>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

@@ -12,7 +12,9 @@ export function getSeatCoordinates(seatIndex, totalSeats = 6, heroSeatIndex = 0)
   
   // Ellipse radii positioned along the OUTER edge / rail of the table
   const radiusX = 47.5; // Sits along outer bumper without overflowing screen
-  const radiusY = 46.5; // Sits neatly along outer rail cushion without hanging too far below
+  // For Hero (relativeIndex === 0, bottom center), anchor slightly tighter onto the table rail cushion (43.8%)
+  // so the player box and turn timer ring rest directly on the wooden rail and stay well clear of the bottom HUD.
+  const radiusY = relativeIndex === 0 ? 43.8 : 46.5;
   
   const left = 50 + radiusX * Math.cos(angle);
   const top = 50 + radiusY * Math.sin(angle);
