@@ -12,8 +12,8 @@ export const PlayerHUD = ({
   bigBlind = 20,
   mainPot = 0,
   handRank = null, // { name: 'Two Pair', description: 'Two Pair, Kings and Queens' }
-  turnTimeLeft = 25,
-  turnMaxTime = 25,
+  turnTimeLeft = 120,
+  turnMaxTime = 120,
   onAction = null  // (action, amount) => void
 }) => {
   if (!heroPlayer || heroPlayer.status === 'folded' || heroPlayer.status === 'sitting_out') {

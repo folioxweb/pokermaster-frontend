@@ -37,7 +37,7 @@ export const LobbyPage = ({
   const [smallBlind, setSmallBlind] = useState(10);
   const [bigBlind, setBigBlind] = useState(20);
   const [startingStack, setStartingStack] = useState(1500);
-  const [turnTime, setTurnTime] = useState(25);
+  const [turnTime, setTurnTime] = useState(120);
   const [creatingTable, setCreatingTable] = useState(false);
   const isCreatingRef = useRef(false);
 
@@ -246,7 +246,7 @@ export const LobbyPage = ({
         startingStack: data.starting_stack || 1500,
         smallBlind: data.small_blind || 10,
         bigBlind: data.big_blind || 20,
-        turnTime: data.turn_time_seconds || 25
+        turnTime: data.turn_time_seconds || 120
       });
     } catch (err) {
       setErrorMsg('Error connecting to table: ' + err.message);
@@ -482,26 +482,30 @@ export const LobbyPage = ({
                 </div>
 
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="lobby-form-label">Table Capacity (3 to 8 Players)</label>
-                    <span className="text-xs font-bold text-amber-400">{maxPlayers} Seats</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label className="lobby-form-label" style={{ margin: 0 }}>Table Capacity</label>
+                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                      {maxPlayers} Max Players
+                    </span>
                   </div>
-                  <input
-                    type="range"
-                    min={3}
-                    max={8}
-                    value={maxPlayers}
-                    onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                    className="w-full accent-amber-400 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                    <span>3 Players</span>
-                    <span>6-Max Standard</span>
-                    <span>8 Full Ring</span>
+                  <div className="table-capacity-grid">
+                    {[3, 4, 5, 6, 7, 8].map((seats) => (
+                      <button
+                        key={seats}
+                        type="button"
+                        onClick={() => setMaxPlayers(seats)}
+                        className={`table-capacity-pill ${maxPlayers === seats ? 'active' : ''}`}
+                      >
+                        <span className="capacity-pill-number">{seats}</span>
+                        <span className="capacity-pill-label">
+                          {seats === 3 ? '3-Max' : seats === 6 ? '6-Max' : seats === 8 ? '8-Ring' : `${seats} Seats`}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="create-table-grid">
                   <div>
                     <label className="lobby-form-label">Blinds Schedule</label>
                     <select
@@ -513,10 +517,18 @@ export const LobbyPage = ({
                       }}
                       className="lobby-form-select"
                     >
-                      <option value="10/20">{formatPoints(10)} / {formatPoints(20)} (Standard)</option>
+                      <option value="1/2">{formatPoints(1)} / {formatPoints(2)} (Micro • 1, 2, 4, 8, 16...)</option>
+                      <option value="2/4">{formatPoints(2)} / {formatPoints(4)} (Micro • 2, 4, 8, 16, 32...)</option>
+                      <option value="5/10">{formatPoints(5)} / {formatPoints(10)} (Low Stakes)</option>
+                      <option value="10/20">{formatPoints(10)} / {formatPoints(20)} (Standard 10/20)</option>
                       <option value="25/50">{formatPoints(25)} / {formatPoints(50)} (Mid Stakes)</option>
                       <option value="50/100">{formatPoints(50)} / {formatPoints(100)} (High Stakes)</option>
+                      <option value="100/200">{formatPoints(100)} / {formatPoints(200)} (High Roller)</option>
+                      <option value="250/500">{formatPoints(250)} / {formatPoints(500)} (Championship)</option>
                     </select>
+                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
+                      Initial Small / Big blind per hand
+                    </span>
                   </div>
 
                   <div>
@@ -526,28 +538,44 @@ export const LobbyPage = ({
                       onChange={(e) => setStartingStack(Number(e.target.value))}
                       className="lobby-form-select"
                     >
-                      <option value={1000}>{formatPoints(1000)} (Turbo)</option>
+                      <option value={100}>{formatPoints(100)} (Micro Stack)</option>
+                      <option value={250}>{formatPoints(250)} (Short Stack)</option>
+                      <option value={500}>{formatPoints(500)} (Medium Stack)</option>
+                      <option value={1000}>{formatPoints(1000)} (Standard Stack)</option>
                       <option value={1500}>{formatPoints(1500)} (Deep 75BB)</option>
-                      <option value={3000}>{formatPoints(3000)} (Championship)</option>
+                      <option value={2500}>{formatPoints(2500)} (Pro Stack)</option>
+                      <option value={5000}>{formatPoints(5000)} (High Roller)</option>
+                      <option value={10000}>{formatPoints(10000)} (Championship)</option>
                     </select>
+                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
+                      Initial chips per seated player
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="lobby-form-label">Shot Clock (Seconds per turn)</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[15, 25, 35].map((sec) => (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label className="lobby-form-label" style={{ margin: 0 }}>Shot Clock (Turn Timer)</label>
+                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                      {turnTime >= 60 ? `${turnTime / 60} Min` : `${turnTime}s`} per turn
+                    </span>
+                  </div>
+                  <div className="shot-clock-grid">
+                    {[
+                      { sec: 30, label: '30s', desc: 'Blitz' },
+                      { sec: 60, label: '1m', desc: 'Quick' },
+                      { sec: 90, label: '1.5m', desc: 'Normal' },
+                      { sec: 120, label: '2m', desc: 'Default' },
+                      { sec: 180, label: '3m', desc: 'Deep' }
+                    ].map(({ sec, label, desc }) => (
                       <button
                         key={sec}
                         type="button"
                         onClick={() => setTurnTime(sec)}
-                        className={`py-2 rounded-xl text-xs font-bold border transition ${
-                          turnTime === sec
-                            ? 'bg-amber-500/20 border-amber-400 text-amber-300'
-                            : 'bg-slate-900 border-slate-700 text-slate-400'
-                        }`}
+                        className={`shot-clock-pill ${turnTime === sec ? 'active' : ''}`}
                       >
-                        {sec} Seconds
+                        <span className="shot-clock-time">{label}</span>
+                        <span className="shot-clock-desc">{desc}</span>
                       </button>
                     ))}
                   </div>
@@ -597,46 +625,39 @@ export const LobbyPage = ({
                             onChange={(e) => setBlindsFrequency(e.target.value)}
                             className="custom-option-select"
                           >
-                            <option value="fast_5">Fast - every 5 hands</option>
-                            <option value="standard_10">Standard - every 10 hands</option>
-                            <option value="slow_15">Slow - every 15 hands</option>
-                            <option value="never">No increase (Constant blinds)</option>
+                            <option value="hyper_2">Hyper-Turbo • Every 2 hands (Doubles: 2, 4, 8, 16, 32...)</option>
+                            <option value="fast_5">Fast • Every 5 hands</option>
+                            <option value="standard_10">Standard • Every 10 hands</option>
+                            <option value="slow_15">Slow • Every 15 hands</option>
+                            <option value="never">Fixed Blinds (No escalation)</option>
                           </select>
                           <button type="button" className="custom-shuffle-btn" title="Option selected">
                             <Shuffle className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         <p className="custom-option-desc">
-                          {blindsFrequency === 'fast_5'
-                            ? 'Blinds start at 10/20 and double every 5 hands or when a player is eliminated'
+                          {blindsFrequency === 'hyper_2'
+                            ? `Blinds start at ${smallBlind}/${bigBlind} and double every 2 hands (e.g. ${smallBlind * 2}/${bigBlind * 2} on Hand 3, ${smallBlind * 4}/${bigBlind * 4} on Hand 5, ${smallBlind * 8}/${bigBlind * 8} on Hand 7...)`
+                            : blindsFrequency === 'fast_5'
+                            ? `Blinds start at ${smallBlind}/${bigBlind} and double every 5 hands or when a player is eliminated`
                             : blindsFrequency === 'standard_10'
-                            ? 'Blinds start at 10/20 and double every 10 hands'
+                            ? `Blinds start at ${smallBlind}/${bigBlind} and double every 10 hands`
                             : blindsFrequency === 'slow_15'
                             ? 'Tournament structure: blinds double every 15 hands'
                             : 'Blinds remain constant throughout all hands'}
                         </p>
                       </div>
 
-                      {/* Initial amount of chips */}
+                      {/* Initial amount of chips / Starting Stack Sync */}
                       <div className="custom-option-item">
-                        <label className="custom-option-label">Initial amount of chips</label>
-                        <div className="custom-select-row">
-                          <select
-                            value={startingStack}
-                            onChange={(e) => setStartingStack(Number(e.target.value))}
-                            className="custom-option-select"
-                          >
-                            <option value={1000}>1000 total value per player</option>
-                            <option value={1500}>1500 total value per player</option>
-                            <option value={3000}>3000 total value per player</option>
-                            <option value={5000}>5000 total value per player</option>
-                          </select>
-                          <button type="button" className="custom-shuffle-btn" title="Option selected">
-                            <Shuffle className="w-3.5 h-3.5" />
-                          </button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <label className="custom-option-label" style={{ margin: 0 }}>Starting Stack (Initial Chips)</label>
+                          <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                            {formatPoints(startingStack)}
+                          </span>
                         </div>
                         <p className="custom-option-desc">
-                          Each player starts with a total chips value of {startingStack}.
+                          Configured above. Every seated player receives a total starting value of {formatPoints(startingStack)} upon joining.
                         </p>
                       </div>
 

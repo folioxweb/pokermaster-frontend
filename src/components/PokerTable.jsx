@@ -64,8 +64,8 @@ export const PokerTable = ({
     winners: []
   });
 
-  const [turnTimeLeft, setTurnTimeLeft] = useState(gameRoom?.turnTime || 25);
-  const turnMaxTime = gameRoom?.turnTime || 25;
+  const [turnTimeLeft, setTurnTimeLeft] = useState(gameRoom?.turnTime || 120);
+  const turnMaxTime = gameRoom?.turnTime || 120;
   const [winningCards, setWinningCards] = useState([]);
   const [announcement, setAnnouncement] = useState('Waiting for host to start hand');
 
@@ -770,7 +770,9 @@ export const PokerTable = ({
     // Apply blinds escalation frequency from custom options
     const freq = gameRoom?.blindsFrequency || 'fast_5';
     let multiplier = 1;
-    if (freq === 'fast_5' && newHandNum > 1) {
+    if (freq === 'hyper_2' && newHandNum > 1) {
+      multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 2));
+    } else if (freq === 'fast_5' && newHandNum > 1) {
       multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 5));
     } else if (freq === 'standard_10' && newHandNum > 1) {
       multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 10));
