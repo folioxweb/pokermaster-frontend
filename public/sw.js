@@ -1,5 +1,5 @@
 // PokerMaster Service Worker for PWA
-const CACHE_NAME = 'pokermaster-cache-v1';
+const CACHE_NAME = 'pokermaster-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
