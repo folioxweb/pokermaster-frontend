@@ -24,7 +24,9 @@ import { formatPoints, formatPointsOnly } from '../lib/formatters';
 export const LobbyPage = ({
   user,
   onLogout,
-  onJoinGame
+  onJoinGame,
+  onOpenSocial = null,
+  onlineCount = 1
 }) => {
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'create' | 'join' | 'practice'
   const [rooms, setRooms] = useState([]);
@@ -286,6 +288,17 @@ export const LobbyPage = ({
 
         {/* User Badge & Actions */}
         <div className="lobby-user-bar">
+          {onOpenSocial && (
+            <button
+              onClick={onOpenSocial}
+              className="social-toggle-btn"
+              title="Online Players & Friends"
+            >
+              <span className="social-toggle-dot" />
+              <span>Online ({onlineCount})</span>
+            </button>
+          )}
+
           <div className="lobby-user-card">
             <div className="lobby-user-avatar">
               {user.username ? user.username.slice(0, 2).toUpperCase() : 'P'}
@@ -345,6 +358,18 @@ export const LobbyPage = ({
             <Bot className="w-4 h-4" />
             <span>Practice / AI</span>
           </button>
+
+          {onOpenSocial && (
+            <button
+              onClick={onOpenSocial}
+              className="lobby-tab-button"
+              style={{ borderColor: 'rgba(245, 158, 11, 0.4)' }}
+              title="Community, Friends & Invites"
+            >
+              <Users className="w-4 h-4 text-amber-400" />
+              <span>Friends ({onlineCount})</span>
+            </button>
+          )}
         </div>
 
         {errorMsg && (

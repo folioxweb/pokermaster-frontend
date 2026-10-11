@@ -473,6 +473,47 @@ button, input, select {
   border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
+@media (max-width: 640px) {
+  .lobby-nav {
+    padding: 0.6rem 0.75rem;
+  }
+  .lobby-brand-sub {
+    display: none;
+  }
+  .lobby-user-bar {
+    gap: 0.4rem;
+  }
+  .lobby-user-card {
+    padding: 0.25rem 0.5rem;
+    gap: 0.35rem;
+  }
+  .lobby-logout-btn span {
+    display: none;
+  }
+  .lobby-logout-btn {
+    padding: 0.45rem;
+  }
+  .lobby-main {
+    padding: 1rem 0.75rem;
+  }
+  .lobby-tabs-container {
+    justify-content: flex-start;
+    padding: 0.35rem;
+    gap: 0.35rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lobby-tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+  .lobby-tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+}
+
 .lobby-section-header {
   display: flex;
   align-items: center;
@@ -1765,16 +1806,27 @@ button, input, select {
 
 @media (max-width: 768px) {
   .table-header-bar {
-    padding: 0.4rem 0.75rem;
+    padding: 0.35rem 0.5rem;
     gap: 6px;
+    flex-wrap: wrap;
   }
   .table-marquee-box {
-    padding: 0.25rem 0.6rem;
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 3px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.68rem;
+    justify-content: center;
+  }
+  .table-nav-btn {
+    padding: 0.35rem 0.55rem;
     font-size: 0.7rem;
-    max-width: 38vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    gap: 0.25rem;
+  }
+  .table-code-badge {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.68rem;
   }
   .table-stage {
     padding: 1rem 0.5rem 15rem 0.5rem;
@@ -1920,3 +1972,641 @@ button, input, select {
     bottom: 3px;
   }
 }
+
+/* ==============================================================================
+   9. REALTIME SOCIAL MODAL, ONLINE PRESENCE & TABLE INVITE TOAST
+   ============================================================================== */
+
+/* Realtime Invite Toast Notification */
+.invite-toast-container {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  width: 92vw;
+  max-width: 440px;
+  animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.invite-toast-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.invite-toast-icon-wrap {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.invite-toast-content {
+  flex: 1;
+}
+
+.invite-toast-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fbbf24;
+}
+
+.invite-toast-badge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.25);
+  color: #fef3c7;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.invite-toast-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-top: 0.2rem;
+  line-height: 1.35;
+}
+
+.invite-toast-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.invite-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.invite-toast-accept-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: 1px solid #34d399;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.invite-toast-accept-btn:hover {
+  transform: scale(1.03);
+}
+
+.invite-toast-decline-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.6rem;
+  background: rgba(51, 65, 85, 0.6);
+  border: 1px solid #475569;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.invite-toast-decline-btn:hover {
+  color: #ffffff;
+  background: #334155;
+}
+
+.invite-toast-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* Social Header Toggle Button */
+.social-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #e0f2fe;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-toggle-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+
+.social-toggle-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* Social Modal Overlay */
+.social-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Desktop Sheet / Mobile Bottom Drawer */
+.social-modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0b0f19;
+  border: 1px solid #1e293b;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.social-modal-drag-indicator {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .social-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .social-modal-sheet {
+    max-width: 100vw;
+    border-radius: 1.5rem 1.5rem 0 0;
+    border-bottom: none;
+    max-height: 85vh;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .social-modal-drag-indicator {
+    display: block;
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: #334155;
+    margin: 8px auto 0 auto;
+  }
+  .social-tabs-bar {
+    padding: 0.35rem 0.45rem;
+    gap: 0.25rem;
+  }
+  .social-tab-btn {
+    padding: 0.45rem 0.25rem;
+    font-size: 0.7rem;
+    gap: 0.25rem;
+  }
+  .social-user-row {
+    padding: 0.55rem 0.65rem;
+  }
+  .social-action-btn {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.68rem;
+  }
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+.social-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.social-modal-icon-badge {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-modal-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-family: var(--font-display);
+  color: #f8fafc;
+  line-height: 1.1;
+}
+
+.social-modal-sub {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+.social-modal-close-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #334155;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.social-modal-close-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+/* Tabs Bar */
+.social-tabs-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 0.4rem 0.6rem;
+  background: #080c14;
+  border-bottom: 1px solid #1e293b;
+  gap: 0.35rem;
+}
+
+.social-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.4rem;
+  border-radius: 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.social-tab-btn:hover {
+  color: #f1f5f9;
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.social-tab-btn.active {
+  background: #1e293b;
+  border-color: #334155;
+  color: #fbbf24;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.online-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.social-badge-count {
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Content Pane */
+.social-content-pane {
+  padding: 0.85rem;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 55vh;
+}
+
+.social-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  border: 1.5px solid #1e293b;
+  margin-bottom: 0.75rem;
+}
+
+.social-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.8rem;
+  color: #f8fafc;
+}
+
+.social-search-input::placeholder {
+  color: #64748b;
+}
+
+/* User List */
+.social-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.social-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.85rem;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  transition: all 0.15s;
+}
+
+.social-user-row:hover {
+  border-color: #334155;
+  background: #131d35;
+}
+
+.social-user-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.social-avatar {
+  position: relative;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border: 1.5px solid #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #f8fafc;
+  flex-shrink: 0;
+}
+
+.social-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #0f172a;
+}
+
+.social-status-dot.in-lobby {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.social-status-dot.in-game {
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+.social-status-dot.offline {
+  background: #64748b;
+}
+
+.social-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.social-username {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.social-status-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+
+.friend-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.social-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.social-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.social-action-btn.invite {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: 1px solid #fbbf24;
+  color: #020617;
+}
+
+.social-action-btn.invite.sent {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+  cursor: default;
+}
+
+.social-action-btn.join {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: 1px solid #34d399;
+  color: #ffffff;
+}
+
+.social-action-btn.friend {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #475569;
+  color: #94a3b8;
+}
+
+.social-action-btn.friend:hover {
+  color: #f8fafc;
+  border-color: #64748b;
+  background: #334155;
+}
+
+.social-action-btn.accept {
+  background: #059669;
+  border: 1px solid #34d399;
+  color: #ffffff;
+}
+
+.social-action-btn.decline, .social-action-btn.remove {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.social-action-btn.remove:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* Empty State */
+.social-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.social-empty-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.social-empty-desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  max-width: 280px;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* Add Friend Form */
+.social-add-friend-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.social-form-input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  border: 1.5px solid #1e293b;
+  color: #ffffff;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.social-form-input:focus {
+  border-color: #f59e0b;
+}
+
+.social-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: 1px solid #fbbf24;
+  color: #020617;
+  font-size: 0.75rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+

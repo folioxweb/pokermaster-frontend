@@ -35,7 +35,9 @@ const BOT_NAMES = ['Viper', 'AceHigh', 'BluffKing', 'Maverick', 'ChipLeader', 'L
 export const PokerTable = ({
   gameRoom,
   user,
-  onLeaveTable
+  onLeaveTable,
+  onOpenSocial = null,
+  onlineCount = 1
 }) => {
   const [feltTheme, setFeltTheme] = useState('emerald');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
@@ -1228,6 +1230,18 @@ export const PokerTable = ({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {onOpenSocial && (
+            <button
+              onClick={onOpenSocial}
+              className="table-nav-btn"
+              style={{ background: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#f59e0b', fontWeight: 700 }}
+              title="Invite Online Friends to Table"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Invite ({onlineCount})</span>
+            </button>
+          )}
+
           {isWaitingOrEnded && (
             <>
               {players.length < (gameRoom?.maxPlayers || 6) && (

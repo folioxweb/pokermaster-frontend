@@ -173,3 +173,29 @@ export const playWinCelebration = () => {
     osc.stop(ctx.currentTime + idx * 0.1 + 0.4);
   });
 };
+
+// Notification chime for invites
+export const playNotificationChime = () => {
+  if (!soundEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const notes = [440, 659.25]; // A4, E5
+  notes.forEach((freq, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+
+    gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + idx * 0.12 + 0.3);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(ctx.currentTime + idx * 0.12);
+    osc.stop(ctx.currentTime + idx * 0.12 + 0.35);
+  });
+};
+

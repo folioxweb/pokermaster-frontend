@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { AuthPage } from './components/AuthPage';
 import { LobbyPage } from './components/LobbyPage';
 import { PokerTable } from './components/PokerTable';
+import { SocialModal } from './components/SocialModal';
+import { InviteToast } from './components/InviteToast';
+import { useSocialPresence } from './lib/useSocialPresence';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -43,6 +46,9 @@ export default function App() {
     }
   };
 
+  // Realtime Social Suite Hook (Presence, Friends, Invites)
+  const social = useSocialPresence(currentUser, activeGameRoom, handleJoinGame);
+
   if (loadingInitial) {
     return (
       <div className="flex items-center justify-center w-screen h-screen bg-slate-950 text-white font-sans">
@@ -61,23 +67,67 @@ export default function App() {
     return <AuthPage onAuthSuccess={handleAuthSuccess} />;
   }
 
-  // View 2: Active Poker Table
-  if (activeGameRoom) {
-    return (
-      <PokerTable
-        gameRoom={activeGameRoom}
-        user={currentUser}
-        onLeaveTable={handleLeaveTable}
-      />
-    );
-  }
-
-  // View 3: Structured Start / Lobby Page
   return (
-    <LobbyPage
-      user={currentUser}
-      onLogout={handleLogout}
-      onJoinGame={handleJoinGame}
-    />
+    <>
+      {/* View 2: Active Poker Table */}
+      {activeGameRoom ? (
+        <PokerTable
+          gameRoom={activeGameRoom}
+          user={currentUser}
+          onLeaveTable={handleLeaveTable}
+          onOpenSocial={() => social.setIsSocialOpen(true)}
+          onlineCount={social.onlineUsers.length}
+        />
+      ) : (
+        /* View 3: Structured Start / Lobby Page */
+        <LobbyPage
+          user={currentUser}
+          onLogout={handleLogout}
+          onJoinGame={handleJoinGame}
+          onOpenSocial={() => social.setIsSocialOpen(true)}
+          onlineCount={social.onlineUsers.length}
+        />
+      )}
+
+      {/* Realtime Floating Table Invite Toast */}
+      <InviteToast
+        invite={social.incomingInvite}
+        onAccept={social.acceptTableInvite}
+        onDecline={social.declineTableInvite}
+      />
+
+      {/* Realtime Social & Friends Modal / Mobile Bottom Sheet */}
+      <SocialModal
+        isOpen={social.isSocialOpen}
+        onClose={() => social.setIsSocialOpen(false)}
+        currentUser={currentUser}
+        activeGameRoom={activeGameRoom}
+        onlineUsers={social.onlineUsers}
+        friends={social.friends}
+        pendingRequests={social.pendingRequests}
+        onSendInvite={social.sendTableInvite}
+        onSendFriendRequest={social.sendFriendRequest}
+        onAcceptFriendRequest={social.acceptFriendRequest}
+        onDeclineFriendRequest={social.declineFriendRequest}
+        onRemoveFriend={social.removeFriend}
+        onJoinTable={(code) => {
+          social.setIsSocialOpen(false);
+          handleJoinGame({
+            roomId: code,
+            roomCode: code,
+            roomName: `Table ${code}`,
+            isPractice: false
+          });
+        }}
+      />
+
+      {/* Global Toast Notification */}
+      {social.toastMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-amber-300 text-xs font-bold shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
+          {social.toastMessage}
+        </div>
+      )}
+    </>
   );
 }
+
