@@ -5,6 +5,7 @@ import {
   LogIn,
   Bot,
   Users,
+  User,
   Coins,
   LogOut,
   RefreshCw,
@@ -28,7 +29,7 @@ export const LobbyPage = ({
   onOpenSocial = null,
   onlineCount = 1
 }) => {
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'create' | 'join' | 'practice'
+  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'create' | 'join' | 'practice' | 'profile'
   const [rooms, setRooms] = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -286,7 +287,7 @@ export const LobbyPage = ({
           </div>
         </div>
 
-        {/* User Badge & Actions */}
+        {/* User Badge & Actions -> ONLY Online section on header */}
         <div className="lobby-user-bar">
           {onOpenSocial && (
             <button
@@ -298,28 +299,6 @@ export const LobbyPage = ({
               <span>Online ({onlineCount})</span>
             </button>
           )}
-
-          <div className="lobby-user-card">
-            <div className="lobby-user-avatar">
-              {user.username ? user.username.slice(0, 2).toUpperCase() : 'P'}
-            </div>
-            <div className="lobby-user-info">
-              <span className="lobby-user-name">{user.username}</span>
-              <span className="lobby-user-chips">
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
-                <span>{formatPoints(user.chips || 5000)}</span>
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={onLogout}
-            className="lobby-logout-btn"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
         </div>
       </header>
 
@@ -359,17 +338,13 @@ export const LobbyPage = ({
             <span>Practice / AI</span>
           </button>
 
-          {onOpenSocial && (
-            <button
-              onClick={onOpenSocial}
-              className="lobby-tab-button"
-              style={{ borderColor: 'rgba(245, 158, 11, 0.4)' }}
-              title="Community, Friends & Invites"
-            >
-              <Users className="w-4 h-4 text-amber-400" />
-              <span>Friends ({onlineCount})</span>
-            </button>
-          )}
+          <button
+            onClick={() => { setActiveTab('profile'); setErrorMsg(null); }}
+            className={`lobby-tab-button ${activeTab === 'profile' ? 'active' : ''}`}
+          >
+            <User className="w-4 h-4" />
+            <span>Profile</span>
+          </button>
         </div>
 
         {errorMsg && (
@@ -831,6 +806,87 @@ export const LobbyPage = ({
                 >
                   <Bot className="w-4 h-4" />
                   <span>START PRACTICE GAME</span>
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* TAB 5: PLAYER PROFILE */}
+        {activeTab === 'profile' && (
+          <section className="lobby-section max-w-lg mx-auto">
+            <div className="profile-container-card">
+              {/* Profile Header Title */}
+              <div className="profile-header-meta">
+                <h2 className="lobby-section-title">Player Profile</h2>
+                <p className="lobby-section-desc">
+                  Your poker account details, chips balance, and session control
+                </p>
+              </div>
+
+              {/* User Hero Banner */}
+              <div className="profile-hero-banner">
+                <div className="profile-avatar-large">
+                  {user.username ? user.username.slice(0, 2).toUpperCase() : 'P'}
+                </div>
+                <div className="profile-hero-info">
+                  <div className="profile-username-row">
+                    <h3 className="profile-username">{user.username}</h3>
+                    <span className="profile-badge-verified">Verified</span>
+                  </div>
+                  <p className="profile-status-text">
+                    <span className="profile-status-dot" />
+                    <span>Online • Texas Hold'em Player</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Chips & Points Balance Card */}
+              <div className="profile-chips-card">
+                <div className="profile-chips-header">
+                  <div className="profile-chips-icon-wrap">
+                    <Coins className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <span className="profile-chips-label">Bankroll / Chips (PTS)</span>
+                    <h4 className="profile-chips-val">{formatPoints(user.chips || 5000)}</h4>
+                  </div>
+                </div>
+                <p className="profile-chips-note">
+                  Virtual ring-game bankroll. Players receive standard starting stacks when seated at tables.
+                </p>
+              </div>
+
+              {/* Account Details & Game Defaults */}
+              <div className="profile-details-grid">
+                <div className="profile-detail-item">
+                  <span className="profile-detail-label">Default Turn Time</span>
+                  <span className="profile-detail-val">2 Minutes (120s)</span>
+                </div>
+                <div className="profile-detail-item">
+                  <span className="profile-detail-label">Table Preference</span>
+                  <span className="profile-detail-val">Ring Games (3–8 Max)</span>
+                </div>
+                <div className="profile-detail-item">
+                  <span className="profile-detail-label">Current Status</span>
+                  <span className="profile-detail-val text-emerald-400">Ready to Play</span>
+                </div>
+                <div className="profile-detail-item">
+                  <span className="profile-detail-label">Audio & SFX</span>
+                  <span className="profile-detail-val">Procedural WebAudio</span>
+                </div>
+              </div>
+
+              {/* Sign Out Action Button */}
+              <div className="profile-actions-footer">
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="profile-signout-btn"
+                  title="Sign Out of Account"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out of Account</span>
                 </button>
               </div>
             </div>
