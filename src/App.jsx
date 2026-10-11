@@ -11,6 +11,42 @@ export default function App() {
   const [activeGameRoom, setActiveGameRoom] = useState(null); // null when in lobby
   const [loadingInitial, setLoadingInitial] = useState(true);
 
+  // Theme State: 'dark' (default) | 'light'
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('pokermaster-theme') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  // Apply theme to document root and update PWA status bar / theme-color
+  useEffect(() => {
+    try {
+      localStorage.setItem('pokermaster-theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
+      } else {
+        document.body.classList.remove('light-theme');
+      }
+      const meta = document.getElementById('meta-theme-color') || document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute('content', theme === 'light' ? '#f8fafc' : '#020617');
+      }
+    } catch (e) {
+      console.warn('Theme update error:', e);
+    }
+  }, [theme]);
+
+  const toggleTheme = (explicitTheme) => {
+    if (typeof explicitTheme === 'string') {
+      setTheme(explicitTheme);
+    } else {
+      setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    }
+  };
+
   // Check persisted user on boot
   useEffect(() => {
     try {
@@ -64,7 +100,7 @@ export default function App() {
 
   // View 1: Auth Screen (Login / Register unique username & password)
   if (!currentUser) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+    return <AuthPage onAuthSuccess={handleAuthSuccess} theme={theme} onToggleTheme={toggleTheme} />;
   }
 
   return (
@@ -77,6 +113,8 @@ export default function App() {
           onLeaveTable={handleLeaveTable}
           onOpenSocial={() => social.setIsSocialOpen(true)}
           onlineCount={social.onlineUsers.length}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       ) : (
         /* View 3: Structured Start / Lobby Page */
@@ -86,6 +124,8 @@ export default function App() {
           onJoinGame={handleJoinGame}
           onOpenSocial={() => social.setIsSocialOpen(true)}
           onlineCount={social.onlineUsers.length}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       )}
 

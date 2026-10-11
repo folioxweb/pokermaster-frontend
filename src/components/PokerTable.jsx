@@ -9,7 +9,9 @@ import {
   Play,
   UserPlus,
   RefreshCw,
-  Users
+  Users,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -37,7 +39,9 @@ export const PokerTable = ({
   user,
   onLeaveTable,
   onOpenSocial = null,
-  onlineCount = 1
+  onlineCount = 1,
+  theme = 'dark',
+  onToggleTheme = null
 }) => {
   const [feltTheme, setFeltTheme] = useState('emerald');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
@@ -1282,6 +1286,16 @@ export const PokerTable = ({
           >
             {soundOn ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
           </button>
+
+          {onToggleTheme && (
+            <button
+              onClick={() => onToggleTheme()}
+              className="table-nav-btn"
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </button>
+          )}
         </div>
       </header>
 

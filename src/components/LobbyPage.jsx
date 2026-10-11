@@ -17,7 +17,9 @@ import {
   ChevronDown,
   ChevronUp,
   Shuffle,
-  Trash2
+  Trash2,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 import { formatPoints, formatPointsOnly } from '../lib/formatters';
@@ -27,7 +29,9 @@ export const LobbyPage = ({
   onLogout,
   onJoinGame,
   onOpenSocial = null,
-  onlineCount = 1
+  onlineCount = 1,
+  theme = 'dark',
+  onToggleTheme = null
 }) => {
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'create' | 'join' | 'practice' | 'profile'
   const [rooms, setRooms] = useState([]);
@@ -287,8 +291,18 @@ export const LobbyPage = ({
           </div>
         </div>
 
-        {/* User Badge & Actions -> ONLY Online section on header */}
+        {/* User Badge & Actions -> Theme Toggle & Online presence */}
         <div className="lobby-user-bar">
+          {onToggleTheme && (
+            <button
+              onClick={() => onToggleTheme()}
+              className="theme-toggle-header-btn"
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </button>
+          )}
+
           {onOpenSocial && (
             <button
               onClick={onOpenSocial}
@@ -874,6 +888,43 @@ export const LobbyPage = ({
                 <div className="profile-detail-item">
                   <span className="profile-detail-label">Audio & SFX</span>
                   <span className="profile-detail-val">Procedural WebAudio</span>
+                </div>
+              </div>
+
+              {/* App Theme / Appearance Card */}
+              <div className="profile-theme-card">
+                <div className="profile-theme-header">
+                  <div className="profile-theme-icon-wrap">
+                    {theme === 'light' ? (
+                      <Sun className="w-5 h-5 text-amber-500" />
+                    ) : (
+                      <Moon className="w-5 h-5 text-indigo-400" />
+                    )}
+                  </div>
+                  <div>
+                    <span className="profile-theme-title">App Theme</span>
+                    <p className="profile-theme-sub">
+                      {theme === 'light' ? 'Luxury Light Mode' : 'Deep Casino Dark Mode'}
+                    </p>
+                  </div>
+                </div>
+                <div className="profile-theme-buttons">
+                  <button
+                    type="button"
+                    onClick={() => onToggleTheme && onToggleTheme('dark')}
+                    className={`profile-theme-btn ${theme !== 'light' ? 'active' : ''}`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    <span>Dark</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onToggleTheme && onToggleTheme('light')}
+                    className={`profile-theme-btn ${theme === 'light' ? 'active' : ''}`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    <span>Light</span>
+                  </button>
                 </div>
               </div>
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ShieldCheck, User, Lock, LogIn, UserPlus, Sparkles, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { ShieldCheck, User, Lock, LogIn, UserPlus, Sparkles, AlertCircle, CheckCircle2, Loader2, Sun, Moon } from 'lucide-react';
 
-export const AuthPage = ({ onAuthSuccess }) => {
+export const AuthPage = ({ onAuthSuccess, theme = 'dark', onToggleTheme = null }) => {
   const [tab, setTab] = useState('login'); // 'login' | 'register'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -162,6 +162,17 @@ export const AuthPage = ({ onAuthSuccess }) => {
 
   return (
     <div className="auth-container">
+      {onToggleTheme && (
+        <button
+          type="button"
+          onClick={() => onToggleTheme()}
+          className="auth-theme-toggle"
+          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+        >
+          {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+        </button>
+      )}
+
       {/* Background Ambience */}
       <div className="auth-ambient-glow auth-glow-amber" />
       <div className="auth-ambient-glow auth-glow-emerald" />
