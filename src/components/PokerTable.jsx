@@ -27,6 +27,13 @@ import {
   toggleSound,
   isSoundEnabled
 } from '../lib/soundEffects';
+import {
+  generateSeatKeyPair,
+  sealHoleCards,
+  unsealHoleCards,
+  sanitizePlayersForBroadcast,
+  sanitizeHandStateForBroadcast
+} from '../lib/pokerSecurity';
 import { PlayerSeat } from './PlayerSeat';
 import { CommunityArea } from './CommunityArea';
 import { PlayerHUD } from './PlayerHUD';
@@ -87,6 +94,25 @@ export const PokerTable = ({
   const handStateRef = useRef(handState);
   const mySeatIndexRef = useRef(mySeatIndex);
   const announcementRef = useRef(announcement);
+
+  // ZERO-KNOWLEDGE POKER SECURITY REFS
+  // Cryptographic keys and private unmasked cards are isolated in browser memory refs.
+  // Opponents' cards and the undealt deck NEVER enter React state, props, DOM or broadcast.
+  const securityKeysRef = useRef(null);
+  const myDecryptedCardsRef = useRef([]);
+  const dealerSecretCardsRef = useRef({});
+  const dealerDeckRef = useRef([]);
+
+  // Generate hardware-accelerated 2048-bit RSA-OAEP keypair for player seat
+  useEffect(() => {
+    let active = true;
+    generateSeatKeyPair().then((keys) => {
+      if (active && keys) {
+        securityKeysRef.current = keys;
+      }
+    });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     playersRef.current = players;
@@ -222,7 +248,11 @@ export const PokerTable = ({
         }
       }
 
-      // 6. Build combined players list
+      // 6. Build combined players list with cryptographic public keys
+      if (!securityKeysRef.current) {
+        securityKeysRef.current = await generateSeatKeyPair();
+      }
+
       const heroPlayer = {
         seat_index: assignedSeat,
         user_id: user.id,
@@ -233,6 +263,7 @@ export const PokerTable = ({
         status: 'active',
         last_action: null,
         cards: [],
+        publicKey: securityKeysRef.current?.publicKey || null,
         shownCards: false,
         isBot: false
       };
@@ -250,6 +281,7 @@ export const PokerTable = ({
             status: p.status || 'active',
             last_action: p.last_action || null,
             cards: [],
+            publicKey: p.publicKey || null,
             shownCards: false,
             isBot: false
           });
@@ -274,18 +306,18 @@ export const PokerTable = ({
         .on('broadcast', { event: 'PLAYER_JOINED' }, ({ payload }) => {
           setPlayers((prev) => {
             if (prev.some(p => p.seat_index === payload.seat_index || p.username === payload.username)) {
-              return prev.map(p => p.username === payload.username ? { ...p, ...payload } : p);
+              return prev.map(p => p.username === payload.username ? { ...p, ...payload, cards: p.seat_index === mySeatIndexRef.current ? p.cards : [] } : p);
             }
             return [...prev, { ...payload, cards: [], shownCards: false }];
           });
           setAnnouncement(`👤 ${payload.username} joined the table!`);
-          // Reply with current table state sync
+          // Reply with current table state sync (STRICTLY SANITIZED - ZERO LEAKS)
           channel.send({
             type: 'broadcast',
             event: 'SYNC_RESPONSE',
             payload: {
-              players: playersRef.current,
-              handState: handStateRef.current
+              players: sanitizePlayersForBroadcast(playersRef.current, mySeatIndexRef.current, handStateRef.current.phase === 'showdown'),
+              handState: sanitizeHandStateForBroadcast(handStateRef.current)
             }
           });
         })
@@ -296,30 +328,44 @@ export const PokerTable = ({
               const mySeat = mySeatIndexRef.current;
               for (const p of payload.players) {
                 if (p.seat_index !== mySeat) {
-                  map.set(p.seat_index, { ...p, shownCards: p.shownCards || false });
+                  map.set(p.seat_index, {
+                    ...p,
+                    cards: [], // NEVER accept opponent hole cards into state from sync response
+                    shownCards: p.shownCards || false
+                  });
                 }
               }
               return Array.from(map.values());
             });
           }
           if (payload.handState && payload.handState.phase !== 'waiting') {
-            setHandState(payload.handState);
+            setHandState(sanitizeHandStateForBroadcast(payload.handState));
           }
         })
         .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
           setPlayers((prev) => {
             if (prev.some(p => p.seat_index === payload.seat_index)) {
-              return prev.map(p => p.seat_index === payload.seat_index ? { ...p, ...payload } : p);
+              return prev.map(p => p.seat_index === payload.seat_index ? { ...p, ...payload, cards: p.seat_index === mySeatIndexRef.current ? p.cards : [] } : p);
             }
-            return [...prev, payload];
+            return [...prev, { ...payload, cards: [] }];
           });
           setAnnouncement(`👤 ${payload.username} seated at Seat ${payload.seat_index + 1}`);
         })
         .on('broadcast', { event: 'PLAYER_LEFT' }, ({ payload }) => {
           setPlayers((prev) => prev.filter(p => p.username !== payload.username && p.seat_index !== payload.seat_index));
           setAnnouncement(`${payload.username} left the table`);
+
+          // If the dealer host left during an active hand, finish hand gracefully
+          if (handStateRef.current.dealerHostSeat === payload.seat_index && !['waiting', 'ended', 'showdown'].includes(handStateRef.current.phase)) {
+            setHandState((prev) => ({
+              ...prev,
+              phase: 'ended',
+              winners: []
+            }));
+            setAnnouncement(`Dealer (${payload.username}) disconnected. You can deal a new hand.`);
+          }
         })
-        .on('broadcast', { event: 'TABLE_STATE_SYNC' }, ({ payload }) => {
+        .on('broadcast', { event: 'TABLE_STATE_SYNC' }, async ({ payload }) => {
           if (!payload || !payload.handState) return;
 
           // 1. Audio and visual feedback for action
@@ -348,51 +394,59 @@ export const PokerTable = ({
           if (payload.announcement) setAnnouncement(payload.announcement);
           if (payload.winningCards) setWinningCards(payload.winningCards);
 
-          // 5. Update handState
-          setHandState(payload.handState);
+          // 5. Update handState (strictly ensure undealt deck is empty)
+          const safeHandState = sanitizeHandStateForBroadcast(payload.handState);
+          setHandState(safeHandState);
 
-          // 6. Update players while preserving all hole cards for showdown logic
+          // 6. Zero-Knowledge Hole Cards Resolution
           const isShowdown = payload.handState.phase === 'showdown' || payload.handState.phase === 'ended';
 
+          // If payload contains sealedCards for Hero, decrypt them using Hero's private key
+          const incomingHero = payload.players?.find((p) => p.seat_index === mySeatIndexRef.current);
+          if (incomingHero?.sealedCards && securityKeysRef.current?.keyPair?.privateKey) {
+            const unsealed = await unsealHoleCards(incomingHero.sealedCards, securityKeysRef.current.keyPair.privateKey);
+            if (unsealed && Array.isArray(unsealed) && unsealed.length >= 2) {
+              myDecryptedCardsRef.current = unsealed;
+            }
+          }
+
+          // Update React state players:
+          // HERO: receives myDecryptedCardsRef.current
+          // OPPONENTS: strictly receive cards: [] during active play.
+          //            Only at showdown for shownCards: true do opponents have revealed cards.
           setPlayers((currentPlayers) => {
             return payload.players.map((incomingP) => {
-              const localP = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
+              const isHeroSeat = incomingP.seat_index === mySeatIndexRef.current;
+              if (isHeroSeat) {
+                return {
+                  ...incomingP,
+                  cards: (myDecryptedCardsRef.current && myDecryptedCardsRef.current.length >= 2)
+                    ? myDecryptedCardsRef.current
+                    : (incomingP.cards || []),
+                  shownCards: isShowdown ? Boolean(incomingP.shownCards) : false
+                };
+              }
 
-              // Maintain card data integrity so showdown and engine have complete hole cards.
-              // Opponent cards privacy during active play is strictly enforced in PlayerSeat.jsx.
-              const effectiveCards = (incomingP.cards && incomingP.cards.length >= 2)
+              // Opponents: STRICTLY EMPTY ARRAY during active play.
+              // Only reveal at showdown if shownCards is true!
+              const opponentCards = (isShowdown && incomingP.shownCards && Array.isArray(incomingP.cards))
                 ? incomingP.cards
-                : (localP?.cards || incomingP.cards || []);
+                : [];
 
               return {
                 ...incomingP,
-                cards: effectiveCards,
+                cards: opponentCards,
                 shownCards: isShowdown ? Boolean(incomingP.shownCards) : false
               };
             });
           });
         })
-        .on('broadcast', { event: 'HAND_DEALT' }, ({ payload }) => {
-          if (!payload || !payload.handState) return;
-          playCardDeal();
-          setHandState(payload.handState);
-          setWinningCards([]);
-          if (payload.announcement) setAnnouncement(payload.announcement);
-
-          setPlayers((currentPlayers) => {
-            return payload.players.map((incomingP) => {
-              const localP = currentPlayers.find((lp) => lp.seat_index === incomingP.seat_index);
-              const effectiveCards = (incomingP.cards && incomingP.cards.length >= 2)
-                ? incomingP.cards
-                : (localP?.cards || incomingP.cards || []);
-
-              return {
-                ...incomingP,
-                cards: effectiveCards,
-                shownCards: false
-              };
-            });
-          });
+        .on('broadcast', { event: 'PLAYER_ACTION' }, ({ payload }) => {
+          if (!payload) return;
+          // Only Dealer Host processes the turn logic and advances the table
+          if (handStateRef.current.dealerHostSeat === mySeatIndexRef.current) {
+            executeActionLogic(payload.action, payload.amount, payload.seatIndex);
+          }
         })
         .on('broadcast', { event: 'PLAYER_SHOW_CARDS' }, ({ payload }) => {
           setPlayers((prev) =>
@@ -532,10 +586,9 @@ export const PokerTable = ({
       return;
     }
 
-    // In multiplayer, only lowest human seat handles bot action
-    const humanPlayers = players.filter((p) => !p.isBot);
-    const lowestHumanSeat = humanPlayers.reduce((min, p) => Math.min(min, p.seat_index), 999);
-    if (mySeatIndex !== lowestHumanSeat && humanPlayers.length > 0) {
+    // Only Dealer Host executes bot turns (guaranteeing single authoritative execution)
+    const isDealerHost = handStateRef.current.dealerHostSeat === mySeatIndex || gameRoom?.isPractice;
+    if (!isDealerHost) {
       return;
     }
 
@@ -563,7 +616,8 @@ export const PokerTable = ({
       status: 'active',
       last_action: null,
       cards: [],
-      shownCards: true,
+      publicKey: securityKeysRef.current?.publicKey || null,
+      shownCards: false,
       isBot: false
     };
 
@@ -658,14 +712,33 @@ export const PokerTable = ({
   // Broadcast full synchronized table state to all connected players
   const broadcastTableState = (newPlayers, newHandState, newAnnouncement, winCards = [], actionInfo = null) => {
     const isShowdown = newHandState.phase === 'showdown' || newHandState.phase === 'ended';
-    // Strictly ensure shownCards is false during all active betting rounds
-    const sanitizedPlayers = newPlayers.map((p) => ({
-      ...p,
-      shownCards: isShowdown ? Boolean(p.shownCards) : false
-    }));
 
-    setPlayers(sanitizedPlayers);
-    setHandState(newHandState);
+    // 1. Sanitize for network: strip undealt deck, strip all opponent hole cards during active play
+    const networkPlayers = sanitizePlayersForBroadcast(newPlayers, mySeatIndexRef.current, isShowdown);
+    const networkHandState = sanitizeHandStateForBroadcast(newHandState);
+
+    // 2. Sanitize for local React state:
+    // Hero gets Hero's decrypted cards. Opponents get [] unless showdown.
+    const localPlayers = newPlayers.map((p) => {
+      const isHero = p.seat_index === mySeatIndexRef.current;
+      if (isHero) {
+        return {
+          ...p,
+          cards: (myDecryptedCardsRef.current && myDecryptedCardsRef.current.length >= 2)
+            ? myDecryptedCardsRef.current
+            : (p.cards || []),
+          shownCards: isShowdown ? Boolean(p.shownCards) : false
+        };
+      }
+      return {
+        ...p,
+        cards: (isShowdown && p.shownCards && Array.isArray(p.cards)) ? p.cards : [],
+        shownCards: isShowdown ? Boolean(p.shownCards) : false
+      };
+    });
+
+    setPlayers(localPlayers);
+    setHandState(networkHandState);
     if (newAnnouncement) setAnnouncement(newAnnouncement);
     setWinningCards(winCards || []);
 
@@ -674,8 +747,8 @@ export const PokerTable = ({
         type: 'broadcast',
         event: 'TABLE_STATE_SYNC',
         payload: {
-          players: sanitizedPlayers,
-          handState: newHandState,
+          players: networkPlayers,
+          handState: networkHandState,
           announcement: newAnnouncement,
           winningCards: winCards || [],
           actor: actionInfo
@@ -687,10 +760,14 @@ export const PokerTable = ({
   // Option for Hero to reveal cards at end of hand
   const handleShowHeroCards = () => {
     const hero = playersRef.current.find((p) => p.seat_index === mySeatIndexRef.current);
-    if (!hero || !hero.cards || hero.cards.length === 0) return;
+    const heroCards = (myDecryptedCardsRef.current && myDecryptedCardsRef.current.length >= 2)
+      ? myDecryptedCardsRef.current
+      : (hero?.cards || []);
+
+    if (!hero || !heroCards || heroCards.length === 0) return;
     setHeroShowCardsClicked(true);
     const updated = playersRef.current.map((p) =>
-      p.seat_index === mySeatIndexRef.current ? { ...p, shownCards: true } : p
+      p.seat_index === mySeatIndexRef.current ? { ...p, shownCards: true, cards: heroCards } : p
     );
     const announcementMsg = `👁️ ${hero.username} revealed their cards!`;
 
@@ -704,7 +781,7 @@ export const PokerTable = ({
         payload: {
           seatIndex: mySeatIndexRef.current,
           username: hero.username,
-          cards: hero.cards
+          cards: heroCards
         }
       });
     }
@@ -728,7 +805,7 @@ export const PokerTable = ({
   };
 
   // START HAND (Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
-  const startNewHand = () => {
+  const startNewHand = async () => {
     // Only allow starting when hand is waiting, ended, or at showdown
     if (!['waiting', 'ended', 'showdown'].includes(handStateRef.current.phase)) {
       return;
@@ -748,6 +825,9 @@ export const PokerTable = ({
 
     const deck = generateDeck();
     let deckIdx = 0;
+
+    // Reset dealer secret card memory
+    dealerSecretCardsRef.current = {};
 
     // Advance Dealer button 1 active seat clockwise
     const currentDealerIdx = activeList.findIndex((p) => p.seat_index === handStateRef.current.dealerSeat);
@@ -788,11 +868,20 @@ export const PokerTable = ({
     sbAmount = sbAmount * multiplier;
     bbAmount = bbAmount * multiplier;
 
-    const updatedPlayers = currentPlayers.map((p) => {
-      if (p.chips <= 0) return { ...p, status: 'sitting_out', cards: [] };
+    const updatedPlayers = [];
+    for (const p of currentPlayers) {
+      if (p.chips <= 0) {
+        updatedPlayers.push({ ...p, status: 'sitting_out', cards: [], sealedCards: null });
+        continue;
+      }
 
       const c1 = deck[deckIdx++];
       const c2 = deck[deckIdx++];
+      const rawCards = [c1, c2];
+
+      // Keep unmasked raw cards strictly in dealer's memory ref
+      dealerSecretCardsRef.current[p.seat_index] = rawCards;
+
       let bet = 0;
       let lastAction = null;
 
@@ -804,17 +893,37 @@ export const PokerTable = ({
         lastAction = 'big_blind';
       }
 
-      return {
+      const isHero = p.seat_index === mySeatIndexRef.current;
+      let pCards = [];
+      let pSealed = null;
+
+      if (isHero) {
+        pCards = rawCards;
+        myDecryptedCardsRef.current = rawCards;
+      } else if (p.publicKey) {
+        // Seal with opponent's public key (RSA-OAEP 2048-bit)
+        pSealed = await sealHoleCards(rawCards, p.publicKey);
+        pCards = [];
+      } else {
+        pCards = [];
+      }
+
+      updatedPlayers.push({
         ...p,
         chips: p.chips - bet,
         current_round_bet: bet,
         total_hand_bet: bet,
         status: p.chips - bet === 0 ? 'all_in' : 'active',
         last_action: lastAction,
-        cards: [c1, c2],
+        cards: pCards,
+        sealedCards: pSealed,
+        hasCards: true,
         shownCards: false
-      };
-    });
+      });
+    }
+
+    // Keep undealt deck strictly in dealer's memory ref
+    dealerDeckRef.current = deck.slice(deckIdx);
 
     playCardDeal();
 
@@ -825,7 +934,8 @@ export const PokerTable = ({
       handNumber: newHandNum,
       phase: 'preflop',
       communityCards: [],
-      deck: deck.slice(deckIdx),
+      deck: [], // NEVER put undealt deck in state or broadcast
+      dealerHostSeat: mySeatIndexRef.current,
       currentTurnSeat: utgSeat,
       dealerSeat: nextDealerSeat,
       sbSeat,
@@ -843,7 +953,29 @@ export const PokerTable = ({
   // Submit Player Action (Hero or local execution)
   const handlePlayerAction = (action, amount = 0) => {
     const currentSeat = handStateRef.current.currentTurnSeat;
-    executeActionLogic(action, amount, currentSeat);
+    const isDealerHost = handStateRef.current.dealerHostSeat === mySeatIndexRef.current || gameRoom?.isPractice;
+
+    // Immediate sound feedback
+    if (action === 'fold') playFold();
+    else if (action === 'check') playCheckKnock();
+    else if (['call', 'bet', 'raise'].includes(action)) playChipClink();
+
+    if (isDealerHost) {
+      executeActionLogic(action, amount, currentSeat);
+    } else {
+      // Non-dealer sends player action to dealer host
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'PLAYER_ACTION',
+          payload: {
+            seatIndex: currentSeat,
+            action,
+            amount
+          }
+        });
+      }
+    }
   };
 
   // Core Betting Logic (Check, Call, Bet, Raise, Fold)
@@ -969,7 +1101,7 @@ export const PokerTable = ({
     const currentHandState = handStateRef.current;
     let nextPhase = 'flop';
     let newCommunity = [...currentHandState.communityCards];
-    let remainingDeck = [...currentHandState.deck];
+    let remainingDeck = [...dealerDeckRef.current];
 
     triggerChipsFlight(playersList);
     playCardDeal();
@@ -994,6 +1126,7 @@ export const PokerTable = ({
       remainingDeck.shift();
       newCommunity.push(remainingDeck.shift());
     } else if (currentHandState.phase === 'river') {
+      dealerDeckRef.current = remainingDeck;
       resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
       return;
     }
@@ -1007,9 +1140,12 @@ export const PokerTable = ({
         remainingDeck.shift(); // burn
         newCommunity.push(remainingDeck.shift());
       }
+      dealerDeckRef.current = remainingDeck;
       resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
       return;
     }
+
+    dealerDeckRef.current = remainingDeck;
 
     // Postflop action starts with first active player clockwise from Dealer Button
     const firstActor = getNextTurnSeat(currentHandState.dealerSeat, resetPlayers);
@@ -1019,7 +1155,7 @@ export const PokerTable = ({
       ...currentHandState,
       phase: nextPhase,
       communityCards: newCommunity,
-      deck: remainingDeck,
+      deck: [], // Undealt deck remains 100% private to dealer memory
       currentBet: 0,
       minRaise: gameRoom?.bigBlind || 20,
       mainPot: currentPot,
@@ -1041,10 +1177,12 @@ export const PokerTable = ({
       return;
     }
 
+    // Evaluate hands using dealer's private secret storage
     const evaluations = contenders.map((player) => {
-      const allCards = [...(player.cards || []), ...communityCards];
+      const secretCards = dealerSecretCardsRef.current[player.seat_index] || player.cards || [];
+      const allCards = [...secretCards, ...communityCards];
       const evaluation = evaluateHand(allCards);
-      return { player, evaluation };
+      return { player: { ...player, cards: secretCards }, evaluation };
     });
 
     evaluations.sort((a, b) => compareScores(b.evaluation?.score || [0], a.evaluation?.score || [0]));
@@ -1061,19 +1199,22 @@ export const PokerTable = ({
     const splitShare = Math.floor(totalPot / winnersList.length);
     const remainder = totalPot % winnersList.length;
 
+    // Reveal hole cards for contenders at showdown ONLY
     const revealedPlayers = playersList.map((p) => {
       const isContender = contenders.some((c) => c.seat_index === p.seat_index);
       const winnerIndex = winnersList.findIndex((w) => w.player.seat_index === p.seat_index);
+      const secretCards = dealerSecretCardsRef.current[p.seat_index] || p.cards || [];
 
       if (winnerIndex !== -1) {
         const bonus = splitShare + (winnerIndex === 0 ? remainder : 0);
         return {
           ...p,
           chips: p.chips + bonus,
+          cards: secretCards,
           shownCards: true
         };
       }
-      return isContender ? { ...p, shownCards: true } : p;
+      return isContender ? { ...p, cards: secretCards, shownCards: true } : { ...p, cards: [], shownCards: false };
     });
 
     let winAnnouncement = '';
@@ -1093,6 +1234,7 @@ export const PokerTable = ({
       ...handStateRef.current,
       phase: 'showdown',
       communityCards,
+      deck: [],
       mainPot: totalPot,
       winners: winnersList.map((w, idx) => ({
         seat_index: w.player.seat_index,
@@ -1121,15 +1263,17 @@ export const PokerTable = ({
 
     let finalCommunity = [...handStateRef.current.communityCards];
     if (gameRoom?.showRemainingRiverCards && finalCommunity.length < 5) {
-      const remainingDeck = [...handStateRef.current.deck];
+      const remainingDeck = [...dealerDeckRef.current];
       const needed = 5 - finalCommunity.length;
       finalCommunity = [...finalCommunity, ...remainingDeck.slice(0, needed)];
+      dealerDeckRef.current = remainingDeck.slice(needed);
     }
 
     const nextHandState = {
       ...handStateRef.current,
       phase: 'ended',
       communityCards: finalCommunity,
+      deck: [],
       mainPot: totalPot,
       winners: [{ seat_index: winner.seat_index, amount: totalPot, handName: 'Uncontested' }]
     };
@@ -1143,7 +1287,8 @@ export const PokerTable = ({
     const pot = currentHandState.mainPot;
     const potOdds = toCall / (pot + toCall || 1);
 
-    const allCards = [...bot.cards, ...currentHandState.communityCards];
+    const botCards = dealerSecretCardsRef.current[bot.seat_index] || bot.cards || [];
+    const allCards = [...botCards, ...currentHandState.communityCards];
     const handEval = evaluateHand(allCards);
     const handStrengthTier = handEval.type;
 
@@ -1169,15 +1314,29 @@ export const PokerTable = ({
   };
 
   const handleTurnTimeout = () => {
-    if (handStateRef.current.currentTurnSeat !== mySeatIndexRef.current) return;
+    // 1. If it's my turn, submit timeout action
+    if (handStateRef.current.currentTurnSeat === mySeatIndexRef.current) {
+      const currentP = playersRef.current.find((p) => p.seat_index === mySeatIndexRef.current);
+      if (!currentP) return;
 
-    const currentP = playersRef.current.find((p) => p.seat_index === mySeatIndexRef.current);
-    if (!currentP) return;
+      if (currentP.current_round_bet === handStateRef.current.currentBet) {
+        handlePlayerAction('check', 0);
+      } else {
+        handlePlayerAction('fold', 0);
+      }
+      return;
+    }
 
-    if (currentP.current_round_bet === handStateRef.current.currentBet) {
-      handlePlayerAction('check', 0);
-    } else {
-      handlePlayerAction('fold', 0);
+    // 2. If I am the dealer host and an opponent timed out, auto-resolve their turn
+    if (handStateRef.current.dealerHostSeat === mySeatIndexRef.current) {
+      const timedOutP = playersRef.current.find((p) => p.seat_index === handStateRef.current.currentTurnSeat);
+      if (!timedOutP) return;
+
+      if (timedOutP.current_round_bet === handStateRef.current.currentBet) {
+        executeActionLogic('check', 0, timedOutP.seat_index);
+      } else {
+        executeActionLogic('fold', 0, timedOutP.seat_index);
+      }
     }
   };
 

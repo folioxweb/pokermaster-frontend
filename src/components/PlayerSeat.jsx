@@ -50,7 +50,7 @@ export const PlayerSeat = ({
   const isCardVisible = Boolean(isHero || (isHandEnded && (isWinner || player.shownCards)));
 
   // Show hole cards if player has cards or is active in the hand
-  const hasCards = (player.cards && player.cards.length >= 2) || (!isSittingOut && !isHandEnded && !isFolded);
+  const hasCards = Boolean(player.hasCards || (player.cards && player.cards.length >= 2) || (!isSittingOut && !isHandEnded && !isFolded));
 
   // SVG turn timer circle stroke dashoffset
   const progressRatio = Math.max(0, Math.min(1, turnTimeLeft / turnMaxTime));
