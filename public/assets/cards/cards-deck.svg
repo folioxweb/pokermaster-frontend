@@ -1191,6 +1191,127 @@
     <g id="A_c">
       <use href="#c_A" />
     </g>
+    <!-- Red Joker (Wildcard) -->
+    <g id="joker_red">
+      <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
+      <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(220, 38, 38, 0.35)" stroke-width="0.8" />
+      
+      <!-- Top Left Vertical Text -->
+      <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
+      <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="9" y="36" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">O</text>
+      <text x="9" y="44" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="9" y="52" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">E</text>
+      <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
+
+      <!-- Center Art: Ornate Jester Hat & Mask Wildcard -->
+      <g transform="translate(50, 68)">
+        <!-- Sunburst rays -->
+        <circle cx="0" cy="0" r="28" fill="rgba(254, 243, 199, 0.6)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
+        <circle cx="0" cy="0" r="22" fill="rgba(254, 226, 226, 0.7)" stroke="#f87171" stroke-width="0.75" />
+        
+        <!-- Jester 3-Point Hat -->
+        <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#dc2626" stroke="#991b1b" stroke-width="1.2" />
+        <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1.2" />
+        
+        <!-- Hat Bells -->
+        <circle cx="-20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        <circle cx="0" cy="-32" r="3.2" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        <circle cx="20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        
+        <!-- Jester Mask / Smile -->
+        <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <!-- Eyes -->
+        <path d="M-7 3 Q-5 0 -3 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M3 3 Q5 0 7 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <!-- Cheeks -->
+        <circle cx="-8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
+        <circle cx="8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
+        <!-- Smile -->
+        <path d="M-6 8 Q0 13 6 8" stroke="#991b1b" stroke-width="1.6" fill="none" stroke-linecap="round" />
+
+        <!-- Gold Wildcard Banner -->
+        <rect x="-24" y="19" width="48" height="13" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.2" />
+        <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#b45309" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
+      </g>
+
+      <!-- Bottom Right Vertical Text (Rotated 180) -->
+      <g transform="rotate(180 50 70)">
+        <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
+        <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="9" y="36" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">O</text>
+        <text x="9" y="44" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="9" y="52" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">E</text>
+        <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
+      </g>
+    </g>
+    <g id="Jr">
+      <use href="#joker_red" />
+    </g>
+    <g id="r_J">
+      <use href="#joker_red" />
+    </g>
+
+    <!-- Black Joker (Wildcard) -->
+    <g id="joker_black">
+      <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
+      <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(15, 23, 42, 0.4)" stroke-width="0.8" />
+      
+      <!-- Top Left Vertical Text -->
+      <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
+      <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="9" y="36" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">O</text>
+      <text x="9" y="44" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="9" y="52" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">E</text>
+      <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
+
+      <!-- Center Art: Onyx & Indigo Jester Hat & Mask Wildcard -->
+      <g transform="translate(50, 68)">
+        <!-- Radiance rays -->
+        <circle cx="0" cy="0" r="28" fill="rgba(241, 245, 249, 0.7)" stroke="rgba(100, 116, 139, 0.4)" stroke-width="1" />
+        <circle cx="0" cy="0" r="22" fill="rgba(224, 231, 255, 0.7)" stroke="#818cf8" stroke-width="0.75" />
+        
+        <!-- Jester 3-Point Hat in Onyx & Royal Indigo -->
+        <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#0f172a" stroke="#020617" stroke-width="1.2" />
+        <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#4338ca" stroke="#312e81" stroke-width="1.2" />
+        
+        <!-- Hat Bells -->
+        <circle cx="-20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        <circle cx="0" cy="-32" r="3.2" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        <circle cx="20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        
+        <!-- Jester Mask / Smile -->
+        <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <!-- Eyes -->
+        <path d="M-7 3 Q-5 0 -3 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M3 3 Q5 0 7 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <!-- Cheeks -->
+        <circle cx="-8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
+        <circle cx="8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
+        <!-- Smile -->
+        <path d="M-6 8 Q0 13 6 8" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round" />
+
+        <!-- Silver / Indigo Wildcard Banner -->
+        <rect x="-24" y="19" width="48" height="13" rx="4" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.2" />
+        <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#312e81" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
+      </g>
+
+      <!-- Bottom Right Vertical Text (Rotated 180) -->
+      <g transform="rotate(180 50 70)">
+        <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
+        <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="9" y="36" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">O</text>
+        <text x="9" y="44" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="9" y="52" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">E</text>
+        <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
+      </g>
+    </g>
+    <g id="Jb">
+      <use href="#joker_black" />
+    </g>
+    <g id="b_J">
+      <use href="#joker_black" />
+    </g>
     
   </defs>
 </svg>

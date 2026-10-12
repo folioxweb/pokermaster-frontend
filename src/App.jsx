@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthPage } from './components/AuthPage';
 import { LobbyPage } from './components/LobbyPage';
 import { PokerTable } from './components/PokerTable';
+import { BluffTable } from './components/BluffTable';
 import { SocialModal } from './components/SocialModal';
 import { InviteToast } from './components/InviteToast';
 import { useSocialPresence } from './lib/useSocialPresence';
@@ -70,6 +71,7 @@ export default function App() {
       const roomParam = params.get('room') || params.get('join');
       if (roomParam) {
         const cleanCode = roomParam.trim().toUpperCase();
+        const isBluffCode = cleanCode.startsWith('BL-');
         supabase
           .from('poker_rooms')
           .select('*')
@@ -82,6 +84,7 @@ export default function App() {
                 roomCode: data.code,
                 roomName: data.name,
                 isPractice: false,
+                gameType: isBluffCode ? 'bluff' : 'poker',
                 hostUsername: data.host_username,
                 maxPlayers: data.max_players || 6,
                 startingStack: data.starting_stack || 1000,
@@ -143,17 +146,29 @@ export default function App() {
 
   return (
     <>
-      {/* View 2: Active Poker Table */}
+      {/* View 2: Active Poker / Bluff Table */}
       {activeGameRoom ? (
-        <PokerTable
-          gameRoom={activeGameRoom}
-          user={currentUser}
-          onLeaveTable={handleLeaveTable}
-          onOpenSocial={() => social.setIsSocialOpen(true)}
-          onlineCount={social.onlineUsers.length}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-        />
+        activeGameRoom.gameType === 'bluff' || activeGameRoom.roomCode?.startsWith('BL-') || activeGameRoom.isBluff ? (
+          <BluffTable
+            gameRoom={activeGameRoom}
+            user={currentUser}
+            onLeaveTable={handleLeaveTable}
+            onOpenSocial={() => social.setIsSocialOpen(true)}
+            onlineCount={social.onlineUsers.length}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        ) : (
+          <PokerTable
+            gameRoom={activeGameRoom}
+            user={currentUser}
+            onLeaveTable={handleLeaveTable}
+            onOpenSocial={() => social.setIsSocialOpen(true)}
+            onlineCount={social.onlineUsers.length}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        )
       ) : (
         /* View 3: Structured Start / Lobby Page */
         <LobbyPage
@@ -190,10 +205,12 @@ export default function App() {
         onRemoveFriend={social.removeFriend}
         onJoinTable={(code) => {
           social.setIsSocialOpen(false);
+          const isBluffCode = code.toUpperCase().startsWith('BL-');
           handleJoinGame({
             roomId: code,
             roomCode: code,
-            roomName: `Table ${code}`,
+            roomName: `${isBluffCode ? 'Bluff' : 'Poker'} Table ${code}`,
+            gameType: isBluffCode ? 'bluff' : 'poker',
             isPractice: false
           });
         }}
