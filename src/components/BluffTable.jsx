@@ -86,9 +86,12 @@ export const BluffTable = ({
     lastPlayedCardsCount: 0,
     lastPlayedCards: [], // Private until challenged
     currentClaimRank: 'A',
+    trickClaimRank: null, // Locked rank for the current trick (null when new trick starts)
+    consecutivePasses: 0, // Count of consecutive passes since last card play
+    burnedCardsCount: 0, // Cards permanently cleared out of the game
     discardPile: [],
     deckType: gameRoom?.deckType || 'single', // 'single' (54) | 'double' (108)
-    passAllowed: gameRoom?.passAllowed ?? true,
+    passAllowed: false, // Cannot pass on opening lead of a trick
     challengeTime: gameRoom?.challengeTime ?? 8, // seconds for challenge window (0 = no limit)
     challengeRule: gameRoom?.challengeRule || 'anyone', // 'anyone' | 'next_only'
     winner: null
@@ -242,13 +245,17 @@ export const BluffTable = ({
       lastPlayedCardsCount: 0,
       lastPlayedCards: [],
       currentClaimRank: 'A',
+      trickClaimRank: null, // Reset for new trick
+      consecutivePasses: 0,
+      burnedCardsCount: 0,
       discardPile: [],
+      passAllowed: false, // Leader must lead cards
       winner: null
     };
 
     setMatchState(newMatch);
     setPlayers(updatedPlayers);
-    const msg = `🃏 Dealt ${deck.length} cards! ${starter?.username} leads the round. Play any card & quantity!`;
+    const msg = `🃏 Dealt ${deck.length} cards! ${starter?.username} gets the chance to start! Lead with any rank & cards.`;
     setAnnouncement(msg);
 
     broadcastState(updatedPlayers, newMatch, msg);
@@ -282,7 +289,15 @@ export const BluffTable = ({
 
     playCardDeal();
     const activeSeat = matchState.currentTurnSeat;
-    const claimedRank = claimedRankOverride || (isHero ? heroClaimRank : matchState.currentClaimRank);
+    // If trickClaimRank is locked, subsequent players must play as that rank!
+    // If trickClaimRank is null, opening play sets and locks the rank for this trick!
+    const effectiveClaimRank = matchState.trickClaimRank !== null
+      ? matchState.trickClaimRank
+      : (claimedRankOverride || (isHero ? heroClaimRank : matchState.currentClaimRank));
+
+    if (isHero && matchState.trickClaimRank === null) {
+      setHeroClaimRank(effectiveClaimRank);
+    }
 
     // Remove played cards from player's hand
     let updatedPlayers = players.map((p) => {
@@ -313,7 +328,7 @@ export const BluffTable = ({
     });
 
     const activePlayer = players.find((p) => p.seat_index === activeSeat);
-    const claimMsg = `${activePlayer?.username} plays ${cardsToPlay.length} ${RANK_NAMES[claimedRank] || claimedRank}!`;
+    const claimMsg = `${activePlayer?.username} plays ${cardsToPlay.length} ${RANK_NAMES[effectiveClaimRank] || effectiveClaimRank}!`;
     setAnnouncement(claimMsg);
 
     // Add cards to central discard pile (held face down)
@@ -328,13 +343,17 @@ export const BluffTable = ({
       lastPlaySeat: activeSeat,
       lastPlayedCardsCount: cardsToPlay.length,
       lastPlayedCards: cardsToPlay,
-      currentClaimRank: claimedRank,
+      currentClaimRank: effectiveClaimRank,
+      trickClaimRank: effectiveClaimRank, // LOCKED for this entire trick!
+      consecutivePasses: 0, // Reset passes counter since a card was played
+      passAllowed: true, // Now subsequent players can pass or play
       discardPile: newPile,
       winner: emptiedHand ? activePlayer : null
     };
 
     setMatchState(nextState);
     setPlayers(updatedPlayers);
+    broadcastState(updatedPlayers, nextState, claimMsg);
 
     // Start challenge window countdown (default to 8 seconds so players have ample reaction time)
     const winTime = matchState.challengeTime > 0 ? matchState.challengeTime : 8;
@@ -367,7 +386,7 @@ export const BluffTable = ({
       return;
     }
 
-    // Advance to next player in clockwise order (free to play any card & quantity)
+    // Advance to next player in clockwise order (MUST play trickClaimRank or Pass)
     const totalPlayers = activePlayers.length;
     let nextSeat = (activeState.lastPlaySeat + 1) % totalPlayers;
 
@@ -380,7 +399,68 @@ export const BluffTable = ({
 
     setMatchState(advancedState);
     const nextP = activePlayers.find((p) => p.seat_index === nextSeat);
-    setAnnouncement(`✅ Nobody called bluff! Turn passes to ${nextP?.username}. Play any card & quantity!`);
+    const lockedRankName = RANK_NAMES[activeState.trickClaimRank] || activeState.trickClaimRank;
+    const msg = `✅ Nobody called bluff! Turn passes to ${nextP?.username}. (Must play ${lockedRankName}s or Pass)`;
+    setAnnouncement(msg);
+    broadcastState(activePlayers, advancedState, msg);
+  };
+
+  // Turn Action: Pass Turn
+  // When everyone passes consecutively after a card play, cards in pile are CLEARED OUT OF THE GAME!
+  // And the player who played last gets the chance to start the new trick!
+  const handlePassTurn = (passingSeat) => {
+    playFold();
+    const activeState = matchStateRef.current;
+    const currentPlayers = playersRef.current;
+    const totalPlayers = currentPlayers.length;
+    const passingPlayer = currentPlayers.find((p) => p.seat_index === passingSeat);
+
+    const newPassCount = activeState.consecutivePasses + 1;
+
+    // Check if everyone else passed after the last play:
+    // When consecutive passes reaches totalPlayers - 1, everyone has passed!
+    if (newPassCount >= totalPlayers - 1 && activeState.lastPlaySeat !== null) {
+      const clearedPileCount = activeState.discardPile.length;
+      const lastPlayer = currentPlayers.find((p) => p.seat_index === activeState.lastPlaySeat);
+
+      // ALL CARDS IN DISCARD PILE ARE CLEARED OUT OF THE GAME!
+      // AND THE PLAYER WHO PLAYED LAST GETS THE CHANCE!
+      const newMatch = {
+        ...activeState,
+        phase: 'playing',
+        currentTurnSeat: activeState.lastPlaySeat, // The player who played last gets the chance!
+        lastPlaySeat: null,
+        lastPlayedCardsCount: 0,
+        lastPlayedCards: [],
+        trickClaimRank: null, // Reset trick rank! Leader can choose ANY rank!
+        currentClaimRank: 'A',
+        discardPile: [], // Cards permanently out of the game!
+        burnedCardsCount: (activeState.burnedCardsCount || 0) + clearedPileCount,
+        consecutivePasses: 0,
+        passAllowed: false // Leader cannot pass on opening lead
+      };
+
+      setMatchState(newMatch);
+      const winMsg = `🗑️ Everyone passed! All ${clearedPileCount} cards in the pile are OUT OF THE GAME! ${lastPlayer?.username} played last and gets the chance to start a new trick!`;
+      setAnnouncement(winMsg);
+      broadcastState(currentPlayers, newMatch, winMsg);
+    } else {
+      // Not everyone passed yet: advance turn to next player in clockwise rotation
+      const nextSeat = (passingSeat + 1) % totalPlayers;
+      const nextP = currentPlayers.find((p) => p.seat_index === nextSeat);
+
+      const newMatch = {
+        ...activeState,
+        currentTurnSeat: nextSeat,
+        consecutivePasses: newPassCount
+      };
+
+      setMatchState(newMatch);
+      const rankName = RANK_NAMES[activeState.trickClaimRank] || activeState.trickClaimRank;
+      const passMsg = `⏭️ ${passingPlayer?.username} passed. Turn moves to ${nextP?.username} (Must play ${rankName}s or Pass).`;
+      setAnnouncement(passMsg);
+      broadcastState(currentPlayers, newMatch, passMsg);
+    }
   };
 
   // Immediate Pass / Accept Challenge
@@ -432,7 +512,7 @@ export const BluffTable = ({
     const challenger = players.find((p) => p.seat_index === challengerSeat);
 
     const playedCards = matchState.lastPlayedCards;
-    const claimedRank = matchState.currentClaimRank;
+    const claimedRank = matchState.trickClaimRank || matchState.currentClaimRank;
 
     // Verify truth or bluff with wildcard Jokers
     const { isBluff, legalCards, bluffCards } = verifyPlay(playedCards, claimedRank);
@@ -474,20 +554,28 @@ export const BluffTable = ({
       setAnnouncement(`✨ INNOCENT! ${bluffer?.username} told the truth! ${challenger?.username} picks up ${wholePile.length} cards.`);
     }
 
-    // Winner of challenge starts next round with any card and any quantity!
+    // Winner of challenge starts next trick with any rank and cards!
     const nextStarterSeat = isBluff ? challengerSeat : blufferSeat;
 
     setTimeout(() => {
       setChallengeResult(null);
-      setMatchState((prev) => ({
-        ...prev,
+      const starter = playersRef.current.find((p) => p.seat_index === nextStarterSeat);
+      const nextMatch = {
+        ...matchStateRef.current,
         phase: 'playing',
         currentTurnSeat: nextStarterSeat,
+        trickClaimRank: null, // Winner leads new trick with any rank!
+        lastPlaySeat: null,
+        lastPlayedCardsCount: 0,
+        lastPlayedCards: [],
         discardPile: [],
-        lastPlayedCards: []
-      }));
-      const starter = players.find((p) => p.seat_index === nextStarterSeat);
-      setAnnouncement(`✨ ${starter?.username} won the challenge and leads the round with any card!`);
+        consecutivePasses: 0,
+        passAllowed: false // Leader must lead cards
+      };
+      setMatchState(nextMatch);
+      const winMsg = `✨ ${starter?.username} won the challenge and gets the chance to lead with any rank & cards!`;
+      setAnnouncement(winMsg);
+      broadcastState(playersRef.current, nextMatch, winMsg);
     }, 4500);
   };
 
@@ -500,17 +588,12 @@ export const BluffTable = ({
         const timer = setTimeout(() => {
           const decision = decideBotPlay(
             activeP.cards,
-            matchState.currentClaimRank,
+            matchState.trickClaimRank,
             matchState.passAllowed,
             matchState.discardPile.length
           );
           if (decision.action === 'pass') {
-            const nextSeat = (matchState.currentTurnSeat + 1) % players.length;
-            setMatchState((prev) => ({
-              ...prev,
-              currentTurnSeat: nextSeat
-            }));
-            setAnnouncement(`⏭️ ${activeP.username} passed their turn.`);
+            handlePassTurn(activeP.seat_index);
           } else {
             handlePlayCards(decision.cards, false, decision.claimedRank);
           }
@@ -531,6 +614,7 @@ export const BluffTable = ({
       const lastPlayerCardCount = lastPlayer
         ? (lastPlayer.seat_index === mySeatIndex ? myHand.length : lastPlayer.cardCount)
         : 10;
+      const activeRank = matchState.trickClaimRank || matchState.currentClaimRank;
 
       // Mode A: NEXT PLAYER ONLY
       if (currentRule === 'next_only') {
@@ -544,7 +628,7 @@ export const BluffTable = ({
         if (nextBot) {
           const wantsToCall = decideBotCallBluff(
             nextBot.cards,
-            matchState.currentClaimRank,
+            activeRank,
             matchState.lastPlayedCardsCount,
             matchState.discardPile.length,
             matchState.deckType,
@@ -572,7 +656,7 @@ export const BluffTable = ({
       for (const bot of eligibleBots) {
         const wantsToCall = decideBotCallBluff(
           bot.cards,
-          matchState.currentClaimRank,
+          activeRank,
           matchState.lastPlayedCardsCount,
           matchState.discardPile.length,
           matchState.deckType,
@@ -591,7 +675,7 @@ export const BluffTable = ({
         }
       }
     }
-  }, [matchState.phase, matchState.currentTurnSeat, matchState.lastPlaySeat, matchState.challengeRule, players]);
+  }, [matchState.phase, matchState.currentTurnSeat, matchState.lastPlaySeat, matchState.challengeRule, matchState.trickClaimRank, players]);
 
   // Victory Handler
   const handleMatchVictory = (champ) => {
@@ -721,15 +805,15 @@ export const BluffTable = ({
                   </span>
                 </div>
 
-                {/* Last Play Claim or Free Play Status */}
+                {/* Trick Rank Status */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', borderRadius: '9999px', background: 'rgba(15, 23, 42, 0.95)', border: '1.5px solid #a855f7', marginBottom: '12px' }}>
                   <span style={{ fontSize: '11px', fontWeight: 800, color: '#c084fc' }}>
-                    {matchState.discardPile.length > 0 ? 'LAST CLAIM:' : 'ROUND STATUS:'}
+                    {matchState.trickClaimRank ? 'LOCKED TRICK RANK:' : 'TRICK STATUS:'}
                   </span>
                   <span style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff' }}>
-                    {matchState.discardPile.length > 0
-                      ? `${matchState.lastPlayedCardsCount} ${RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}`
-                      : 'FREE PLAY • ANY CARD'}
+                    {matchState.trickClaimRank
+                      ? `${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank} (${matchState.trickClaimRank}s ONLY)`
+                      : `${players.find((p) => p.seat_index === matchState.currentTurnSeat)?.username || 'LEADER'} GETS THE CHANCE`}
                   </span>
                 </div>
 
@@ -745,13 +829,25 @@ export const BluffTable = ({
                         <CardAsset hidden={true} />
                       </div>
                       <CardAsset hidden={true} />
-                      <div style={{ position: 'absolute', bottom: '-10px', padding: '3px 10px', borderRadius: '9999px', background: '#0f172a', border: '1.5px solid #f59e0b', fontSize: '11px', fontWeight: 900, color: '#fbbf24', boxShadow: '0 4px 12px rgba(0,0,0,0.8)' }}>
-                        {matchState.discardPile.length} Cards in Pile
+                      <div style={{ position: 'absolute', bottom: '-14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+                        <div style={{ padding: '3px 10px', borderRadius: '9999px', background: '#0f172a', border: '1.5px solid #f59e0b', fontSize: '11px', fontWeight: 900, color: '#fbbf24', boxShadow: '0 4px 12px rgba(0,0,0,0.8)', whiteSpace: 'nowrap' }}>
+                          {matchState.discardPile.length} in Pile
+                        </div>
+                        {matchState.burnedCardsCount > 0 && (
+                          <div style={{ padding: '2px 8px', borderRadius: '9999px', background: 'rgba(30, 41, 59, 0.9)', border: '1px solid #475569', fontSize: '10px', fontWeight: 700, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                            🗑️ {matchState.burnedCardsCount} Out of Game
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : (
-                    <div className="poker-card-slot" style={{ borderStyle: 'dashed', borderColor: 'rgba(168, 85, 247, 0.4)' }}>
+                    <div className="poker-card-slot" style={{ borderStyle: 'dashed', borderColor: 'rgba(168, 85, 247, 0.4)', position: 'relative' }}>
                       <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700 }}>Empty Pile</span>
+                      {matchState.burnedCardsCount > 0 && (
+                        <div style={{ position: 'absolute', bottom: '-22px', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(30, 41, 59, 0.9)', border: '1px solid #475569', fontSize: '10px', fontWeight: 700, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                          🗑️ {matchState.burnedCardsCount} Out of Game
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -847,11 +943,11 @@ export const BluffTable = ({
               <span className="bluff-challenge-banner-text">
                 {matchState.lastPlaySeat === mySeatIndex ? (
                   <span>
-                    You played <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>. Waiting for challengers...
+                    You played <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.trickClaimRank || matchState.currentClaimRank] || (matchState.trickClaimRank || matchState.currentClaimRank)}</strong>. Waiting for challengers...
                   </span>
                 ) : (
                   <span>
-                    Did <strong>{players.find((p) => p.seat_index === matchState.lastPlaySeat)?.username}</strong> really play <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>?
+                    Did <strong>{players.find((p) => p.seat_index === matchState.lastPlaySeat)?.username}</strong> really play <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.trickClaimRank || matchState.currentClaimRank] || (matchState.trickClaimRank || matchState.currentClaimRank)}</strong>?
                   </span>
                 )}
               </span>
@@ -905,8 +1001,8 @@ export const BluffTable = ({
                       setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
                     } else {
                       setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                      // Auto-set declared rank to clicked card
-                      if (card && card !== 'Jr' && card !== 'Jb') {
+                      // Auto-set declared rank to clicked card ONLY if starting a new trick (not locked)
+                      if (!matchState.trickClaimRank && card && card !== 'Jr' && card !== 'Jb') {
                         const r = card.length === 3 ? '10' : card[0];
                         setHeroClaimRank(r);
                       }
@@ -943,7 +1039,7 @@ export const BluffTable = ({
                         setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
                       } else {
                         setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                        if (card && card !== 'Jr' && card !== 'Jb') {
+                        if (!matchState.trickClaimRank && card && card !== 'Jr' && card !== 'Jb') {
                           const r = card.length === 3 ? '10' : card[0];
                           setHeroClaimRank(r);
                         }
@@ -998,35 +1094,54 @@ export const BluffTable = ({
                 onClick={handleAutoSelectCurrentRank}
                 className="table-nav-btn bluff-dock-btn"
                 style={{ borderColor: '#a855f7', color: '#c084fc' }}
-                title={`Select ${heroClaimRank}s from your hand`}
+                title={`Select ${matchState.trickClaimRank || heroClaimRank}s from your hand`}
               >
-                Pick {heroClaimRank}
+                Pick {matchState.trickClaimRank ? `${matchState.trickClaimRank}s` : `${heroClaimRank}s`}
               </button>
             </div>
           </div>
 
-          {/* Center: Declare Rank Selector (Only active on your turn) */}
+          {/* Center: Locked Trick Rank vs Lead Any Rank Selector */}
           {isMyTurn ? (
-            <div className="bluff-dock-center">
-              <span className="bluff-dock-label">DECLARE:</span>
-              <div className="bluff-declare-pills">
-                {BLUFF_RANKS.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setHeroClaimRank(r)}
-                    className={`bluff-declare-pill ${heroClaimRank === r ? 'active' : ''}`}
-                    title={`Declare rank as ${RANK_NAMES[r] || r}`}
-                  >
-                    {r}
-                  </button>
-                ))}
+            matchState.trickClaimRank ? (
+              <div className="bluff-dock-center">
+                <div className="bluff-dock-locked-chip">
+                  <span className="bluff-dock-locked-tag">🔒 LOCKED RANK:</span>
+                  <span className="bluff-dock-locked-rank">
+                    {matchState.trickClaimRank}s ({RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank})
+                  </span>
+                  <span className="bluff-dock-locked-sub">
+                    • Play as {matchState.trickClaimRank}s (Truth / Bluff) or PASS
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bluff-dock-center">
+                <span className="bluff-dock-label">LEAD ANY RANK:</span>
+                <div className="bluff-declare-pills">
+                  {BLUFF_RANKS.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setHeroClaimRank(r)}
+                      className={`bluff-declare-pill ${heroClaimRank === r ? 'active' : ''}`}
+                      title={`Lead with ${RANK_NAMES[r] || r}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
           ) : (
             <div className="bluff-dock-center-waiting">
               <span style={{ fontSize: '12px', color: '#94a3b8' }}>
                 Waiting for <strong>{players.find((p) => p.seat_index === matchState.currentTurnSeat)?.username || 'opponent'}</strong> to play...
+                {matchState.trickClaimRank && (
+                  <span style={{ color: '#c084fc', marginLeft: '6px' }}>
+                    (Locked: {matchState.trickClaimRank}s)
+                  </span>
+                )}
               </span>
             </div>
           )}
@@ -1036,15 +1151,9 @@ export const BluffTable = ({
             {isMyTurn && matchState.passAllowed && (
               <button
                 type="button"
-                onClick={() => {
-                  setMatchState((prev) => ({
-                    ...prev,
-                    currentTurnSeat: (prev.currentTurnSeat + 1) % players.length
-                  }));
-                  setAnnouncement('You passed your turn.');
-                }}
+                onClick={() => handlePassTurn(mySeatIndex)}
                 className="table-nav-btn bluff-dock-btn"
-                style={{ padding: '8px 16px', fontWeight: 800 }}
+                style={{ padding: '8px 18px', fontWeight: 800, background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444', color: '#fca5a5' }}
               >
                 PASS
               </button>
@@ -1055,14 +1164,17 @@ export const BluffTable = ({
               disabled={!isMyTurn || selectedCardIndices.length === 0}
               onClick={() => {
                 const cardsToPlay = selectedCardIndices.map((i) => myHand[i]);
-                handlePlayCards(cardsToPlay, true, heroClaimRank);
+                const rankToPlay = matchState.trickClaimRank || heroClaimRank;
+                handlePlayCards(cardsToPlay, true, rankToPlay);
               }}
               className="bluff-play-btn-large"
             >
               <Flame className="w-4 h-4 text-amber-300" />
               <span>
                 {selectedCardIndices.length > 0
-                  ? `PLAY ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`
+                  ? (matchState.trickClaimRank
+                      ? `PLAY ${selectedCardIndices.length} AS ${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank}`
+                      : `LEAD ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`)
                   : `SELECT CARDS`}
               </span>
             </button>

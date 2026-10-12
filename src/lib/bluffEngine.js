@@ -150,7 +150,7 @@ export function verifyPlay(playedCards = [], claimedRank = 'A') {
  * @param {number} pileCount
  * @returns {{ action: 'play' | 'pass', cards: string[], claimedRank: string }}
  */
-export function decideBotPlay(botHand = [], previousClaimRank = null, canPass = false, pileCount = 0) {
+export function decideBotPlay(botHand = [], trickClaimRank = null, canPass = false, pileCount = 0) {
   if (botHand.length === 0) {
     return { action: 'pass', cards: [], claimedRank: 'A' };
   }
@@ -171,78 +171,85 @@ export function decideBotPlay(botHand = [], previousClaimRank = null, canPass = 
 
   const heldRanks = Object.keys(groups);
 
-  // 2. Pass decision (if pile is huge, bot has many cards and wants to avoid danger)
-  if (canPass && pileCount > 8 && Math.random() < 0.25) {
-    return { action: 'pass', cards: [], claimedRank: previousClaimRank || 'A' };
-  }
+  // =========================================================================
+  // CASE 1: TRICK RANK IS LOCKED (All subsequent players MUST play trickClaimRank or Pass)
+  // =========================================================================
+  if (trickClaimRank !== null) {
+    const matchingCards = [];
+    if (groups[trickClaimRank]) {
+      matchingCards.push(...groups[trickClaimRank]);
+    }
+    // Include wild Jokers as matching cards
+    matchingCards.push(...jokers);
 
-  // 3. Decide: Honest Play (~65%) vs Bluff (~35%)
-  const shouldBluff = Math.random() < 0.35;
-
-  // --- HONEST PLAY ---
-  if (!shouldBluff && heldRanks.length > 0) {
-    // A. If previous claim rank exists and bot holds matching cards, prefer matching (~60% of honest plays)
-    if (previousClaimRank && groups[previousClaimRank] && Math.random() < 0.6) {
-      const match = groups[previousClaimRank];
-      // Play 1, 2, or all matching cards
-      const count = Math.min(match.length, Math.floor(Math.random() * match.length) + 1);
-      return {
-        action: 'play',
-        cards: match.slice(0, count),
-        claimedRank: previousClaimRank
-      };
+    // If bot has matching cards:
+    if (matchingCards.length > 0) {
+      // 82% of the time: play matching cards honestly!
+      if (Math.random() < 0.82) {
+        const count = Math.min(matchingCards.length, Math.random() < 0.6 ? matchingCards.length : Math.floor(Math.random() * matchingCards.length) + 1);
+        return {
+          action: 'play',
+          cards: matchingCards.slice(0, Math.max(1, count)),
+          claimedRank: trickClaimRank
+        };
+      } else if (canPass && pileCount > 5) {
+        // 18% of the time: preserve cards and pass if pile is risky
+        return { action: 'pass', cards: [], claimedRank: trickClaimRank };
+      }
     }
 
-    // B. Pick the rank bot holds the most of (dump largest set)
-    heldRanks.sort((a, b) => groups[b].length - groups[a].length);
-    const bestRank = heldRanks[0];
-    const bestCards = [...groups[bestRank]];
-
-    // If bot has a Joker, sometimes attach it as wildcard
-    if (jokers.length > 0 && Math.random() < 0.4) {
-      bestCards.push(jokers[0]);
+    // If bot does NOT hold matching cards:
+    if (canPass) {
+      // 70% of the time or if pile is large: pass safely!
+      if (pileCount > 5 || Math.random() < 0.70) {
+        return { action: 'pass', cards: [], claimedRank: trickClaimRank };
+      }
     }
 
-    // Play 1 to all of this rank
-    const count = bestCards.length <= 2 ? bestCards.length : (Math.random() < 0.7 ? bestCards.length : bestCards.length - 1);
-    const chosenCards = bestCards.slice(0, Math.max(1, count));
+    // Otherwise, bot bluffs with junk cards claiming the LOCKED trick rank!
+    const singletons = heldRanks.filter((r) => groups[r].length === 1).map((r) => groups[r][0]);
+    const junkCards = singletons.length > 0 ? singletons : botHand.filter((c) => c !== 'Jr' && c !== 'Jb');
+    const bluffPool = junkCards.length > 0 ? junkCards : botHand;
+    const count = Math.min(bluffPool.length, Math.random() < 0.8 ? 1 : 2);
 
     return {
       action: 'play',
-      cards: chosenCards,
+      cards: bluffPool.slice(0, Math.max(1, count)),
+      claimedRank: trickClaimRank // MUST play as the locked trick rank!
+    };
+  }
+
+  // =========================================================================
+  // CASE 2: NEW TRICK (Bot has the lead and can choose ANY rank!)
+  // =========================================================================
+  heldRanks.sort((a, b) => groups[b].length - groups[a].length);
+  const bestRank = heldRanks[0] || 'A';
+  const bestCards = [...(groups[bestRank] || [])];
+
+  if (jokers.length > 0 && Math.random() < 0.4) {
+    bestCards.push(jokers[0]);
+  }
+
+  // 85% of the time: lead honestly with best rank
+  if (bestCards.length > 0 && Math.random() < 0.85) {
+    const count = bestCards.length <= 2 ? bestCards.length : (Math.random() < 0.7 ? bestCards.length : bestCards.length - 1);
+    return {
+      action: 'play',
+      cards: bestCards.slice(0, Math.max(1, count)),
       claimedRank: bestRank
     };
   }
 
-  // --- LOGICAL BLUFF PLAY ---
-  // Identify singleton or weak cards to discard
-  const singletons = heldRanks.filter((r) => groups[r].length === 1).map((r) => groups[r][0]);
-  const junkCards = singletons.length > 0 ? singletons : botHand.filter((c) => c !== 'Jr' && c !== 'Jb');
-
-  // How many cards to bluff? Usually 1 or 2, rarely 3
-  const bluffCount = Math.min(junkCards.length, Math.random() < 0.75 ? (junkCards.length >= 2 && Math.random() < 0.4 ? 2 : 1) : 2);
-  const cardsToPlay = junkCards.slice(0, Math.max(1, bluffCount));
-
-  // What rank to claim?
-  // Strategy 1: Semi-bluff! Claim a rank bot actually holds 1 of (making opponents less likely to suspect)
-  let claimedRank = 'A';
-  if (heldRanks.length > 0 && Math.random() < 0.65) {
-    const candidateRanks = heldRanks.filter((r) => !cardsToPlay.some((c) => (c.length === 3 ? '10' : c[0]) === r));
-    if (candidateRanks.length > 0) {
-      claimedRank = candidateRanks[Math.floor(Math.random() * candidateRanks.length)];
-    } else {
-      claimedRank = heldRanks[Math.floor(Math.random() * heldRanks.length)];
-    }
-  } else {
-    // Strategy 2: Pick a common plausible rank (A, K, Q, J, 10, 9, 8)
-    const plausible = ['A', 'K', 'Q', 'J', '10', '9', '8'];
-    claimedRank = plausible[Math.floor(Math.random() * plausible.length)];
-  }
+  // 15% of the time: lead with a cheeky bluff
+  const plausible = ['A', 'K', 'Q', 'J', '10', '9', '8'];
+  const bluffClaim = plausible[Math.floor(Math.random() * plausible.length)];
+  const junk = botHand.filter((c) => c !== 'Jr' && c !== 'Jb');
+  const cardsToPlay = (junk.length > 0 ? junk : botHand).slice(0, Math.min(botHand.length, Math.random() < 0.7 ? 1 : 2));
 
   return {
     action: 'play',
     cards: cardsToPlay.length > 0 ? cardsToPlay : [botHand[0]],
-    claimedRank
+    claimedRank: bluffClaim
   };
 }
 

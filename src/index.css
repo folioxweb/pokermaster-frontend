@@ -6160,6 +6160,47 @@ button, input, select {
   transform: scale(1.08);
 }
 
+/* Locked Trick Rank Chip */
+.bluff-dock-locked-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1.5px solid #a855f7;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.3);
+  animation: pulseLockedGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes pulseLockedGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.55); }
+}
+
+.bluff-dock-locked-tag {
+  font-size: 10px;
+  font-weight: 900;
+  color: #c084fc;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bluff-dock-locked-rank {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.bluff-dock-locked-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
 /* Dock Right: Pass & Play Actions */
 .bluff-dock-right {
   display: flex;
