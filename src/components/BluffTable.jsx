@@ -614,6 +614,17 @@ export const BluffTable = ({
     matchState.lastPlaySeat !== mySeatIndex &&
     (matchState.challengeRule === 'next_only' ? isHeroNext : true);
 
+  const getCardMargin = (idx, total) => {
+    if (idx === 0) return '0px';
+    if (isMobile) return '-32px';
+    if (total > 24) return '-60px';
+    if (total > 18) return '-52px';
+    if (total > 14) return '-44px';
+    if (total > 10) return '-38px';
+    if (total > 6) return '-30px';
+    return '-22px';
+  };
+
   return (
     <div className="table-viewport-container">
       {/* Top Header */}
@@ -780,6 +791,9 @@ export const BluffTable = ({
 
               {/* SEATED PLAYERS AROUND OVAL RAIL */}
               {players.map((player) => {
+                // Hero is prominently rendered at the bottom viewport via fanned cards and control dock
+                if (player.seat_index === mySeatIndex) return null;
+
                 const totalSeats = Math.max(players.length, 6);
                 const pos = getSeatCoordinates(player.seat_index, totalSeats, mySeatIndex);
                 const isTurn = matchState.currentTurnSeat === player.seat_index && matchState.phase === 'playing';
@@ -794,18 +808,18 @@ export const BluffTable = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', background: 'rgba(15, 23, 42, 0.9)', padding: '2px 8px', borderRadius: '12px', border: '1px solid #334155' }}>
                       <span style={{ fontSize: '11px' }}>🃏</span>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24' }}>
-                        {player.seat_index === mySeatIndex ? myHand.length : player.cardCount} Cards
+                        {player.cardCount} Cards
                       </span>
                     </div>
 
                     {/* Player Pod */}
-                    <div className={`poker-player-box ${isTurn ? 'active-turn' : ''} ${player.seat_index === mySeatIndex ? 'hero' : ''}`}>
+                    <div className={`poker-player-box ${isTurn ? 'active-turn' : ''}`}>
                       <div className="poker-avatar">
                         {player.username.charAt(0).toUpperCase()}
                       </div>
                       <div className="poker-details">
                         <span className="poker-username">{player.username}</span>
-                        <span className="poker-chips">{player.seat_index === mySeatIndex ? 'YOU' : 'SEAT ' + (player.seat_index + 1)}</span>
+                        <span className="poker-chips">{'SEAT ' + (player.seat_index + 1)}</span>
                       </div>
                     </div>
                   </div>
@@ -843,126 +857,105 @@ export const BluffTable = ({
         </div>
       )}
 
-      {/* BOTTOM ACTION TRAY: PLAYER'S HAND & BLUFF CONTROLS */}
-      <div className="poker-hud-wrapper" style={{ maxWidth: '860px' }}>
-        <div className="poker-hud-panel" style={{ padding: '10px 14px' }}>
-          
-          {/* CHALLENGE REACTION SLAP WINDOW IN HUD */}
-          {matchState.phase === 'challenge_window' && (
-            <div className="bluff-challenge-hud-box">
-              <div className="bluff-challenge-hud-meta">
-                <div className="bluff-challenge-hud-badge">
-                  {matchState.challengeRule === 'next_only' ? '👉 STRICT NEXT PERSON MODE' : '⚡ ANYONE CHALLENGE WINDOW'}
-                </div>
-                <div className="bluff-challenge-hud-question">
-                  {matchState.lastPlaySeat === mySeatIndex ? (
-                    <span>
-                      You played <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>. Waiting for challengers...
-                    </span>
-                  ) : (
-                    <span>
-                      Did <strong>{players.find((p) => p.seat_index === matchState.lastPlaySeat)?.username}</strong> really play <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>?
-                    </span>
+      {/* FULL-WIDTH BLUFF BOTTOM VIEWPORT (NO GIANT WHITE BACKGROUND) */}
+      <div className="bluff-bottom-container">
+        {/* Challenge Reaction Slap Banner (Floating Centered Pill) */}
+        {matchState.phase === 'challenge_window' && (
+          <div className="bluff-challenge-floating-banner">
+            <div className="bluff-challenge-banner-info">
+              <span className="bluff-challenge-banner-tag">
+                {matchState.challengeRule === 'next_only' ? '👉 NEXT PLAYER ONLY' : '⚡ REACTION WINDOW'}
+              </span>
+              <span className="bluff-challenge-banner-text">
+                {matchState.lastPlaySeat === mySeatIndex ? (
+                  <span>
+                    You played <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>. Waiting for challengers...
+                  </span>
+                ) : (
+                  <span>
+                    Did <strong>{players.find((p) => p.seat_index === matchState.lastPlaySeat)?.username}</strong> really play <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>?
+                  </span>
+                )}
+              </span>
+            </div>
+
+            {canIChallenge ? (
+              <div className="bluff-challenge-banner-actions">
+                <button
+                  type="button"
+                  onClick={() => handleCallBluff(mySeatIndex)}
+                  className="bluff-call-btn-large"
+                >
+                  <ShieldAlert className="w-5 h-5 text-amber-300 animate-pulse" />
+                  <span>CALL BLUFF! ({challengeTimeLeft}s)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePassChallenge}
+                  className="bluff-accept-btn-large"
+                >
+                  <Check className="w-4 h-4 text-emerald-300" />
+                  <span>{matchState.challengeRule === 'next_only' ? 'ACCEPT & PLAY' : "DON'T CALL"}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="bluff-challenge-waiting-pill">
+                <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                <span>
+                  {matchState.lastPlaySeat === mySeatIndex
+                    ? `Waiting for reaction (${challengeTimeLeft}s)`
+                    : `Waiting for ${players.find((p) => p.seat_index === nextSeatAfterPlay)?.username || 'next player'} (${challengeTimeLeft}s)`}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FANNED CARDS: SITS DIRECTLY ON FELT ACROSS FULL DESKTOP WIDTH (SINGLE ROW) */}
+        <div className="bluff-fanned-container">
+          <div className="bluff-fanned-row">
+            {(isMobile && myHand.length > 7 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand).map((card, i) => {
+              const globalIdx = i;
+              const isSelected = selectedCardIndices.includes(globalIdx);
+              const cardMargin = getCardMargin(i, myHand.length);
+
+              return (
+                <div
+                  key={`${card}-${globalIdx}`}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
+                    } else {
+                      setSelectedCardIndices([...selectedCardIndices, globalIdx]);
+                      // Auto-set declared rank to clicked card
+                      if (card && card !== 'Jr' && card !== 'Jb') {
+                        const r = card.length === 3 ? '10' : card[0];
+                        setHeroClaimRank(r);
+                      }
+                    }
+                  }}
+                  className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
+                  style={{
+                    marginLeft: cardMargin,
+                    zIndex: isSelected ? 120 + i : 10 + i
+                  }}
+                >
+                  <CardAsset card={card} isHero={true} />
+                  {isSelected && (
+                    <div className="bluff-card-selected-badge">
+                      <Check className="w-3 h-3 text-white stroke-[3]" />
+                    </div>
                   )}
                 </div>
-              </div>
-
-              {canIChallenge ? (
-                <div className="bluff-challenge-hud-buttons">
-                  <button
-                    type="button"
-                    onClick={() => handleCallBluff(mySeatIndex)}
-                    className="bluff-call-btn-large"
-                  >
-                    <ShieldAlert className="w-5 h-5 text-amber-300 animate-pulse" />
-                    <span>CALL BLUFF! ({challengeTimeLeft}s)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePassChallenge}
-                    className="bluff-accept-btn-large"
-                  >
-                    <Check className="w-4 h-4 text-emerald-300" />
-                    <span>{matchState.challengeRule === 'next_only' ? 'ACCEPT & PLAY' : "DON'T CALL"}</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="bluff-challenge-waiting-pill">
-                  <Clock className="w-4 h-4 text-amber-400 animate-spin" />
-                  <span>
-                    {matchState.lastPlaySeat === mySeatIndex
-                      ? `Waiting for reaction (${challengeTimeLeft}s)`
-                      : `Waiting for ${players.find((p) => p.seat_index === nextSeatAfterPlay)?.username || 'next player'} (${challengeTimeLeft}s)`}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Declare Claim Rank Selector when it's Hero's turn */}
-          {isMyTurn && (
-            <div className="bluff-declare-rank-bar">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <span className="bluff-declare-label">DECLARE RANK:</span>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Tap rank to bluff or match:</span>
-              </div>
-              <div className="bluff-declare-pills">
-                {BLUFF_RANKS.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setHeroClaimRank(r)}
-                    className={`bluff-declare-pill ${heroClaimRank === r ? 'active' : ''}`}
-                    title={`Declare as ${RANK_NAMES[r] || r}`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Hand Header with Count, Sort, and Auto-Select */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '12px', fontWeight: 900, color: '#e0e7ff' }}>
-                YOUR HAND ({myHand.length}):
-              </span>
-              <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                Discard any number of cards as <strong>{RANK_NAMES[heroClaimRank] || heroClaimRank}</strong>
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={handleSortHand}
-                className="table-nav-btn"
-                style={{ padding: '3px 8px', fontSize: '10px', height: '24px' }}
-                title="Sort cards in hand by rank"
-              >
-                Sort
-              </button>
-              <button
-                type="button"
-                onClick={handleAutoSelectCurrentRank}
-                className="table-nav-btn"
-                style={{ padding: '3px 8px', fontSize: '10px', height: '24px', borderColor: '#a855f7', color: '#c084fc' }}
-                title={`Auto-select ${heroClaimRank}s from your hand`}
-              >
-                Pick {heroClaimRank}
-              </button>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24', marginLeft: '4px' }}>
-                {selectedCardIndices.length} Selected
-              </span>
-            </div>
+              );
+            })}
           </div>
 
-          {/* FANNED / OVERLAPPING CARDS (1 Row Desktop, 2 Rows Mobile / High Card Count) */}
-          <div className="bluff-fanned-container">
-            <div className="bluff-fanned-row">
-              {(isMobile ? (myHand.length > 6 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand) : (myHand.length > 13 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand)).map((card, i) => {
-                const globalIdx = i;
+          {/* Row 2 ONLY on mobile if mobile has > 7 cards */}
+          {isMobile && myHand.length > 7 && (
+            <div className="bluff-fanned-row row-two">
+              {myHand.slice(Math.ceil(myHand.length / 2)).map((card, i) => {
+                const globalIdx = Math.ceil(myHand.length / 2) + i;
                 const isSelected = selectedCardIndices.includes(globalIdx);
                 return (
                   <div
@@ -972,7 +965,6 @@ export const BluffTable = ({
                         setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
                       } else {
                         setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                        // Auto-set declared rank to clicked card
                         if (card && card !== 'Jr' && card !== 'Jb') {
                           const r = card.length === 3 ? '10' : card[0];
                           setHeroClaimRank(r);
@@ -981,8 +973,8 @@ export const BluffTable = ({
                     }}
                     className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      marginLeft: i === 0 ? '0px' : (isMobile ? '-32px' : '-38px'),
-                      zIndex: isSelected ? 100 + i : 10 + i
+                      marginLeft: i === 0 ? '0px' : '-32px',
+                      zIndex: isSelected ? 120 + i : 10 + i
                     }}
                   >
                     <CardAsset card={card} isHero={true} />
@@ -995,49 +987,74 @@ export const BluffTable = ({
                 );
               })}
             </div>
+          )}
+        </div>
 
-            {/* Row 2 if Mobile > 6 cards OR Desktop > 13 cards */}
-            {((isMobile && myHand.length > 6) || (!isMobile && myHand.length > 13)) && (
-              <div className="bluff-fanned-row row-two">
-                {myHand.slice(Math.ceil(myHand.length / 2)).map((card, i) => {
-                  const globalIdx = Math.ceil(myHand.length / 2) + i;
-                  const isSelected = selectedCardIndices.includes(globalIdx);
-                  return (
-                    <div
-                      key={`${card}-${globalIdx}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
-                        } else {
-                          setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                          // Auto-set declared rank to clicked card
-                          if (card && card !== 'Jr' && card !== 'Jb') {
-                            const r = card.length === 3 ? '10' : card[0];
-                            setHeroClaimRank(r);
-                          }
-                        }
-                      }}
-                      className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
-                      style={{
-                        marginLeft: i === 0 ? '0px' : (isMobile ? '-32px' : '-38px'),
-                        zIndex: isSelected ? 100 + i : 10 + i
-                      }}
-                    >
-                      <CardAsset card={card} isHero={true} />
-                      {isSelected && (
-                        <div className="bluff-card-selected-badge">
-                          <Check className="w-3 h-3 text-white stroke-[3]" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+        {/* SLEEK FLOATING CONTROL DOCK (DARK GLASS, NO WHITE BACKGROUND) */}
+        <div className={`bluff-controls-dock ${isMyTurn ? 'is-hero-turn' : ''}`}>
+          {/* Left: Hero identity, Hand count, Sort, Auto-select */}
+          <div className="bluff-dock-left">
+            <div className="bluff-dock-hero-profile">
+              <div className="poker-avatar bluff-dock-avatar" style={{ background: '#7c3aed', color: '#ffffff' }}>
+                {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
               </div>
+              <div className="bluff-dock-hero-meta">
+                <span className="bluff-dock-hero-name">{user?.username || 'You'}</span>
+                <span className="bluff-dock-hero-hand-count">🃏 <strong>{myHand.length}</strong> Cards</span>
+              </div>
+            </div>
+            {selectedCardIndices.length > 0 && (
+              <span className="bluff-dock-selected-chip">{selectedCardIndices.length} Selected</span>
             )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={handleSortHand}
+                className="table-nav-btn bluff-dock-btn"
+                title="Sort hand by rank"
+              >
+                Sort
+              </button>
+              <button
+                type="button"
+                onClick={handleAutoSelectCurrentRank}
+                className="table-nav-btn bluff-dock-btn"
+                style={{ borderColor: '#a855f7', color: '#c084fc' }}
+                title={`Select ${heroClaimRank}s from your hand`}
+              >
+                Pick {heroClaimRank}
+              </button>
+            </div>
           </div>
 
-          {/* Turn Action Row */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+          {/* Center: Declare Rank Selector (Only active on your turn) */}
+          {isMyTurn ? (
+            <div className="bluff-dock-center">
+              <span className="bluff-dock-label">DECLARE:</span>
+              <div className="bluff-declare-pills">
+                {BLUFF_RANKS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setHeroClaimRank(r)}
+                    className={`bluff-declare-pill ${heroClaimRank === r ? 'active' : ''}`}
+                    title={`Declare rank as ${RANK_NAMES[r] || r}`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bluff-dock-center-waiting">
+              <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                Waiting for <strong>{players.find((p) => p.seat_index === matchState.currentTurnSeat)?.username || 'opponent'}</strong> to play...
+              </span>
+            </div>
+          )}
+
+          {/* Right: Turn Actions (Pass / Play) */}
+          <div className="bluff-dock-right">
             {isMyTurn && matchState.passAllowed && (
               <button
                 type="button"
@@ -1048,10 +1065,10 @@ export const BluffTable = ({
                   }));
                   setAnnouncement('You passed your turn.');
                 }}
-                className="table-nav-btn"
-                style={{ padding: '8px 16px' }}
+                className="table-nav-btn bluff-dock-btn"
+                style={{ padding: '8px 16px', fontWeight: 800 }}
               >
-                PASS TURN
+                PASS
               </button>
             )}
 
@@ -1062,25 +1079,13 @@ export const BluffTable = ({
                 const cardsToPlay = selectedCardIndices.map((i) => myHand[i]);
                 handlePlayCards(cardsToPlay, true, heroClaimRank);
               }}
-              style={{
-                background: !isMyTurn || selectedCardIndices.length === 0 ? '#334155' : 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
-                color: '#ffffff',
-                fontWeight: 900,
-                fontSize: '13px',
-                padding: '8px 20px',
-                borderRadius: '10px',
-                border: 'none',
-                cursor: !isMyTurn || selectedCardIndices.length === 0 ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
+              className="bluff-play-btn-large"
             >
               <Flame className="w-4 h-4 text-amber-300" />
               <span>
                 {selectedCardIndices.length > 0
                   ? `PLAY ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`
-                  : `SELECT CARDS TO PLAY`}
+                  : `SELECT CARDS`}
               </span>
             </button>
           </div>
