@@ -5745,5 +5745,258 @@ button, input, select {
   border-color: #9333ea;
 }
 
+/* ==========================================================================
+   11. BLUFF MASTER FANNED CARDS & CHALLENGE HUD STYLES
+   ========================================================================== */
+
+/* Fanned / Overlapping Hand Container */
+.bluff-fanned-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 8px 8px 8px; /* Extra top clearance for card hover & selection lifts */
+  overflow: visible;
+  min-height: 120px;
+}
+
+.bluff-fanned-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  padding: 0 12px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.bluff-fanned-row.row-two {
+  margin-top: -32px; /* Smooth vertical layer overlap for 2-row layout */
+  z-index: 30;
+}
+
+/* Individual Fanned Card Wrapper */
+.bluff-fanned-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2), filter 0.18s ease;
+  user-select: none;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.bluff-fanned-card:hover {
+  transform: translateY(-18px);
+  z-index: 120 !important;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7));
+}
+
+.bluff-fanned-card.is-selected {
+  transform: translateY(-28px);
+  z-index: 150 !important;
+  filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.95)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+}
+
+.bluff-card-selected-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  z-index: 160;
+  animation: popIn 0.16s ease-out;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Prominent Bluff Challenge HUD Panel */
+.bluff-challenge-hud-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.96) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1.5px solid rgba(168, 85, 247, 0.6);
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.25);
+  animation: hudGlow 2.5s infinite alternate;
+}
+
+@keyframes hudGlow {
+  0% { border-color: rgba(168, 85, 247, 0.5); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(168, 85, 247, 0.2); }
+  100% { border-color: rgba(225, 29, 72, 0.7); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 24px rgba(225, 29, 72, 0.35); }
+}
+
+.bluff-challenge-hud-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bluff-challenge-hud-badge {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #c084fc;
+  text-transform: uppercase;
+}
+
+.bluff-challenge-hud-question {
+  font-size: 13px;
+  color: #f1f5f9;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bluff-challenge-hud-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.bluff-call-btn-large {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  border: 1.5px solid #fda4af;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 14px;
+  padding: 9px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(225, 29, 72, 0.65);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: bluffPulse 1.8s infinite;
+}
+
+.bluff-call-btn-large:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 32px rgba(225, 29, 72, 0.9);
+}
+
+.bluff-accept-btn-large {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid #34d399;
+  color: #34d399;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.bluff-accept-btn-large:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.bluff-challenge-waiting-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+@keyframes bluffPulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(225, 29, 72, 0.5); }
+  50% { box-shadow: 0 0 30px rgba(225, 29, 72, 0.95); }
+}
+
+/* Light Mode Overrides for Bluff HUD */
+[data-theme="light"] .bluff-challenge-hud-box,
+.light-theme .bluff-challenge-hud-box {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .bluff-challenge-hud-question,
+.light-theme .bluff-challenge-hud-question {
+  color: #0f172a;
+}
+
+[data-theme="light"] .bluff-accept-btn-large,
+.light-theme .bluff-accept-btn-large {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #15803d;
+}
+
+/* Mobile Responsiveness for Fanned Layout & Challenge HUD */
+@media (max-width: 768px) {
+  .bluff-fanned-container {
+    padding: 18px 4px 6px 4px;
+    min-height: 95px;
+  }
+  .bluff-fanned-row.row-two {
+    margin-top: -24px;
+  }
+  .bluff-fanned-card:hover {
+    transform: translateY(-12px);
+  }
+  .bluff-fanned-card.is-selected {
+    transform: translateY(-20px);
+  }
+  .bluff-card-selected-badge {
+    width: 18px;
+    height: 18px;
+    top: -6px;
+    right: -6px;
+  }
+  .bluff-challenge-hud-box {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .bluff-challenge-hud-question {
+    white-space: normal;
+    font-size: 12px;
+  }
+  .bluff-challenge-hud-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .bluff-call-btn-large,
+  .bluff-accept-btn-large {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+
 
 

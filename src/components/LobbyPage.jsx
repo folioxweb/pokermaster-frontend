@@ -73,6 +73,7 @@ export const LobbyPage = ({
   const [bluffMaxPlayers, setBluffMaxPlayers] = useState(6); // 2 to 8
   const [bluffDeckType, setBluffDeckType] = useState('single'); // 'single' (54) | 'double' (108)
   const [bluffChallengeTime, setBluffChallengeTime] = useState(8); // 0 (No Limit), 5, 8, 10, 15
+  const [bluffChallengeRule, setBluffChallengeRule] = useState('anyone'); // 'anyone' | 'next_only'
   const [bluffPassAllowed, setBluffPassAllowed] = useState(true);
   const [bluffPracticeSeats, setBluffPracticeSeats] = useState(5);
 
@@ -238,6 +239,7 @@ export const LobbyPage = ({
           gameType: 'bluff',
           deckType: bluffDeckType,
           challengeTime: bluffChallengeTime,
+          challengeRule: bluffChallengeRule,
           passAllowed: bluffPassAllowed,
           maxPlayers: bluffMaxPlayers,
           isPractice: false,
@@ -254,6 +256,7 @@ export const LobbyPage = ({
           gameType: 'bluff',
           deckType: bluffDeckType,
           challengeTime: bluffChallengeTime,
+          challengeRule: bluffChallengeRule,
           passAllowed: bluffPassAllowed,
           maxPlayers: bluffMaxPlayers,
           isPractice: false,
@@ -403,6 +406,7 @@ export const LobbyPage = ({
       gameType: 'bluff',
       deckType: bluffDeckType,
       challengeTime: bluffChallengeTime,
+      challengeRule: bluffChallengeRule,
       passAllowed: bluffPassAllowed,
       isPractice: true,
       maxPlayers: bluffPracticeSeats,
@@ -849,6 +853,51 @@ export const LobbyPage = ({
                       </span>
                     </div>
 
+                    {/* Challenge Rule Mode (Anyone Can Call vs Next Person Only) */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <label className="lobby-form-label" style={{ margin: 0 }}>Challenge Rule Mode</label>
+                        <span className="table-badge-shotclock">
+                          {bluffChallengeRule === 'anyone' ? '⚡ Anyone Can Call' : '👉 Next Person Only'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setBluffChallengeRule('anyone')}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            bluffChallengeRule === 'anyone'
+                              ? 'bg-purple-950/50 border-purple-500 text-purple-200 shadow-lg shadow-purple-900/30'
+                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1">
+                            <span>⚡ Anyone Can Call</span>
+                          </div>
+                          <span className="text-[11px] text-slate-400 leading-tight block">
+                            Free-for-all: Any seated player can call bluff during the reaction timer.
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setBluffChallengeRule('next_only')}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            bluffChallengeRule === 'next_only'
+                              ? 'bg-purple-950/50 border-purple-500 text-purple-200 shadow-lg shadow-purple-900/30'
+                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1">
+                            <span>👉 Next Person Only</span>
+                          </div>
+                          <span className="text-[11px] text-slate-400 leading-tight block">
+                            Strict turn rotation: Only the immediate next player challenges or accepts & plays!
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Pass Allowed Toggle */}
                     <div className="custom-toggle-card">
                       <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
@@ -1264,6 +1313,41 @@ export const LobbyPage = ({
                             <span>🃏🃏 Double Deck</span>
                           </div>
                           <div className="text-[10px] text-slate-400 mt-0.5">108 Cards (4 Jokers)</div>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="lobby-form-label">Challenge Rule Mode</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setBluffChallengeRule('anyone')}
+                          className={`p-2.5 rounded-xl border text-left transition-all ${
+                            bluffChallengeRule === 'anyone'
+                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
+                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-white flex items-center gap-1">
+                            <span>⚡ Anyone Can Call</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Free-for-all challenge window</div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setBluffChallengeRule('next_only')}
+                          className={`p-2.5 rounded-xl border text-left transition-all ${
+                            bluffChallengeRule === 'next_only'
+                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
+                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-white flex items-center gap-1">
+                            <span>👉 Next Person Only</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Strict clockwise rotation</div>
                         </button>
                       </div>
                     </div>

@@ -68,6 +68,14 @@ export const BluffTable = ({
   const [myHand, setMyHand] = useState([]);
   const [selectedCardIndices, setSelectedCardIndices] = useState([]);
 
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   // Bluff Match State
   const [matchState, setMatchState] = useState({
     handNumber: 0,
@@ -80,7 +88,8 @@ export const BluffTable = ({
     discardPile: [],
     deckType: gameRoom?.deckType || 'single', // 'single' (54) | 'double' (108)
     passAllowed: gameRoom?.passAllowed ?? true,
-    challengeTime: gameRoom?.challengeTime ?? 5, // seconds for challenge window (0 = no limit)
+    challengeTime: gameRoom?.challengeTime ?? 8, // seconds for challenge window (0 = no limit)
+    challengeRule: gameRoom?.challengeRule || 'anyone', // 'anyone' | 'next_only'
     winner: null
   });
 
@@ -320,8 +329,8 @@ export const BluffTable = ({
     setMatchState(nextState);
     setPlayers(updatedPlayers);
 
-    // Start challenge window countdown
-    const winTime = matchState.challengeTime > 0 ? matchState.challengeTime : 5;
+    // Start challenge window countdown (default to 8 seconds so players have ample reaction time)
+    const winTime = matchState.challengeTime > 0 ? matchState.challengeTime : 8;
     setChallengeTimeLeft(winTime);
 
     if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
@@ -329,7 +338,7 @@ export const BluffTable = ({
       setChallengeTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(challengeTimerRef.current);
-          handleChallengeTimeout(nextState, updatedPlayers);
+          handleChallengeTimeout(matchStateRef.current, playersRef.current);
           return 0;
         }
         return prev - 1;
@@ -337,23 +346,27 @@ export const BluffTable = ({
     }, 1000);
   };
 
-  // Challenge Window Expired Without Anyone Calling Bluff
-  const handleChallengeTimeout = (stateToAdvance, currentPlayersList) => {
+  // Challenge Window Expired or Passed Without Anyone Calling Bluff
+  const handleChallengeTimeout = (stateToAdvance = null, currentPlayersList = null) => {
     if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
+    const activeState = stateToAdvance || matchStateRef.current;
+    const activePlayers = currentPlayersList || playersRef.current;
+
+    if (activeState.phase !== 'challenge_window') return;
 
     // If last player emptied their hand and wasn't challenged, they WIN!
-    if (stateToAdvance.winner) {
-      handleMatchVictory(stateToAdvance.winner);
+    if (activeState.winner) {
+      handleMatchVictory(activeState.winner);
       return;
     }
 
-    // Advance to next player and next rank
-    const nextRank = getNextClaimRank(stateToAdvance.currentClaimRank);
-    const totalPlayers = currentPlayersList.length;
-    let nextSeat = (stateToAdvance.lastPlaySeat + 1) % totalPlayers;
+    // Advance to next player and next rank in clockwise order
+    const nextRank = getNextClaimRank(activeState.currentClaimRank);
+    const totalPlayers = activePlayers.length;
+    let nextSeat = (activeState.lastPlaySeat + 1) % totalPlayers;
 
     const advancedState = {
-      ...stateToAdvance,
+      ...activeState,
       phase: 'playing',
       currentTurnSeat: nextSeat,
       currentClaimRank: nextRank,
@@ -361,13 +374,52 @@ export const BluffTable = ({
     };
 
     setMatchState(advancedState);
-    const nextP = currentPlayersList.find((p) => p.seat_index === nextSeat);
-    setAnnouncement(`✅ Nobody called bluff! Turn passes to ${nextP?.username} for ${RANK_NAMES[nextRank]}.`);
+    const nextP = activePlayers.find((p) => p.seat_index === nextSeat);
+    setAnnouncement(`✅ Claim accepted! Turn passes to ${nextP?.username} for ${RANK_NAMES[nextRank] || nextRank}.`);
+  };
+
+  // Immediate Pass / Accept Challenge
+  const handlePassChallenge = () => {
+    if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
+    setChallengeTimeLeft(0);
+    handleChallengeTimeout(matchStateRef.current, playersRef.current);
+  };
+
+  // Toggle Challenge Rule ('anyone' vs 'next_only') on the fly
+  const handleToggleChallengeRule = () => {
+    const nextRule = matchState.challengeRule === 'anyone' ? 'next_only' : 'anyone';
+    const updatedMatch = { ...matchState, challengeRule: nextRule };
+    setMatchState(updatedMatch);
+    const msg = `Mode changed: ${nextRule === 'anyone' ? '⚡ Anyone Can Call Bluff' : '👉 Only Next Person Can Call'}`;
+    setAnnouncement(msg);
+    broadcastState(players, updatedMatch, msg);
+  };
+
+  // Sort Hand by Rank
+  const handleSortHand = () => {
+    const sorted = sortHand(myHand);
+    setMyHand(sorted);
+    setSelectedCardIndices([]);
+  };
+
+  // Auto-Select Cards Matching Current Claim Rank
+  const handleAutoSelectCurrentRank = () => {
+    const targetRank = matchState.currentClaimRank;
+    const matching = [];
+    myHand.forEach((c, idx) => {
+      const isJoker = c === 'Jr' || c === 'Jb';
+      const cRank = c.length === 3 ? '10' : c[0];
+      if ((isJoker || cRank === targetRank) && matching.length < 4) {
+        matching.push(idx);
+      }
+    });
+    setSelectedCardIndices(matching);
   };
 
   // Action: Call Bluff!
   const handleCallBluff = (challengerSeat) => {
     if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
+    setChallengeTimeLeft(0);
     playCheckKnock();
 
     const blufferSeat = matchState.lastPlaySeat;
@@ -434,8 +486,9 @@ export const BluffTable = ({
     }, 4500);
   };
 
-  // Bot Turn Automation
+  // Bot Turn & Challenge Automation
   useEffect(() => {
+    // 1. Bot Playing Cards on Turn
     if (matchState.phase === 'playing') {
       const activeP = players.find((p) => p.seat_index === matchState.currentTurnSeat);
       if (activeP && activeP.isBot) {
@@ -457,10 +510,51 @@ export const BluffTable = ({
       }
     }
 
-    // Bot Challenge Slap in Challenge Window
+    // 2. Challenge Window Reaction
     if (matchState.phase === 'challenge_window') {
-      const bots = players.filter((p) => p.isBot && p.seat_index !== matchState.lastPlaySeat);
-      for (const bot of bots) {
+      const currentRule = matchState.challengeRule || 'anyone';
+      const totalP = players.length;
+      const nextSeat = matchState.lastPlaySeat !== null && totalP > 0
+        ? (matchState.lastPlaySeat + 1) % totalP
+        : null;
+
+      // Mode A: NEXT PLAYER ONLY
+      if (currentRule === 'next_only') {
+        // If Hero is the next player, bots must NEVER challenge! Hero has 100% exclusive authority.
+        if (nextSeat === mySeatIndex) {
+          return;
+        }
+
+        // If next player is a Bot, ONLY that bot evaluates challenge or accept
+        const nextBot = players.find((p) => p.seat_index === nextSeat && p.isBot);
+        if (nextBot) {
+          const wantsToCall = decideBotCallBluff(
+            nextBot.cards,
+            matchState.currentClaimRank,
+            matchState.lastPlayedCardsCount,
+            matchState.discardPile.length,
+            matchState.deckType
+          );
+
+          const timer = setTimeout(() => {
+            if (wantsToCall) {
+              handleCallBluff(nextBot.seat_index);
+            } else {
+              // Bot accepts! Immediately advance to bot's turn to play
+              handlePassChallenge();
+            }
+          }, 1600);
+          return () => clearTimeout(timer);
+        }
+        return;
+      }
+
+      // Mode B: ANYONE CAN CALL
+      // If Hero can call bluff, give Hero priority with 3.8s-5.2s bot delay so bots don't snipe!
+      const heroCanCall = matchState.lastPlaySeat !== mySeatIndex;
+      const eligibleBots = players.filter((p) => p.isBot && p.seat_index !== matchState.lastPlaySeat);
+
+      for (const bot of eligibleBots) {
         const wantsToCall = decideBotCallBluff(
           bot.cards,
           matchState.currentClaimRank,
@@ -468,15 +562,20 @@ export const BluffTable = ({
           matchState.discardPile.length,
           matchState.deckType
         );
+
         if (wantsToCall) {
+          const delay = heroCanCall
+            ? Math.floor(Math.random() * 1400) + 3800 // Hero has 3.8s+ to react!
+            : Math.floor(Math.random() * 1400) + 1800;
+
           const timer = setTimeout(() => {
             handleCallBluff(bot.seat_index);
-          }, Math.floor(Math.random() * 1800) + 800);
+          }, delay);
           return () => clearTimeout(timer);
         }
       }
     }
-  }, [matchState.phase, matchState.currentTurnSeat, players]);
+  }, [matchState.phase, matchState.currentTurnSeat, matchState.lastPlaySeat, matchState.challengeRule, players]);
 
   // Victory Handler
   const handleMatchVictory = (champ) => {
@@ -487,7 +586,17 @@ export const BluffTable = ({
   };
 
   const isMyTurn = matchState.currentTurnSeat === mySeatIndex && matchState.phase === 'playing';
-  const canIChallenge = matchState.phase === 'challenge_window' && matchState.lastPlaySeat !== mySeatIndex;
+
+  // Strict Turn Rotation vs Anyone Can Call
+  const totalPlayersCount = players.length;
+  const nextSeatAfterPlay = matchState.lastPlaySeat !== null && totalPlayersCount > 0
+    ? (matchState.lastPlaySeat + 1) % totalPlayersCount
+    : null;
+  const isHeroNext = nextSeatAfterPlay === mySeatIndex;
+
+  const canIChallenge = matchState.phase === 'challenge_window' &&
+    matchState.lastPlaySeat !== mySeatIndex &&
+    (matchState.challengeRule === 'next_only' ? isHeroNext : true);
 
   return (
     <div className="table-viewport-container">
@@ -513,6 +622,27 @@ export const BluffTable = ({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Challenge Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={handleToggleChallengeRule}
+            className="table-nav-btn"
+            style={{
+              background: matchState.challengeRule === 'next_only' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+              borderColor: matchState.challengeRule === 'next_only' ? '#3b82f6' : '#a855f7',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+            title="Click to switch challenge mode between 'Anyone' and 'Next Only'"
+          >
+            <span>{matchState.challengeRule === 'next_only' ? '👉' : '⚡'}</span>
+            <span>{matchState.challengeRule === 'next_only' ? 'Next Only' : 'Anyone'}</span>
+          </button>
+
           {matchState.phase === 'waiting' && (
             <button
               onClick={startNewBluffMatch}
@@ -545,9 +675,24 @@ export const BluffTable = ({
 
               {/* CENTER DISCARD PILE & CLAIM STATUS */}
               <div className="poker-community-area">
-                <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.25em', color: '#a855f7', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  BLUFF MASTER • {matchState.deckType === 'double' ? '108 CARDS (2 DECKS)' : '54 CARDS (1 DECK)'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em', color: '#a855f7', textTransform: 'uppercase' }}>
+                    {matchState.deckType === 'double' ? '108 CARDS' : '54 CARDS'}
+                  </span>
+                  <span style={{ color: '#64748b' }}>•</span>
+                  <span
+                    onClick={handleToggleChallengeRule}
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      color: matchState.challengeRule === 'next_only' ? '#93c5fd' : '#f0abfc',
+                      cursor: 'pointer'
+                    }}
+                    title="Click to toggle challenge mode"
+                  >
+                    {matchState.challengeRule === 'next_only' ? '👉 STRICT ROTATION' : '⚡ ANYONE CAN CALL'}
+                  </span>
+                </div>
 
                 {/* Current Sequential Claim Rank */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', borderRadius: '9999px', background: 'rgba(15, 23, 42, 0.95)', border: '1.5px solid #a855f7', marginBottom: '12px' }}>
@@ -580,7 +725,7 @@ export const BluffTable = ({
                   )}
                 </div>
 
-                {/* Challenge Reaction Slap Window */}
+                {/* Challenge Reaction Slap Window on Felt */}
                 {matchState.phase === 'challenge_window' && (
                   <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 900, color: '#f43f5e', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -678,50 +823,168 @@ export const BluffTable = ({
         </div>
       )}
 
-      {/* BOTTOM ACTION TRAY: PLAYER'S HAND (MULTICARD SELECT) */}
-      <div className="poker-hud-wrapper" style={{ maxWidth: '820px' }}>
+      {/* BOTTOM ACTION TRAY: PLAYER'S HAND & BLUFF CONTROLS */}
+      <div className="poker-hud-wrapper" style={{ maxWidth: '860px' }}>
         <div className="poker-hud-panel" style={{ padding: '10px 14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 900, color: '#e0e7ff' }}>YOUR HAND:</span>
+          
+          {/* CHALLENGE REACTION SLAP WINDOW IN HUD */}
+          {matchState.phase === 'challenge_window' && (
+            <div className="bluff-challenge-hud-box">
+              <div className="bluff-challenge-hud-meta">
+                <div className="bluff-challenge-hud-badge">
+                  {matchState.challengeRule === 'next_only' ? '👉 STRICT NEXT PERSON MODE' : '⚡ ANYONE CHALLENGE WINDOW'}
+                </div>
+                <div className="bluff-challenge-hud-question">
+                  {matchState.lastPlaySeat === mySeatIndex ? (
+                    <span>
+                      You played <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>. Waiting for challengers...
+                    </span>
+                  ) : (
+                    <span>
+                      Did <strong>{players.find((p) => p.seat_index === matchState.lastPlaySeat)?.username}</strong> really play <strong>{matchState.lastPlayedCardsCount} {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>?
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {canIChallenge ? (
+                <div className="bluff-challenge-hud-buttons">
+                  <button
+                    type="button"
+                    onClick={() => handleCallBluff(mySeatIndex)}
+                    className="bluff-call-btn-large"
+                  >
+                    <ShieldAlert className="w-5 h-5 text-amber-300 animate-pulse" />
+                    <span>CALL BLUFF! ({challengeTimeLeft}s)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePassChallenge}
+                    className="bluff-accept-btn-large"
+                  >
+                    <Check className="w-4 h-4 text-emerald-300" />
+                    <span>{matchState.challengeRule === 'next_only' ? 'ACCEPT & PLAY' : "DON'T CALL"}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="bluff-challenge-waiting-pill">
+                  <Clock className="w-4 h-4 text-amber-400 animate-spin" />
+                  <span>
+                    {matchState.lastPlaySeat === mySeatIndex
+                      ? `Waiting for reaction (${challengeTimeLeft}s)`
+                      : `Waiting for ${players.find((p) => p.seat_index === nextSeatAfterPlay)?.username || 'next player'} (${challengeTimeLeft}s)`}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Hand Header with Count, Sort, and Auto-Select */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '12px', fontWeight: 900, color: '#e0e7ff' }}>
+                YOUR HAND ({myHand.length}):
+              </span>
               <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                Select 1 to 4 cards to discard as <strong>{RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>
+                Discard 1 to 4 cards as <strong>{RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>
               </span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24' }}>
-              {selectedCardIndices.length} Selected
-            </span>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={handleSortHand}
+                className="table-nav-btn"
+                style={{ padding: '3px 8px', fontSize: '10px', height: '24px' }}
+                title="Sort cards in hand by rank"
+              >
+                Sort
+              </button>
+              <button
+                type="button"
+                onClick={handleAutoSelectCurrentRank}
+                className="table-nav-btn"
+                style={{ padding: '3px 8px', fontSize: '10px', height: '24px', borderColor: '#a855f7', color: '#c084fc' }}
+                title={`Auto-select ${matchState.currentClaimRank}s from your hand`}
+              >
+                Pick {matchState.currentClaimRank}
+              </button>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24', marginLeft: '4px' }}>
+                {selectedCardIndices.length}/4
+              </span>
+            </div>
           </div>
 
-          {/* Cards Tray with Horizontal Scroll */}
-          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', scrollBehavior: 'smooth' }}>
-            {myHand.map((card, idx) => {
-              const isSelected = selectedCardIndices.includes(idx);
-              return (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    if (isSelected) {
-                      setSelectedCardIndices(selectedCardIndices.filter((i) => i !== idx));
-                    } else if (selectedCardIndices.length < 4) {
-                      setSelectedCardIndices([...selectedCardIndices, idx]);
-                    }
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    transform: isSelected ? 'translateY(-10px)' : 'none',
-                    transition: 'transform 0.15s ease',
-                    boxShadow: isSelected ? '0 0 12px #a855f7' : 'none'
-                  }}
-                >
-                  <CardAsset card={card} isHero={true} />
-                </div>
-              );
-            })}
+          {/* FANNED / OVERLAPPING CARDS (1 Row Desktop, 2 Rows Mobile / High Card Count) */}
+          <div className="bluff-fanned-container">
+            <div className="bluff-fanned-row">
+              {(isMobile ? (myHand.length > 6 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand) : (myHand.length > 13 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand)).map((card, i) => {
+                const globalIdx = i;
+                const isSelected = selectedCardIndices.includes(globalIdx);
+                return (
+                  <div
+                    key={`${card}-${globalIdx}`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
+                      } else if (selectedCardIndices.length < 4) {
+                        setSelectedCardIndices([...selectedCardIndices, globalIdx]);
+                      }
+                    }}
+                    className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
+                    style={{
+                      marginLeft: i === 0 ? '0px' : (isMobile ? '-32px' : '-38px'),
+                      zIndex: isSelected ? 100 + i : 10 + i
+                    }}
+                  >
+                    <CardAsset card={card} isHero={true} />
+                    {isSelected && (
+                      <div className="bluff-card-selected-badge">
+                        <Check className="w-3 h-3 text-white stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Row 2 if Mobile > 6 cards OR Desktop > 13 cards */}
+            {((isMobile && myHand.length > 6) || (!isMobile && myHand.length > 13)) && (
+              <div className="bluff-fanned-row row-two">
+                {myHand.slice(Math.ceil(myHand.length / 2)).map((card, i) => {
+                  const globalIdx = Math.ceil(myHand.length / 2) + i;
+                  const isSelected = selectedCardIndices.includes(globalIdx);
+                  return (
+                    <div
+                      key={`${card}-${globalIdx}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
+                        } else if (selectedCardIndices.length < 4) {
+                          setSelectedCardIndices([...selectedCardIndices, globalIdx]);
+                        }
+                      }}
+                      className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
+                      style={{
+                        marginLeft: i === 0 ? '0px' : (isMobile ? '-32px' : '-38px'),
+                        zIndex: isSelected ? 100 + i : 10 + i
+                      }}
+                    >
+                      <CardAsset card={card} isHero={true} />
+                      {isSelected && (
+                        <div className="bluff-card-selected-badge">
+                          <Check className="w-3 h-3 text-white stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Action Row */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+          {/* Turn Action Row */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
             {isMyTurn && matchState.passAllowed && (
               <button
                 type="button"
