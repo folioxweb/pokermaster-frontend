@@ -5997,6 +5997,112 @@ button, input, select {
   }
 }
 
+/* Declare Claim Rank Selector Bar */
+.bluff-declare-rank-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  padding: 6px 12px;
+  margin-bottom: 8px;
+}
+
+.bluff-declare-label {
+  font-size: 11px;
+  font-weight: 900;
+  color: #c084fc;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.bluff-declare-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.bluff-declare-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.bluff-declare-pill {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.bluff-declare-pill:hover {
+  border-color: #a855f7;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.bluff-declare-pill.active {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  border-color: #f3e8ff;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.85);
+  transform: scale(1.08);
+}
+
+[data-theme="light"] .bluff-declare-rank-bar,
+.light-theme .bluff-declare-rank-bar {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .bluff-declare-pill,
+.light-theme .bluff-declare-pill {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+[data-theme="light"] .bluff-declare-pill.active,
+.light-theme .bluff-declare-pill.active {
+  background: #9333ea;
+  border-color: #7e22ce;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .bluff-declare-rank-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .bluff-declare-pills {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .bluff-declare-pill {
+    min-width: 25px;
+    height: 25px;
+    font-size: 10px;
+  }
+}
+
+
 
 
 

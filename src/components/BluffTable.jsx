@@ -67,6 +67,7 @@ export const BluffTable = ({
   const [players, setPlayers] = useState([]);
   const [myHand, setMyHand] = useState([]);
   const [selectedCardIndices, setSelectedCardIndices] = useState([]);
+  const [heroClaimRank, setHeroClaimRank] = useState('A');
 
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
@@ -228,11 +229,15 @@ export const BluffTable = ({
     setSelectedCardIndices([]);
     setChallengeResult(null);
 
+    // Pick any random player to start the match!
+    const startingSeat = Math.floor(Math.random() * updatedPlayers.length);
+    const starter = updatedPlayers[startingSeat];
+
     const newMatch = {
       ...matchState,
       handNumber: matchState.handNumber + 1,
       phase: 'playing',
-      currentTurnSeat: 0,
+      currentTurnSeat: startingSeat,
       lastPlaySeat: null,
       lastPlayedCardsCount: 0,
       lastPlayedCards: [],
@@ -243,9 +248,10 @@ export const BluffTable = ({
 
     setMatchState(newMatch);
     setPlayers(updatedPlayers);
-    setAnnouncement(`🃏 Dealt ${deck.length} cards! First turn starts on ACES.`);
+    const msg = `🃏 Dealt ${deck.length} cards! ${starter?.username} leads the round. Play any card & quantity!`;
+    setAnnouncement(msg);
 
-    broadcastState(updatedPlayers, newMatch, 'First turn starts on ACES');
+    broadcastState(updatedPlayers, newMatch, msg);
   };
 
   // Broadcast helper
@@ -268,15 +274,15 @@ export const BluffTable = ({
   };
 
   // Turn Action: Play Cards
-  const handlePlayCards = (cardsToPlay, isHero = true) => {
-    if (cardsToPlay.length === 0 || cardsToPlay.length > 4) {
-      alert('You must select between 1 and 4 cards to play.');
+  const handlePlayCards = (cardsToPlay, isHero = true, claimedRankOverride = null) => {
+    if (cardsToPlay.length === 0) {
+      alert('You must select at least 1 card to play.');
       return;
     }
 
     playCardDeal();
     const activeSeat = matchState.currentTurnSeat;
-    const claimedRank = matchState.currentClaimRank;
+    const claimedRank = claimedRankOverride || (isHero ? heroClaimRank : matchState.currentClaimRank);
 
     // Remove played cards from player's hand
     let updatedPlayers = players.map((p) => {
@@ -322,6 +328,7 @@ export const BluffTable = ({
       lastPlaySeat: activeSeat,
       lastPlayedCardsCount: cardsToPlay.length,
       lastPlayedCards: cardsToPlay,
+      currentClaimRank: claimedRank,
       discardPile: newPile,
       winner: emptiedHand ? activePlayer : null
     };
@@ -360,8 +367,7 @@ export const BluffTable = ({
       return;
     }
 
-    // Advance to next player and next rank in clockwise order
-    const nextRank = getNextClaimRank(activeState.currentClaimRank);
+    // Advance to next player in clockwise order (free to play any card & quantity)
     const totalPlayers = activePlayers.length;
     let nextSeat = (activeState.lastPlaySeat + 1) % totalPlayers;
 
@@ -369,13 +375,12 @@ export const BluffTable = ({
       ...activeState,
       phase: 'playing',
       currentTurnSeat: nextSeat,
-      currentClaimRank: nextRank,
       lastPlayedCards: []
     };
 
     setMatchState(advancedState);
     const nextP = activePlayers.find((p) => p.seat_index === nextSeat);
-    setAnnouncement(`✅ Claim accepted! Turn passes to ${nextP?.username} for ${RANK_NAMES[nextRank] || nextRank}.`);
+    setAnnouncement(`✅ Nobody called bluff! Turn passes to ${nextP?.username}. Play any card & quantity!`);
   };
 
   // Immediate Pass / Accept Challenge
@@ -404,12 +409,12 @@ export const BluffTable = ({
 
   // Auto-Select Cards Matching Current Claim Rank
   const handleAutoSelectCurrentRank = () => {
-    const targetRank = matchState.currentClaimRank;
+    const targetRank = heroClaimRank;
     const matching = [];
     myHand.forEach((c, idx) => {
       const isJoker = c === 'Jr' || c === 'Jb';
       const cRank = c.length === 3 ? '10' : c[0];
-      if ((isJoker || cRank === targetRank) && matching.length < 4) {
+      if (isJoker || cRank === targetRank) {
         matching.push(idx);
       }
     });
@@ -469,9 +474,8 @@ export const BluffTable = ({
       setAnnouncement(`✨ INNOCENT! ${bluffer?.username} told the truth! ${challenger?.username} picks up ${wholePile.length} cards.`);
     }
 
-    // Winner of challenge starts next round
+    // Winner of challenge starts next round with any card and any quantity!
     const nextStarterSeat = isBluff ? challengerSeat : blufferSeat;
-    const nextRank = getNextClaimRank(matchState.currentClaimRank);
 
     setTimeout(() => {
       setChallengeResult(null);
@@ -479,10 +483,11 @@ export const BluffTable = ({
         ...prev,
         phase: 'playing',
         currentTurnSeat: nextStarterSeat,
-        currentClaimRank: nextRank,
         discardPile: [],
         lastPlayedCards: []
       }));
+      const starter = players.find((p) => p.seat_index === nextStarterSeat);
+      setAnnouncement(`✨ ${starter?.username} won the challenge and leads the round with any card!`);
     }, 4500);
   };
 
@@ -493,17 +498,21 @@ export const BluffTable = ({
       const activeP = players.find((p) => p.seat_index === matchState.currentTurnSeat);
       if (activeP && activeP.isBot) {
         const timer = setTimeout(() => {
-          const decision = decideBotPlay(activeP.cards, matchState.currentClaimRank, matchState.passAllowed);
+          const decision = decideBotPlay(
+            activeP.cards,
+            matchState.currentClaimRank,
+            matchState.passAllowed,
+            matchState.discardPile.length
+          );
           if (decision.action === 'pass') {
             const nextSeat = (matchState.currentTurnSeat + 1) % players.length;
             setMatchState((prev) => ({
               ...prev,
-              currentTurnSeat: nextSeat,
-              currentClaimRank: getNextClaimRank(prev.currentClaimRank)
+              currentTurnSeat: nextSeat
             }));
             setAnnouncement(`⏭️ ${activeP.username} passed their turn.`);
           } else {
-            handlePlayCards(decision.cards, false);
+            handlePlayCards(decision.cards, false, decision.claimedRank);
           }
         }, 1600);
         return () => clearTimeout(timer);
@@ -517,6 +526,11 @@ export const BluffTable = ({
       const nextSeat = matchState.lastPlaySeat !== null && totalP > 0
         ? (matchState.lastPlaySeat + 1) % totalP
         : null;
+
+      const lastPlayer = players.find((p) => p.seat_index === matchState.lastPlaySeat);
+      const lastPlayerCardCount = lastPlayer
+        ? (lastPlayer.seat_index === mySeatIndex ? myHand.length : lastPlayer.cardCount)
+        : 10;
 
       // Mode A: NEXT PLAYER ONLY
       if (currentRule === 'next_only') {
@@ -533,7 +547,8 @@ export const BluffTable = ({
             matchState.currentClaimRank,
             matchState.lastPlayedCardsCount,
             matchState.discardPile.length,
-            matchState.deckType
+            matchState.deckType,
+            lastPlayerCardCount
           );
 
           const timer = setTimeout(() => {
@@ -560,7 +575,8 @@ export const BluffTable = ({
           matchState.currentClaimRank,
           matchState.lastPlayedCardsCount,
           matchState.discardPile.length,
-          matchState.deckType
+          matchState.deckType,
+          lastPlayerCardCount
         );
 
         if (wantsToCall) {
@@ -694,11 +710,15 @@ export const BluffTable = ({
                   </span>
                 </div>
 
-                {/* Current Sequential Claim Rank */}
+                {/* Last Play Claim or Free Play Status */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', borderRadius: '9999px', background: 'rgba(15, 23, 42, 0.95)', border: '1.5px solid #a855f7', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#c084fc' }}>CURRENT CLAIM:</span>
-                  <span style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff' }}>
-                    {RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#c084fc' }}>
+                    {matchState.discardPile.length > 0 ? 'LAST CLAIM:' : 'ROUND STATUS:'}
+                  </span>
+                  <span style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff' }}>
+                    {matchState.discardPile.length > 0
+                      ? `${matchState.lastPlayedCardsCount} ${RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}`
+                      : 'FREE PLAY • ANY CARD'}
                   </span>
                 </div>
 
@@ -879,6 +899,29 @@ export const BluffTable = ({
             </div>
           )}
 
+          {/* Declare Claim Rank Selector when it's Hero's turn */}
+          {isMyTurn && (
+            <div className="bluff-declare-rank-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <span className="bluff-declare-label">DECLARE RANK:</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>Tap rank to bluff or match:</span>
+              </div>
+              <div className="bluff-declare-pills">
+                {BLUFF_RANKS.map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setHeroClaimRank(r)}
+                    className={`bluff-declare-pill ${heroClaimRank === r ? 'active' : ''}`}
+                    title={`Declare as ${RANK_NAMES[r] || r}`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Hand Header with Count, Sort, and Auto-Select */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -886,7 +929,7 @@ export const BluffTable = ({
                 YOUR HAND ({myHand.length}):
               </span>
               <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                Discard 1 to 4 cards as <strong>{RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}</strong>
+                Discard any number of cards as <strong>{RANK_NAMES[heroClaimRank] || heroClaimRank}</strong>
               </span>
             </div>
 
@@ -905,12 +948,12 @@ export const BluffTable = ({
                 onClick={handleAutoSelectCurrentRank}
                 className="table-nav-btn"
                 style={{ padding: '3px 8px', fontSize: '10px', height: '24px', borderColor: '#a855f7', color: '#c084fc' }}
-                title={`Auto-select ${matchState.currentClaimRank}s from your hand`}
+                title={`Auto-select ${heroClaimRank}s from your hand`}
               >
-                Pick {matchState.currentClaimRank}
+                Pick {heroClaimRank}
               </button>
               <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24', marginLeft: '4px' }}>
-                {selectedCardIndices.length}/4
+                {selectedCardIndices.length} Selected
               </span>
             </div>
           </div>
@@ -927,8 +970,13 @@ export const BluffTable = ({
                     onClick={() => {
                       if (isSelected) {
                         setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
-                      } else if (selectedCardIndices.length < 4) {
+                      } else {
                         setSelectedCardIndices([...selectedCardIndices, globalIdx]);
+                        // Auto-set declared rank to clicked card
+                        if (card && card !== 'Jr' && card !== 'Jb') {
+                          const r = card.length === 3 ? '10' : card[0];
+                          setHeroClaimRank(r);
+                        }
                       }
                     }}
                     className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
@@ -960,8 +1008,13 @@ export const BluffTable = ({
                       onClick={() => {
                         if (isSelected) {
                           setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
-                        } else if (selectedCardIndices.length < 4) {
+                        } else {
                           setSelectedCardIndices([...selectedCardIndices, globalIdx]);
+                          // Auto-set declared rank to clicked card
+                          if (card && card !== 'Jr' && card !== 'Jb') {
+                            const r = card.length === 3 ? '10' : card[0];
+                            setHeroClaimRank(r);
+                          }
                         }
                       }}
                       className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
@@ -991,8 +1044,7 @@ export const BluffTable = ({
                 onClick={() => {
                   setMatchState((prev) => ({
                     ...prev,
-                    currentTurnSeat: (prev.currentTurnSeat + 1) % players.length,
-                    currentClaimRank: getNextClaimRank(prev.currentClaimRank)
+                    currentTurnSeat: (prev.currentTurnSeat + 1) % players.length
                   }));
                   setAnnouncement('You passed your turn.');
                 }}
@@ -1008,7 +1060,7 @@ export const BluffTable = ({
               disabled={!isMyTurn || selectedCardIndices.length === 0}
               onClick={() => {
                 const cardsToPlay = selectedCardIndices.map((i) => myHand[i]);
-                handlePlayCards(cardsToPlay, true);
+                handlePlayCards(cardsToPlay, true, heroClaimRank);
               }}
               style={{
                 background: !isMyTurn || selectedCardIndices.length === 0 ? '#334155' : 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
@@ -1027,8 +1079,8 @@ export const BluffTable = ({
               <Flame className="w-4 h-4 text-amber-300" />
               <span>
                 {selectedCardIndices.length > 0
-                  ? `PLAY ${selectedCardIndices.length} ${RANK_NAMES[matchState.currentClaimRank] || matchState.currentClaimRank}`
-                  : `SELECT CARDS AS ${matchState.currentClaimRank}`}
+                  ? `PLAY ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`
+                  : `SELECT CARDS TO PLAY`}
               </span>
             </button>
           </div>

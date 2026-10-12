@@ -142,72 +142,129 @@ export function verifyPlay(playedCards = [], claimedRank = 'A') {
 }
 
 /**
- * AI Bot Decision: Decides which cards to play on its turn.
+ * AI Bot Decision: Decides which cards to play and which rank to claim.
+ * Bots bluff randomly but logically!
  * @param {string[]} botHand
- * @param {string} claimedRank
+ * @param {string|null} previousClaimRank
  * @param {boolean} canPass
- * @returns {{ action: 'play' | 'pass', cards: string[] }}
+ * @param {number} pileCount
+ * @returns {{ action: 'play' | 'pass', cards: string[], claimedRank: string }}
  */
-export function decideBotPlay(botHand = [], claimedRank = 'A', canPass = false) {
-  // 1. Check for real matching cards & jokers in hand
-  const matchingCards = [];
+export function decideBotPlay(botHand = [], previousClaimRank = null, canPass = false, pileCount = 0) {
+  if (botHand.length === 0) {
+    return { action: 'pass', cards: [], claimedRank: 'A' };
+  }
+
+  // 1. Group cards by rank and identify Jokers
+  const groups = {};
   const jokers = [];
-  const otherCards = [];
 
   for (const c of botHand) {
-    const isJoker = c === 'Jr' || c === 'Jb';
-    const cRank = c.length === 3 ? '10' : c[0];
-    if (isJoker) jokers.push(c);
-    else if (cRank === claimedRank) matchingCards.push(c);
-    else otherCards.push(c);
+    if (c === 'Jr' || c === 'Jb') {
+      jokers.push(c);
+    } else {
+      const r = c.length === 3 ? '10' : c[0];
+      if (!groups[r]) groups[r] = [];
+      groups[r].push(c);
+    }
   }
 
-  // 2. If bot has real matching cards, 85% probability it tells the truth
-  if (matchingCards.length > 0 && Math.random() < 0.85) {
-    // Play up to 3 or 4 matching cards
-    const playCount = Math.min(matchingCards.length, Math.floor(Math.random() * 2) + 1);
+  const heldRanks = Object.keys(groups);
+
+  // 2. Pass decision (if pile is huge, bot has many cards and wants to avoid danger)
+  if (canPass && pileCount > 8 && Math.random() < 0.25) {
+    return { action: 'pass', cards: [], claimedRank: previousClaimRank || 'A' };
+  }
+
+  // 3. Decide: Honest Play (~65%) vs Bluff (~35%)
+  const shouldBluff = Math.random() < 0.35;
+
+  // --- HONEST PLAY ---
+  if (!shouldBluff && heldRanks.length > 0) {
+    // A. If previous claim rank exists and bot holds matching cards, prefer matching (~60% of honest plays)
+    if (previousClaimRank && groups[previousClaimRank] && Math.random() < 0.6) {
+      const match = groups[previousClaimRank];
+      // Play 1, 2, or all matching cards
+      const count = Math.min(match.length, Math.floor(Math.random() * match.length) + 1);
+      return {
+        action: 'play',
+        cards: match.slice(0, count),
+        claimedRank: previousClaimRank
+      };
+    }
+
+    // B. Pick the rank bot holds the most of (dump largest set)
+    heldRanks.sort((a, b) => groups[b].length - groups[a].length);
+    const bestRank = heldRanks[0];
+    const bestCards = [...groups[bestRank]];
+
+    // If bot has a Joker, sometimes attach it as wildcard
+    if (jokers.length > 0 && Math.random() < 0.4) {
+      bestCards.push(jokers[0]);
+    }
+
+    // Play 1 to all of this rank
+    const count = bestCards.length <= 2 ? bestCards.length : (Math.random() < 0.7 ? bestCards.length : bestCards.length - 1);
+    const chosenCards = bestCards.slice(0, Math.max(1, count));
+
     return {
       action: 'play',
-      cards: matchingCards.slice(0, playCount)
+      cards: chosenCards,
+      claimedRank: bestRank
     };
   }
 
-  // 3. If bot has a Joker and no real matches, 50% chance it uses Joker as wild
-  if (jokers.length > 0 && Math.random() < 0.5) {
-    return {
-      action: 'play',
-      cards: [jokers[0]]
-    };
-  }
+  // --- LOGICAL BLUFF PLAY ---
+  // Identify singleton or weak cards to discard
+  const singletons = heldRanks.filter((r) => groups[r].length === 1).map((r) => groups[r][0]);
+  const junkCards = singletons.length > 0 ? singletons : botHand.filter((c) => c !== 'Jr' && c !== 'Jb');
 
-  // 4. If canPass and bot has high hand count and hates risk, pass 40% of time
-  if (canPass && botHand.length > 6 && Math.random() < 0.4) {
-    return {
-      action: 'pass',
-      cards: []
-    };
-  }
+  // How many cards to bluff? Usually 1 or 2, rarely 3
+  const bluffCount = Math.min(junkCards.length, Math.random() < 0.75 ? (junkCards.length >= 2 && Math.random() < 0.4 ? 2 : 1) : 2);
+  const cardsToPlay = junkCards.slice(0, Math.max(1, bluffCount));
 
-  // 5. Otherwise: BLUFF! Pick 1 to 2 random non-matching cards (lowest value)
-  const bluffCount = Math.min(otherCards.length, Math.random() < 0.75 ? 1 : 2);
-  const cardsToBluff = otherCards.slice(0, Math.max(1, bluffCount));
+  // What rank to claim?
+  // Strategy 1: Semi-bluff! Claim a rank bot actually holds 1 of (making opponents less likely to suspect)
+  let claimedRank = 'A';
+  if (heldRanks.length > 0 && Math.random() < 0.65) {
+    const candidateRanks = heldRanks.filter((r) => !cardsToPlay.some((c) => (c.length === 3 ? '10' : c[0]) === r));
+    if (candidateRanks.length > 0) {
+      claimedRank = candidateRanks[Math.floor(Math.random() * candidateRanks.length)];
+    } else {
+      claimedRank = heldRanks[Math.floor(Math.random() * heldRanks.length)];
+    }
+  } else {
+    // Strategy 2: Pick a common plausible rank (A, K, Q, J, 10, 9, 8)
+    const plausible = ['A', 'K', 'Q', 'J', '10', '9', '8'];
+    claimedRank = plausible[Math.floor(Math.random() * plausible.length)];
+  }
 
   return {
     action: 'play',
-    cards: cardsToBluff
+    cards: cardsToPlay.length > 0 ? cardsToPlay : [botHand[0]],
+    claimedRank
   };
 }
 
 /**
  * AI Bot Decision: Decides whether to challenge ("BLUFF!") the previous player.
+ * Evaluates mathematically and psychologically (risk vs reward).
  * @param {string[]} botHand
  * @param {string} claimedRank
- * @param {number} claimedCount (1 to 4)
+ * @param {number} claimedCount (1 to any number)
  * @param {number} pileCount
  * @param {'single' | 'double'} deckType
+ * @param {number} playerRemainingCards
  * @returns {boolean}
  */
-export function decideBotCallBluff(botHand = [], claimedRank = 'A', claimedCount = 1, pileCount = 1, deckType = 'single') {
+export function decideBotCallBluff(
+  botHand = [],
+  claimedRank = 'A',
+  claimedCount = 1,
+  pileCount = 1,
+  deckType = 'single',
+  playerRemainingCards = 10
+) {
   const maxInDeck = deckType === 'double' ? 8 : 4;
   const maxJokers = deckType === 'double' ? 4 : 2;
 
@@ -218,26 +275,42 @@ export function decideBotCallBluff(botHand = [], claimedRank = 'A', claimedCount
     if (cRank === claimedRank) botCount++;
   }
 
-  // Impossible scenario: Bot + Claim exceeds max possible cards + jokers in deck
+  // 1. Definite Mathematical Impossibility (100% guarantee it's a bluff!)
   if (botCount + claimedCount > maxInDeck + maxJokers) {
-    return true; // 100% guarantee it's a bluff!
-  }
-
-  // High probability of bluff if bot holds 3 or 4 of that rank and player claimed 2 or 3
-  if (botCount >= 3 && claimedCount >= 2) {
-    return Math.random() < 0.9;
-  }
-
-  // If someone claimed 3 or 4 cards of a rank, suspicion is high
-  if (claimedCount >= 3) {
-    return Math.random() < (0.45 + (botCount * 0.15));
-  }
-
-  // If pile is very small (1-3 cards), bot has low risk to challenge
-  if (pileCount <= 3 && Math.random() < 0.25) {
     return true;
   }
 
-  // Default modest suspicion
-  return Math.random() < (0.12 + (botCount * 0.1));
+  // 2. High Evidence: Bot holds 3+ of the rank and player claimed 2+
+  if (botCount >= 3 && claimedCount >= 2) {
+    return Math.random() < 0.92;
+  }
+
+  // 3. Bot holds 2+ of the rank and player claimed 3+
+  if (botCount >= 2 && claimedCount >= 3) {
+    return Math.random() < 0.88;
+  }
+
+  // 4. Endgame: Player who just played has 0 or 1 card left (trying to empty hand and win!)
+  if (playerRemainingCards <= 1) {
+    return Math.random() < (0.65 + botCount * 0.15);
+  }
+
+  // 5. High Claim Count: Claiming 3 or 4 of any rank is inherently suspicious
+  if (claimedCount >= 3) {
+    return Math.random() < (0.40 + botCount * 0.18);
+  }
+
+  // 6. Pile Risk Management:
+  // Low pile (<= 3 cards): Low penalty for being wrong, so bolder challenges
+  if (pileCount <= 3 && Math.random() < 0.28) {
+    return true;
+  }
+
+  // High pile (> 10 cards): High penalty for being wrong, only challenge if bot holds at least 1 or 2
+  if (pileCount > 10) {
+    return botCount >= 2 && Math.random() < 0.7;
+  }
+
+  // 7. Baseline Random Suspicion (personality factor)
+  return Math.random() < (0.12 + botCount * 0.12);
 }
