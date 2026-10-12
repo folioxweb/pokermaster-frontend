@@ -21,7 +21,8 @@ import {
   Sparkles,
   Share2,
   Link,
-  ChevronDown
+  ChevronDown,
+  Mail
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -109,7 +110,17 @@ export const BluffTable = ({
   const matchStateRef = useRef(matchState);
   const myHandRef = useRef(myHand);
 
-  const isCreator = (gameRoom?.host_username || gameRoom?.hostUsername) === user?.username || Boolean(gameRoom?.isHost);
+  const isCreator = (gameRoom?.host_username || gameRoom?.hostUsername) === user?.username || Boolean(gameRoom?.isHost) || Boolean(gameRoom?.isPractice) || !gameRoom?.host_username;
+  const isCreatorRef = useRef(isCreator);
+  const mySeatIndexRef = useRef(mySeatIndex);
+
+  useEffect(() => {
+    isCreatorRef.current = isCreator;
+  }, [isCreator]);
+
+  useEffect(() => {
+    mySeatIndexRef.current = mySeatIndex;
+  }, [mySeatIndex]);
 
   useEffect(() => {
     playersRef.current = players;
@@ -153,12 +164,12 @@ export const BluffTable = ({
       if (isMounted) {
         setMySeatIndex(0);
         setPlayers(initial);
-        setAnnouncement(`Practice Mode (${totalMax} Players) • Click START MATCH to deal`);
+        setAnnouncement(`Practice Mode (${totalMax} Players) • Ready to deal cards`);
       }
       return;
     }
 
-    // Multiplayer room setup
+    // Multiplayer room setup with Supabase Realtime Broadcast
     const initMultiplayer = async () => {
       let initial = [
         {
@@ -183,6 +194,102 @@ export const BluffTable = ({
       });
 
       channel
+        .on('broadcast', { event: 'BLUFF_PLAYER_JOINED' }, ({ payload }) => {
+          if (!payload || payload.username === user?.username) return;
+          setPlayers((prev) => {
+            if (prev.some((p) => p.username === payload.username)) return prev;
+            const openSeats = prev.map((p) => p.seat_index);
+            let targetSeat = payload.seat_index ?? 1;
+            while (openSeats.includes(targetSeat) && targetSeat < 8) {
+              targetSeat++;
+            }
+            const newP = {
+              seat_index: targetSeat,
+              user_id: payload.user_id,
+              username: payload.username,
+              cardCount: 0,
+              cards: [],
+              status: 'active',
+              isBot: false
+            };
+            const updated = [...prev, newP];
+
+            // Host responds by syncing full roster and table settings to everyone
+            if (isCreatorRef.current && channelRef.current) {
+              channelRef.current.send({
+                type: 'broadcast',
+                event: 'BLUFF_ROSTER_SYNC',
+                payload: {
+                  players: updated.map((p) => ({ ...p, cards: [] })),
+                  matchState: matchStateRef.current
+                }
+              });
+            }
+            return updated;
+          });
+          setAnnouncement(`👋 ${payload.username} joined the table!`);
+        })
+        .on('broadcast', { event: 'BLUFF_ROSTER_SYNC' }, ({ payload }) => {
+          if (!payload) return;
+          if (payload.players) {
+            setPlayers((prev) => {
+              const myEntry = payload.players.find((p) => p.username === user?.username);
+              if (myEntry) setMySeatIndex(myEntry.seat_index);
+              return payload.players.map((p) => ({
+                ...p,
+                cards: p.seat_index === (myEntry?.seat_index ?? mySeatIndexRef.current) ? myHandRef.current : (p.isBot ? (p.cards || []) : [])
+              }));
+            });
+          }
+          if (payload.matchState) {
+            setMatchState((prev) => ({
+              ...prev,
+              deckType: payload.matchState.deckType ?? prev.deckType,
+              challengeRule: payload.matchState.challengeRule ?? prev.challengeRule,
+              challengeTime: payload.matchState.challengeTime ?? prev.challengeTime
+            }));
+          }
+        })
+        .on('broadcast', { event: 'BLUFF_BOT_ADDED' }, ({ payload }) => {
+          if (!payload?.botPlayer) return;
+          setPlayers((prev) => {
+            if (prev.some((p) => p.seat_index === payload.botPlayer.seat_index)) return prev;
+            return [...prev, payload.botPlayer];
+          });
+          setAnnouncement(`🤖 Added ${payload.botPlayer.username} to Seat ${payload.botPlayer.seat_index + 1}`);
+        })
+        .on('broadcast', { event: 'BLUFF_PLAYER_REMOVED' }, ({ payload }) => {
+          if (!payload) return;
+          if (payload.username === user?.username) {
+            alert('You were removed from the table by the host.');
+            onLeaveTable();
+            return;
+          }
+          setPlayers((prev) => prev.filter((p) => p.seat_index !== payload.seat_index));
+          setAnnouncement(`${payload.username} left the table.`);
+        })
+        .on('broadcast', { event: 'BLUFF_SETTINGS_SYNC' }, ({ payload }) => {
+          if (!payload?.settings) return;
+          setMatchState((prev) => ({ ...prev, ...payload.settings }));
+          setAnnouncement('⚙️ Table settings updated.');
+        })
+        .on('broadcast', { event: 'BLUFF_MATCH_STARTED' }, ({ payload }) => {
+          if (!payload) return;
+          playCardDeal();
+          const myCards = payload.seatCards?.[mySeatIndexRef.current] || [];
+          setMyHand(myCards);
+          setSelectedCardIndices([]);
+          setChallengeResult(null);
+
+          const synchedPlayers = payload.players.map((p) => ({
+            ...p,
+            cards: p.seat_index === mySeatIndexRef.current ? myCards : (p.isBot ? (payload.seatCards?.[p.seat_index] || []) : [])
+          }));
+
+          setPlayers(synchedPlayers);
+          setMatchState(payload.matchState);
+          if (payload.announcement) setAnnouncement(payload.announcement);
+        })
         .on('broadcast', { event: 'BLUFF_STATE_SYNC' }, ({ payload }) => {
           if (!payload) return;
           if (payload.matchState) setMatchState(payload.matchState);
@@ -191,7 +298,7 @@ export const BluffTable = ({
             setPlayers((prev) =>
               payload.players.map((p) => ({
                 ...p,
-                cards: p.seat_index === mySeatIndex ? myHandRef.current : []
+                cards: p.seat_index === mySeatIndexRef.current ? myHandRef.current : (p.isBot ? (p.cards || []) : [])
               }))
             );
           }
@@ -202,7 +309,20 @@ export const BluffTable = ({
           setAnnouncement(`🚨 ${payload.challenger} CALLED BLUFF on ${payload.target}!`);
         });
 
-      channel.subscribe();
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'BLUFF_PLAYER_JOINED',
+            payload: {
+              username: user?.username || 'Hero',
+              user_id: user?.id,
+              seat_index: 0
+            }
+          });
+        }
+      });
+
       channelRef.current = channel;
     };
 
@@ -214,12 +334,100 @@ export const BluffTable = ({
     };
   }, [gameRoom, user]);
 
-  // Deal New Bluff Hand
+  // Add Practice Bot into Table
+  const handleAddBot = () => {
+    const totalMax = Math.max(2, Math.min(8, gameRoom?.maxPlayers || 6));
+    if (players.length >= totalMax) {
+      alert('Table is full!');
+      return;
+    }
+
+    const occupied = players.map((p) => p.seat_index);
+    let openSeat = 1;
+    while (occupied.includes(openSeat) && openSeat < totalMax) {
+      openSeat++;
+    }
+
+    const botName = BOT_NAMES[(openSeat - 1) % BOT_NAMES.length];
+    const newBot = {
+      seat_index: openSeat,
+      username: botName,
+      cardCount: 0,
+      cards: [],
+      status: 'active',
+      isBot: true
+    };
+
+    const updated = [...players, newBot];
+    setPlayers(updated);
+    setAnnouncement(`🤖 Added ${botName} to Seat ${openSeat + 1}`);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_BOT_ADDED',
+        payload: { botPlayer: newBot }
+      });
+    }
+  };
+
+  // Remove Player or Bot from Table (Host only)
+  const handleRemovePlayer = (pToRemove) => {
+    const updated = players.filter((p) => p.seat_index !== pToRemove.seat_index);
+    setPlayers(updated);
+    setAnnouncement(`Removed ${pToRemove.username} from table`);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_PLAYER_REMOVED',
+        payload: { username: pToRemove.username, seat_index: pToRemove.seat_index }
+      });
+    }
+  };
+
+  // Live Sync Settings (Host & Waiting Lobby)
+  const handleUpdateSetting = (newSettings) => {
+    const updated = { ...matchState, ...newSettings };
+    setMatchState(updated);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_SETTINGS_SYNC',
+        payload: { settings: newSettings }
+      });
+    }
+  };
+
+  // Copy / Share Direct Invite Link
+  const handleShareInviteLink = () => {
+    const roomCode = gameRoom?.roomCode || 'BL-SOLO';
+    const url = `${window.location.origin}/?room=${roomCode}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setInviteLinkCopied(true);
+      setAnnouncement('📋 Invite link copied to clipboard! Share with friends to join.');
+      setTimeout(() => setInviteLinkCopied(false), 2500);
+    }
+  };
+
+  // Deal New Bluff Hand & Start Match
   const startNewBluffMatch = () => {
+    if (players.length < 2) {
+      alert('Need at least 2 players to start a Bluff match! Add a practice bot or invite friends.');
+      return;
+    }
+
     playCardDeal();
     const currentList = [...playersRef.current];
     const deck = createBluffDeck(matchState.deckType);
     const hands = dealBluffCards(deck, currentList.length);
+
+    const seatCards = {};
+    currentList.forEach((p, idx) => {
+      seatCards[p.seat_index] = hands[idx];
+    });
 
     const updatedPlayers = currentList.map((p, idx) => ({
       ...p,
@@ -258,7 +466,18 @@ export const BluffTable = ({
     const msg = `🃏 Dealt ${deck.length} cards! ${starter?.username} gets the chance to start! Lead with any rank & cards.`;
     setAnnouncement(msg);
 
-    broadcastState(updatedPlayers, newMatch, msg);
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_MATCH_STARTED',
+        payload: {
+          players: updatedPlayers.map((p) => ({ ...p, cards: [] })),
+          seatCards,
+          matchState: newMatch,
+          announcement: msg
+        }
+      });
+    }
   };
 
   // Broadcast helper
@@ -720,7 +939,7 @@ export const BluffTable = ({
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '18px' }}>🎭</span>
-            <h2 className="table-room-title">{gameRoom?.roomName || 'Bluff Master Table'}</h2>
+            <h2 className="table-room-title">{gameRoom?.roomName || 'Taash Royale • Bluff Arena'}</h2>
             <span className="table-code-badge">{gameRoom?.roomCode || 'BL-SOLO'}</span>
           </div>
         </div>
@@ -733,6 +952,29 @@ export const BluffTable = ({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Settings & Waiting Lobby Toggle Button */}
+          {matchState.handNumber === 0 && matchState.phase === 'waiting' && (
+            <button
+              type="button"
+              onClick={() => setIsWaitingLobbyMinimized((prev) => !prev)}
+              className="table-nav-btn"
+              style={{
+                background: isWaitingLobbyMinimized ? 'rgba(168, 85, 247, 0.2)' : 'rgba(168, 85, 247, 0.45)',
+                borderColor: '#a855f7',
+                color: '#ffffff',
+                fontWeight: 800,
+                fontSize: '11px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+              title="Toggle Waiting Lobby Settings"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>{isWaitingLobbyMinimized ? 'Settings & Lobby' : 'Hide Lobby'}</span>
+            </button>
+          )}
+
           {/* Challenge Mode Toggle Button */}
           <button
             type="button"
@@ -904,6 +1146,286 @@ export const BluffTable = ({
         </div>
       </main>
 
+      {/* FLOATING RE-OPEN BUTTON FOR MINIMIZED WAITING LOBBY */}
+      {matchState.handNumber === 0 && matchState.phase === 'waiting' && isWaitingLobbyMinimized && (
+        <button
+          type="button"
+          onClick={() => setIsWaitingLobbyMinimized(false)}
+          className="waiting-minimized-floating-btn"
+          title="Open Waiting Lobby Settings"
+        >
+          <Settings className="w-4 h-4 text-emerald-400" />
+          <span>Waiting Lobby Settings ({players.length}/{gameRoom?.maxPlayers || 6})</span>
+        </button>
+      )}
+
+      {/* WAITING LOBBY MODAL (Hand 0 / Pre-match stage) */}
+      {matchState.handNumber === 0 && matchState.phase === 'waiting' && !isWaitingLobbyMinimized && (
+        <div className="waiting-lobby-overlay">
+          <div className="waiting-lobby-card">
+            <div className="waiting-lobby-header">
+              <div className="waiting-lobby-header-left">
+                <div className="waiting-lobby-badge-row">
+                  <span className="waiting-lobby-badge" style={{ background: '#7c3aed', color: '#ffffff' }}>BLUFF LOBBY</span>
+                  <span className="waiting-lobby-badge-status">
+                    {players.length >= 2 ? '🟢 Ready to Deal' : '🟡 Gathering Players'}
+                  </span>
+                </div>
+                <h2 className="waiting-lobby-title">{gameRoom?.roomName || gameRoom?.name || 'Taash Royale • Bluff Master'}</h2>
+                <div className="waiting-lobby-meta">
+                  <div className="waiting-lobby-code-box">
+                    <span className="waiting-lobby-meta-lbl">Room Code:</span>
+                    <span className="waiting-lobby-code-val">{gameRoom?.roomCode || '---'}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(gameRoom?.roomCode || '');
+                        setAnnouncement('Room code copied to clipboard!');
+                      }}
+                      className="waiting-lobby-copy-btn"
+                      title="Copy Room Code"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleShareInviteLink}
+                      className="waiting-lobby-copy-btn waiting-lobby-link-icon-btn"
+                      title="Copy / Share Invite Link"
+                    >
+                      {inviteLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Link className="w-3.5 h-3.5 text-sky-400" />}
+                    </button>
+                  </div>
+                  {gameRoom?.host_username && (
+                    <div className="waiting-lobby-host-box">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Host: <strong>{gameRoom.host_username}</strong></span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsWaitingLobbyMinimized(true)}
+                className="waiting-lobby-minimize-btn"
+                title="Minimize lobby to view table felt"
+              >
+                <span>View Table Felt</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="waiting-lobby-body">
+              {/* Seated Players Roster */}
+              <div className="waiting-lobby-section">
+                <div className="waiting-lobby-section-head">
+                  <div className="waiting-lobby-section-title">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <span>Seated Players ({players.length} / {gameRoom?.maxPlayers || 6})</span>
+                  </div>
+
+                  <div className="waiting-lobby-actions-group">
+                    <button
+                      type="button"
+                      onClick={handleShareInviteLink}
+                      className="waiting-lobby-link-btn"
+                      title="Invite anyone via direct link"
+                    >
+                      {inviteLinkCopied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Link Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Invite Link</span>
+                        </>
+                      )}
+                    </button>
+
+                    {onOpenSocial && (
+                      <button
+                        type="button"
+                        onClick={onOpenSocial}
+                        className="waiting-lobby-invite-btn"
+                        title="Invite online friends"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Invite Friends</span>
+                      </button>
+                    )}
+
+                    {players.length < (gameRoom?.maxPlayers || 6) && (
+                      <button
+                        type="button"
+                        onClick={handleAddBot}
+                        className="waiting-lobby-addbot-btn"
+                        title="Add a practice bot"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>+ Add Practice Bot</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="waiting-lobby-roster-grid">
+                  {players.map((p) => {
+                    const isHero = p.seat_index === mySeatIndex;
+                    return (
+                      <div
+                        key={p.seat_index}
+                        className={`waiting-roster-chip ${isHero ? 'is-hero' : ''} ${p.isBot ? 'is-bot' : ''} ${isCreator && !isHero ? 'has-kick' : ''}`}
+                      >
+                        <div className="waiting-roster-avatar" style={{ background: p.isBot ? '#334155' : 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+                          {p.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="waiting-roster-info">
+                          <div className="waiting-roster-name-row">
+                            <span className="waiting-roster-name">{p.username}</span>
+                            {isHero && <span className="waiting-you-badge">YOU</span>}
+                            {p.isBot && <span className="waiting-bot-tag">BOT</span>}
+                          </div>
+                          <span className="waiting-roster-stack">
+                            Seat {p.seat_index + 1}
+                          </span>
+                        </div>
+
+                        {isCreator && !isHero && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePlayer(p);
+                            }}
+                            className="waiting-roster-kick-btn"
+                            title={`Remove ${p.username} from table`}
+                            aria-label={`Remove ${p.username}`}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Table Settings (Live synced) */}
+              <div className="waiting-lobby-section">
+                <div className="waiting-lobby-section-head">
+                  <div className="waiting-lobby-section-title">
+                    <Settings className="w-4 h-4 text-emerald-400" />
+                    <span>Bluff Rules & Settings</span>
+                  </div>
+                  <span className="waiting-sync-indicator">⚡ Live synced to all players</span>
+                </div>
+
+                <div className="waiting-lobby-settings-grid">
+                  {/* Deck Type */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <Layers className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Deck Type</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { type: 'single', label: 'Single Deck (54 Cards + 2 Jokers)' },
+                        { type: 'double', label: 'Double Deck (108 Cards + 4 Jokers)' }
+                      ].map((d) => (
+                        <button
+                          key={d.type}
+                          type="button"
+                          onClick={() => handleUpdateSetting({ deckType: d.type })}
+                          className={`waiting-pill-btn ${matchState.deckType === d.type ? 'active' : ''}`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Challenge Rule */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Challenge Rule</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { rule: 'anyone', label: '⚡ Anyone Can Call' },
+                        { rule: 'next_only', label: '👉 Only Next Player' }
+                      ].map((r) => (
+                        <button
+                          key={r.rule}
+                          type="button"
+                          onClick={() => handleUpdateSetting({ challengeRule: r.rule })}
+                          className={`waiting-pill-btn ${matchState.challengeRule === r.rule ? 'active' : ''}`}
+                        >
+                          {r.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reaction Window */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Reaction Timer</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { sec: 0, label: '∞ No Limit' },
+                        { sec: 5, label: '5s Blitz' },
+                        { sec: 8, label: '8s Normal' },
+                        { sec: 15, label: '15s Relaxed' }
+                      ].map((t) => (
+                        <button
+                          key={t.sec}
+                          type="button"
+                          onClick={() => handleUpdateSetting({ challengeTime: t.sec })}
+                          className={`waiting-pill-btn ${matchState.challengeTime === t.sec ? 'active' : ''}`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="waiting-lobby-footer">
+              <div className="waiting-lobby-status-note">
+                {players.length < 2 ? (
+                  <span className="text-amber-400 font-semibold">
+                    ⚠️ Waiting for at least 2 players to start the match (click "+ Add Practice Bot" if solo)
+                  </span>
+                ) : (
+                  <span className="text-emerald-400 font-semibold">
+                    ✨ {players.length} players ready. Anyone can launch the match!
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={startNewBluffMatch}
+                disabled={players.length < 2}
+                className="waiting-lobby-start-btn"
+                style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)', borderColor: '#c084fc' }}
+              >
+                <Play className="w-4 h-4 fill-white" />
+                <span>START MATCH & DEAL CARDS</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CHALLENGE SHOWDOWN REVEAL MODAL */}
       {challengeResult && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
@@ -1011,7 +1533,7 @@ export const BluffTable = ({
                   className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
                   style={{
                     marginLeft: cardMargin,
-                    zIndex: isSelected ? 120 + i : 10 + i
+                    zIndex: 10 + i
                   }}
                 >
                   <CardAsset card={card} isHero={true} />
@@ -1048,7 +1570,7 @@ export const BluffTable = ({
                     className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
                     style={{
                       marginLeft: i === 0 ? '0px' : '-32px',
-                      zIndex: isSelected ? 120 + i : 10 + i
+                      zIndex: 10 + i
                     }}
                   >
                     <CardAsset card={card} isHero={true} />

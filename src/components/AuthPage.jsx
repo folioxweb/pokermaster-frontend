@@ -183,11 +183,11 @@ export const AuthPage = ({ onAuthSuccess, theme = 'dark', onToggleTheme = null }
         <div className="auth-header">
           <div className="auth-badge">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>High Stakes Texas Hold'em</span>
+            <span>Classic Card & Board Games Arena</span>
           </div>
-          <h1 className="auth-title">POKERMASTER</h1>
+          <h1 className="auth-title">TAASH ROYALE</h1>
           <p className="auth-subtitle">
-            Server-Authoritative Ring Game • 3 to 8 Players
+            Live Multiplayer Bluff Master & Texas Hold'em
           </p>
         </div>
 

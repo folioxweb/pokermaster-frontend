@@ -419,10 +419,12 @@ export const LobbyPage = ({
       {/* Top Header */}
       <header className="lobby-nav">
         <div className="lobby-brand">
-          <div className="lobby-brand-logo">♠</div>
+          <div className="lobby-brand-logo" style={{ background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)', boxShadow: '0 0 14px rgba(217, 119, 6, 0.45)' }}>
+            👑
+          </div>
           <div>
-            <h1 className="lobby-brand-name">POKERMASTER</h1>
-            <span className="lobby-brand-sub">Ring Games (3–8 Players)</span>
+            <h1 className="lobby-brand-name" style={{ letterSpacing: '0.04em' }}>TAASH ROYALE</h1>
+            <span className="lobby-brand-sub">Classic Board & Card Games • Bluff & Poker</span>
           </div>
         </div>
 

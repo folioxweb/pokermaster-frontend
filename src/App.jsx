@@ -131,8 +131,8 @@ export default function App() {
       <div className="flex items-center justify-center w-screen h-screen bg-slate-950 text-white font-sans">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            Loading PokerMaster...
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
+            Loading Taash Royale...
           </span>
         </div>
       </div>

@@ -79,7 +79,7 @@ export const SocialModal = ({
               <Users className="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <h2 className="social-modal-title">PokerMaster Social</h2>
+              <h2 className="social-modal-title">Taash Royale Social</h2>
               <p className="social-modal-sub">
                 {activeGameRoom
                   ? `Table: ${activeGameRoom.roomName || activeGameRoom.roomCode}`
