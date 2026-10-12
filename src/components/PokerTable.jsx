@@ -11,7 +11,14 @@ import {
   RefreshCw,
   Users,
   Sun,
-  Moon
+  Moon,
+  Trophy,
+  Crown,
+  Settings,
+  Eye,
+  Clock,
+  Coins,
+  ChevronDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -82,10 +89,23 @@ export const PokerTable = ({
   const [winningCards, setWinningCards] = useState([]);
   const [announcement, setAnnouncement] = useState('Waiting for host to start hand');
 
-  // Animation & Interaction states
   const [flyingChips, setFlyingChips] = useState([]);
   const [isPotPulsing, setIsPotPulsing] = useState(false);
   const [heroShowCardsClicked, setHeroShowCardsClicked] = useState(false);
+
+  // Match Over / Tournament Champion & Auto-Redirect State
+  const [matchChampion, setMatchChampion] = useState(null);
+  const [lobbyRedirectCountdown, setLobbyRedirectCountdown] = useState(null);
+
+  // Waiting Room Settings (Editable by ANY player before match begins)
+  const [tableSettings, setTableSettings] = useState({
+    smallBlind: gameRoom?.smallBlind || 10,
+    bigBlind: gameRoom?.bigBlind || 20,
+    startingStack: gameRoom?.startingStack || 1500,
+    turnTime: gameRoom?.turnTime || 120,
+    blindsFrequency: gameRoom?.blindsFrequency || 'fast_5'
+  });
+  const [isWaitingLobbyMinimized, setIsWaitingLobbyMinimized] = useState(false);
 
   const channelRef = useRef(null);
   const turnTimerRef = useRef(null);
@@ -129,6 +149,19 @@ export const PokerTable = ({
   useEffect(() => {
     announcementRef.current = announcement;
   }, [announcement]);
+
+  // Automatic lobby redirect effect on match completion
+  useEffect(() => {
+    if (lobbyRedirectCountdown === null) return;
+    if (lobbyRedirectCountdown <= 0) {
+      onLeaveTable();
+      return;
+    }
+    const timer = setTimeout(() => {
+      setLobbyRedirectCountdown((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [lobbyRedirectCountdown, onLeaveTable]);
 
   // Initialize Seated Players & Supabase Realtime Channel
   useEffect(() => {
@@ -457,6 +490,20 @@ export const PokerTable = ({
             )
           );
           setAnnouncement(`👁️ ${payload.username} revealed their cards!`);
+        })
+        .on('broadcast', { event: 'MATCH_OVER' }, ({ payload }) => {
+          if (!payload?.winner) return;
+          setMatchChampion(payload.winner);
+          setAnnouncement(`🏆 MATCH OVER! ${payload.winner.username} is the CHAMPION!`);
+          playWinCelebration();
+          confetti({ particleCount: 220, spread: 110, origin: { y: 0.5 } });
+          setLobbyRedirectCountdown(5);
+        })
+        .on('broadcast', { event: 'TABLE_SETTINGS_SYNC' }, ({ payload }) => {
+          if (payload?.settings) {
+            setTableSettings(payload.settings);
+            setAnnouncement(`⚙️ ${payload.updatedBy || 'Player'} updated table settings`);
+          }
         });
 
       if (rid) {
@@ -787,6 +834,65 @@ export const PokerTable = ({
     }
   };
 
+  // Handle any player updating settings in the Waiting Lobby
+  const handleUpdateSetting = (key, value) => {
+    const updated = { ...tableSettings, [key]: value };
+    setTableSettings(updated);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'TABLE_SETTINGS_SYNC',
+        payload: {
+          settings: updated,
+          updatedBy: user.username
+        }
+      });
+    }
+
+    if (activeRoomIdRef.current) {
+      const dbPayload = {};
+      if (key === 'smallBlind') dbPayload.small_blind = value;
+      if (key === 'bigBlind') dbPayload.big_blind = value;
+      if (key === 'startingStack') dbPayload.starting_stack = value;
+      if (key === 'turnTime') dbPayload.turn_time_seconds = value;
+      supabase
+        .from('poker_rooms')
+        .update(dbPayload)
+        .eq('id', activeRoomIdRef.current)
+        .then(() => {});
+    }
+  };
+
+  // Handle Match Over / Tournament Victory
+  const handleMatchOver = (champion) => {
+    setMatchChampion(champion);
+    setAnnouncement(`🏆 MATCH OVER! ${champion.username} is the CHAMPION!`);
+
+    playWinCelebration();
+    confetti({ particleCount: 220, spread: 110, origin: { y: 0.5 } });
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'MATCH_OVER',
+        payload: {
+          winner: champion
+        }
+      });
+    }
+
+    if (activeRoomIdRef.current) {
+      supabase
+        .from('poker_rooms')
+        .update({ status: 'completed' })
+        .eq('id', activeRoomIdRef.current)
+        .then(() => {});
+    }
+
+    setLobbyRedirectCountdown(5);
+  };
+
   // Helper: Deck generator
   const generateDeck = () => {
     const suits = ['s', 'h', 'd', 'c'];
@@ -849,12 +955,13 @@ export const PokerTable = ({
 
     setHeroShowCardsClicked(false);
 
+    const isFirstHand = (handStateRef.current.handNumber || 0) === 0;
     const newHandNum = (handStateRef.current.handNumber || 0) + 1;
-    let sbAmount = gameRoom?.smallBlind || 10;
-    let bbAmount = gameRoom?.bigBlind || 20;
+    let sbAmount = tableSettings.smallBlind || gameRoom?.smallBlind || 10;
+    let bbAmount = tableSettings.bigBlind || gameRoom?.bigBlind || 20;
 
     // Apply blinds escalation frequency from custom options
-    const freq = gameRoom?.blindsFrequency || 'fast_5';
+    const freq = tableSettings.blindsFrequency || gameRoom?.blindsFrequency || 'fast_5';
     let multiplier = 1;
     if (freq === 'hyper_2' && newHandNum > 1) {
       multiplier = Math.pow(2, Math.floor((newHandNum - 1) / 2));
@@ -870,8 +977,9 @@ export const PokerTable = ({
 
     const updatedPlayers = [];
     for (const p of currentPlayers) {
-      if (p.chips <= 0) {
-        updatedPlayers.push({ ...p, status: 'sitting_out', cards: [], sealedCards: null });
+      const baseChips = isFirstHand ? (tableSettings.startingStack || p.chips || 1500) : p.chips;
+      if (baseChips <= 0) {
+        updatedPlayers.push({ ...p, chips: 0, status: 'sitting_out', cards: [], sealedCards: null });
         continue;
       }
 
@@ -886,10 +994,10 @@ export const PokerTable = ({
       let lastAction = null;
 
       if (p.seat_index === sbSeat) {
-        bet = Math.min(p.chips, sbAmount);
+        bet = Math.min(baseChips, sbAmount);
         lastAction = 'small_blind';
       } else if (p.seat_index === bbSeat) {
-        bet = Math.min(p.chips, bbAmount);
+        bet = Math.min(baseChips, bbAmount);
         lastAction = 'big_blind';
       }
 
@@ -910,10 +1018,10 @@ export const PokerTable = ({
 
       updatedPlayers.push({
         ...p,
-        chips: p.chips - bet,
+        chips: baseChips - bet,
         current_round_bet: bet,
         total_hand_bet: bet,
-        status: p.chips - bet === 0 ? 'all_in' : 'active',
+        status: baseChips - bet === 0 ? 'all_in' : 'active',
         last_action: lastAction,
         cards: pCards,
         sealedCards: pSealed,
@@ -1177,6 +1285,33 @@ export const PokerTable = ({
       return;
     }
 
+    // UNCALLED BET REFUND CALCULATION
+    // If one contender bet more than the next highest contender (e.g. 1000 pts vs 50 pts all-in),
+    // refund the uncalled excess (950 pts) immediately back to the higher bettor!
+    let effectivePot = totalPot;
+    let adjustedPlayers = [...playersList];
+    if (contenders.length >= 2) {
+      const sortedByBets = [...contenders].sort((a, b) => (b.total_hand_bet || 0) - (a.total_hand_bet || 0));
+      const highestBet = sortedByBets[0].total_hand_bet || 0;
+      const secondHighestBet = sortedByBets[1].total_hand_bet || 0;
+      const uncalledExcess = Math.max(0, highestBet - secondHighestBet);
+
+      if (uncalledExcess > 0) {
+        const excessSeat = sortedByBets[0].seat_index;
+        adjustedPlayers = adjustedPlayers.map((p) => {
+          if (p.seat_index === excessSeat) {
+            return {
+              ...p,
+              chips: p.chips + uncalledExcess,
+              total_hand_bet: Math.max(0, p.total_hand_bet - uncalledExcess)
+            };
+          }
+          return p;
+        });
+        effectivePot = Math.max(0, effectivePot - uncalledExcess);
+      }
+    }
+
     // Evaluate hands using dealer's private secret storage
     const evaluations = contenders.map((player) => {
       const secretCards = dealerSecretCardsRef.current[player.seat_index] || player.cards || [];
@@ -1196,11 +1331,11 @@ export const PokerTable = ({
       (e) => compareScores(e.evaluation?.score || [0], bestScore) === 0
     );
 
-    const splitShare = Math.floor(totalPot / winnersList.length);
-    const remainder = totalPot % winnersList.length;
+    const splitShare = Math.floor(effectivePot / winnersList.length);
+    const remainder = effectivePot % winnersList.length;
 
     // Reveal hole cards for contenders at showdown ONLY
-    const revealedPlayers = playersList.map((p) => {
+    const revealedPlayers = adjustedPlayers.map((p) => {
       const isContender = contenders.some((c) => c.seat_index === p.seat_index);
       const winnerIndex = winnersList.findIndex((w) => w.player.seat_index === p.seat_index);
       const secretCards = dealerSecretCardsRef.current[p.seat_index] || p.cards || [];
@@ -1223,7 +1358,7 @@ export const PokerTable = ({
       winAnnouncement = `🤝 Split Pot! ${names} each win ${formatPoints(splitShare)} with ${bestEval.name}!`;
     } else {
       const singleWinner = winnersList[0].player;
-      winAnnouncement = `🏆 ${singleWinner.username} Wins ${formatPoints(totalPot)} with ${bestEval.name}!`;
+      winAnnouncement = `🏆 ${singleWinner.username} Wins ${formatPoints(effectivePot)} with ${bestEval.name}!`;
     }
 
     playWinCelebration();
@@ -1235,7 +1370,7 @@ export const PokerTable = ({
       phase: 'showdown',
       communityCards,
       deck: [],
-      mainPot: totalPot,
+      mainPot: effectivePot,
       winners: winnersList.map((w, idx) => ({
         seat_index: w.player.seat_index,
         amount: splitShare + (idx === 0 ? remainder : 0),
@@ -1244,6 +1379,15 @@ export const PokerTable = ({
     };
 
     broadcastTableState(revealedPlayers, nextHandState, winAnnouncement, winCards, actorInfo);
+
+    // TOURNAMENT / MATCH OVER CHECK
+    // If only 1 player has chips remaining, match is completely over!
+    const activeContendersWithChips = revealedPlayers.filter((p) => p.chips > 0);
+    if (activeContendersWithChips.length === 1 && revealedPlayers.length >= 2) {
+      setTimeout(() => {
+        handleMatchOver(activeContendersWithChips[0]);
+      }, 1500);
+    }
   };
 
   const resolveUncontestedWinner = (winner, totalPot, playersList, actorInfo) => {
@@ -1279,6 +1423,15 @@ export const PokerTable = ({
     };
 
     broadcastTableState(updated, nextHandState, winAnnouncement, [], actorInfo);
+
+    // TOURNAMENT / MATCH OVER CHECK
+    // If only 1 player has chips remaining, match is completely over!
+    const activeContendersWithChips = updated.filter((p) => p.chips > 0);
+    if (activeContendersWithChips.length === 1 && updated.length >= 2) {
+      setTimeout(() => {
+        handleMatchOver(activeContendersWithChips[0]);
+      }, 1500);
+    }
   };
 
   const executeBotTurn = (bot) => {
@@ -1577,6 +1730,24 @@ export const PokerTable = ({
                 </button>
               )}
 
+              {handState.handNumber === 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsWaitingLobbyMinimized((prev) => !prev)}
+                  className="table-nav-btn"
+                  style={{
+                    background: isWaitingLobbyMinimized ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.4)',
+                    borderColor: '#818cf8',
+                    color: '#e0e7ff',
+                    padding: '8px 12px'
+                  }}
+                  title="Table Settings & Lobby"
+                >
+                  <Settings className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>{isWaitingLobbyMinimized ? 'Settings & Lobby' : 'Hide Lobby'}</span>
+                </button>
+              )}
+
               {players.length < (gameRoom?.maxPlayers || 6) && (
                 <button
                   type="button"
@@ -1605,6 +1776,302 @@ export const PokerTable = ({
                 <span>{handState.handNumber === 0 ? 'DEAL FIRST HAND' : 'NEXT HAND'}</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING RE-OPEN BUTTON FOR MINIMIZED WAITING LOBBY */}
+      {handState.handNumber === 0 && handState.phase === 'waiting' && isWaitingLobbyMinimized && (
+        <button
+          type="button"
+          onClick={() => setIsWaitingLobbyMinimized(false)}
+          className="waiting-minimized-floating-btn"
+          title="Open Waiting Lobby Settings"
+        >
+          <Settings className="w-4 h-4 text-emerald-400" />
+          <span>Waiting Lobby Settings ({players.length}/{gameRoom?.maxPlayers || 6})</span>
+        </button>
+      )}
+
+      {/* 1. WAITING LOBBY MODAL (Hand 0 / Pre-match stage) */}
+      {handState.handNumber === 0 && handState.phase === 'waiting' && !isWaitingLobbyMinimized && (
+        <div className="waiting-lobby-overlay">
+          <div className="waiting-lobby-card">
+            <div className="waiting-lobby-header">
+              <div className="waiting-lobby-header-left">
+                <div className="waiting-lobby-badge-row">
+                  <span className="waiting-lobby-badge">WAITING LOBBY</span>
+                  <span className="waiting-lobby-badge-status">
+                    {players.length >= 2 ? '🟢 Ready to Deal' : '🟡 Gathering Players'}
+                  </span>
+                </div>
+                <h2 className="waiting-lobby-title">{gameRoom?.name || 'High Stakes Poker Table'}</h2>
+                <div className="waiting-lobby-meta">
+                  <div className="waiting-lobby-code-box">
+                    <span className="waiting-lobby-meta-lbl">Room Code:</span>
+                    <span className="waiting-lobby-code-val">{gameRoom?.roomCode || '---'}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(gameRoom?.roomCode || '');
+                        setAnnouncement('Room code copied to clipboard!');
+                      }}
+                      className="waiting-lobby-copy-btn"
+                      title="Copy Room Code"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {gameRoom?.host_username && (
+                    <div className="waiting-lobby-host-box">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Host: <strong>{gameRoom.host_username}</strong></span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsWaitingLobbyMinimized(true)}
+                className="waiting-lobby-minimize-btn"
+                title="Minimize lobby to view table felt"
+              >
+                <span>View Table Felt</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="waiting-lobby-body">
+              {/* Seated Players Roster */}
+              <div className="waiting-lobby-section">
+                <div className="waiting-lobby-section-head">
+                  <div className="waiting-lobby-section-title">
+                    <Users className="w-4 h-4 text-indigo-400" />
+                    <span>Seated Players ({players.length} / {gameRoom?.maxPlayers || 6})</span>
+                  </div>
+                  {players.length < (gameRoom?.maxPlayers || 6) && (
+                    <button
+                      type="button"
+                      onClick={handleAddBot}
+                      className="waiting-lobby-addbot-btn"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>+ Add Practice Bot</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="waiting-lobby-roster-grid">
+                  {players.map((p) => {
+                    const isHero = p.seat_index === mySeatIndex;
+                    return (
+                      <div
+                        key={p.seat_index}
+                        className={`waiting-roster-chip ${isHero ? 'is-hero' : ''} ${p.isBot ? 'is-bot' : ''}`}
+                      >
+                        <div className="waiting-roster-avatar">
+                          {p.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="waiting-roster-info">
+                          <span className="waiting-roster-name">
+                            {p.username} {isHero && <span className="waiting-you-badge">YOU</span>}
+                          </span>
+                          <span className="waiting-roster-stack">
+                            {formatPoints(p.chips || tableSettings.startingStack)} pts
+                          </span>
+                        </div>
+                        {p.isBot && <span className="waiting-bot-tag">AI BOT</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Live Editable Settings (Any seated player can customize before match start) */}
+              <div className="waiting-lobby-section">
+                <div className="waiting-lobby-section-head">
+                  <div className="waiting-lobby-section-title">
+                    <Settings className="w-4 h-4 text-emerald-400" />
+                    <span>Table Settings (Editable by Anyone in Waiting Lobby)</span>
+                  </div>
+                  <span className="waiting-sync-indicator">⚡ Live synced to all players</span>
+                </div>
+
+                <div className="waiting-lobby-settings-grid">
+                  {/* Starting Stack */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Starting Chips</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[500, 1000, 1500, 2500, 5000].map((stack) => (
+                        <button
+                          key={stack}
+                          type="button"
+                          onClick={() => handleUpdateSetting('startingStack', stack)}
+                          className={`waiting-pill-btn ${tableSettings.startingStack === stack ? 'active' : ''}`}
+                        >
+                          {formatPoints(stack)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Blinds */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <Trophy className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Blinds (Small / Big)</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { sb: 5, bb: 10, label: '5 / 10' },
+                        { sb: 10, bb: 20, label: '10 / 20' },
+                        { sb: 25, bb: 50, label: '25 / 50' },
+                        { sb: 50, bb: 100, label: '50 / 100' }
+                      ].map((b) => (
+                        <button
+                          key={b.label}
+                          type="button"
+                          onClick={() => {
+                            handleUpdateSetting('smallBlind', b.sb);
+                            handleUpdateSetting('bigBlind', b.bb);
+                          }}
+                          className={`waiting-pill-btn ${tableSettings.smallBlind === b.sb && tableSettings.bigBlind === b.bb ? 'active' : ''}`}
+                        >
+                          {b.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Turn Timer */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Shot Clock / Timer</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { sec: 15, label: '15s Blitz' },
+                        { sec: 30, label: '30s Rapid' },
+                        { sec: 60, label: '60s Normal' },
+                        { sec: 120, label: '120s Deep' }
+                      ].map((t) => (
+                        <button
+                          key={t.sec}
+                          type="button"
+                          onClick={() => handleUpdateSetting('turnTime', t.sec)}
+                          className={`waiting-pill-btn ${tableSettings.turnTime === t.sec ? 'active' : ''}`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Blind Escalation */}
+                  <div className="waiting-setting-card">
+                    <label className="waiting-setting-label">
+                      <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Blind Escalation</span>
+                    </label>
+                    <div className="waiting-setting-pills">
+                      {[
+                        { id: 'hyper_2', label: 'Every 2 Hands' },
+                        { id: 'fast_5', label: 'Every 5 Hands' },
+                        { id: 'standard_10', label: 'Every 10 Hands' },
+                        { id: 'never', label: 'Fixed Blinds' }
+                      ].map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => handleUpdateSetting('blindsFrequency', f.id)}
+                          className={`waiting-pill-btn ${tableSettings.blindsFrequency === f.id ? 'active' : ''}`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="waiting-lobby-footer">
+              <div className="waiting-lobby-status-note">
+                {players.length < 2 ? (
+                  <span className="text-amber-400 font-semibold">
+                    ⚠️ Waiting for at least 2 players to start the match (click "+ Add Practice Bot" if solo)
+                  </span>
+                ) : (
+                  <span className="text-emerald-400 font-semibold">
+                    ✨ {players.length} players ready. Anyone can launch the match!
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={startNewHand}
+                disabled={players.length < 2}
+                className="waiting-lobby-start-btn"
+              >
+                <Play className="w-4 h-4 fill-white" />
+                <span>START MATCH</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. MATCH OVER / TOURNAMENT CHAMPION VICTORY OVERLAY */}
+      {matchChampion && (
+        <div className="match-over-backdrop">
+          <div className="match-over-card">
+            <div className="match-over-trophy-container">
+              <Trophy className="w-20 h-20 text-amber-400 match-over-trophy-icon" />
+              <div className="match-over-glow" />
+            </div>
+
+            <span className="match-over-badge">TOURNAMENT WINNER</span>
+            <h2 className="match-over-champ-name">{matchChampion.username}</h2>
+            <p className="match-over-desc">
+              All other players have been eliminated!
+            </p>
+
+            <div className="match-over-stats-row">
+              <div className="match-over-stat-box">
+                <span className="match-over-stat-lbl">Winning Stack</span>
+                <span className="match-over-stat-val text-amber-400">
+                  {formatPoints(matchChampion.chips)}
+                </span>
+              </div>
+              <div className="match-over-stat-box">
+                <span className="match-over-stat-lbl">Result</span>
+                <span className="match-over-stat-val text-emerald-400">
+                  1st Place Victory
+                </span>
+              </div>
+            </div>
+
+            <div className="match-over-redirect-panel">
+              <div className="match-over-spinner" />
+              <span>
+                Redirecting all players to lobby in{' '}
+                <strong className="text-amber-400 font-bold">{lobbyRedirectCountdown ?? 0}s</strong>...
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={onLeaveTable}
+              className="match-over-return-btn"
+            >
+              Return to Lobby Immediately
+            </button>
           </div>
         </div>
       )}

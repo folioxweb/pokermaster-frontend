@@ -117,30 +117,45 @@ export const LobbyPage = ({
     }
   };
 
-  // Close / Delete a Table
-  const handleCloseRoom = async (roomId, e) => {
+  // Close / Delete a Table (Allowed ONLY for table creator, and ONLY if 0 players are seated)
+  const handleCloseRoom = async (room, e) => {
     if (e) e.stopPropagation();
-    if (!window.confirm('Are you sure you want to close and remove this table?')) return;
+
+    // Protection 1: Active players protection - No one can delete a table with active players
+    if ((room.player_count || 0) > 0) {
+      alert('Cannot delete this table: There are active players currently seated at the table.');
+      return;
+    }
+
+    // Protection 2: Creator ownership protection - Table created by user A can only be deleted by user A
+    if (room.host_username && user?.username && room.host_username !== user.username) {
+      alert(`Only the table creator (${room.host_username}) can delete this table.`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to close and remove table "${room.name}"?`)) return;
     try {
       await supabase
         .from('poker_rooms')
         .update({ status: 'closed' })
-        .eq('id', roomId);
+        .eq('id', room.id);
       fetchRooms();
     } catch (err) {
       console.warn('Error closing room:', err);
     }
   };
 
-  // Clean all empty tables with 0 players
+  // Clean empty tables with 0 players created by the current user
   const handleCleanEmptyRooms = async () => {
-    const emptyRooms = rooms.filter((r) => (r.player_count || 0) === 0);
-    if (emptyRooms.length === 0) {
-      alert('No empty tables to clean up.');
+    const myEmptyRooms = rooms.filter(
+      (r) => (r.player_count || 0) === 0 && (!r.host_username || r.host_username === user?.username)
+    );
+    if (myEmptyRooms.length === 0) {
+      alert('You have no empty tables to clean up.');
       return;
     }
     try {
-      const emptyIds = emptyRooms.map((r) => r.id);
+      const emptyIds = myEmptyRooms.map((r) => r.id);
       await supabase
         .from('poker_rooms')
         .update({ status: 'closed' })
@@ -176,7 +191,8 @@ export const LobbyPage = ({
         p_starting_stack: startingStack,
         p_small_blind: smallBlind,
         p_big_blind: bigBlind,
-        p_turn_time: turnTime
+        p_turn_time: turnTime,
+        p_host_username: user?.username || 'Host'
       });
 
       if (error) {
@@ -191,6 +207,8 @@ export const LobbyPage = ({
         roomCode: generatedCode,
         roomName: cleanTableName,
         isPractice: false,
+        hostUsername: user?.username || 'Host',
+        isHost: true,
         maxPlayers,
         startingStack,
         smallBlind,
@@ -376,15 +394,15 @@ export const LobbyPage = ({
                 <p className="lobby-section-desc">Join an existing ring table or create your own</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {rooms.some((r) => (r.player_count || 0) === 0) && (
+                {rooms.some((r) => (r.player_count || 0) === 0 && (!r.host_username || r.host_username === user?.username)) && (
                   <button
                     onClick={handleCleanEmptyRooms}
                     className="lobby-refresh-btn"
                     style={{ borderColor: '#ef4444', color: '#f87171' }}
-                    title="Close all empty tables"
+                    title="Close your empty tables"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>Clean Empty ({rooms.filter((r) => (r.player_count || 0) === 0).length})</span>
+                    <span>Clean My Empty ({rooms.filter((r) => (r.player_count || 0) === 0 && (!r.host_username || r.host_username === user?.username)).length})</span>
                   </button>
                 )}
                 <button
@@ -420,7 +438,7 @@ export const LobbyPage = ({
                     <div className="lobby-room-card-header">
                       <div>
                         <h4 className="lobby-room-name">{r.name}</h4>
-                        <span className="lobby-room-code">Code: {r.code}</span>
+                        <span className="lobby-room-code">Code: {r.code} • Host: {r.host_username || 'Host'}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span className={`lobby-room-status-badge ${(r.player_count || 0) > 0 ? (r.status === 'in_progress' ? 'live' : 'waiting') : 'empty'}`}>
@@ -428,13 +446,16 @@ export const LobbyPage = ({
                             ? (r.status === 'in_progress' ? 'Live Hand' : 'Open Seats')
                             : 'Empty'}
                         </span>
-                        <button
-                          onClick={(e) => handleCloseRoom(r.id, e)}
-                          className="lobby-room-delete-btn"
-                          title="Close / Delete Table"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-400" />
-                        </button>
+                        {/* Only table creator can delete table, and ONLY when 0 active players are seated */}
+                        {(!r.host_username || r.host_username === user?.username) && (r.player_count || 0) === 0 && (
+                          <button
+                            onClick={(e) => handleCloseRoom(r, e)}
+                            className="lobby-room-delete-btn"
+                            title="Close / Delete Table (Creator only)"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-400" />
+                          </button>
+                        )}
                       </div>
                     </div>
 
