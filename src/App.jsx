@@ -84,10 +84,10 @@ export default function App() {
                 isPractice: false,
                 hostUsername: data.host_username,
                 maxPlayers: data.max_players || 6,
-                startingStack: data.starting_stack || 1500,
-                smallBlind: data.small_blind || 10,
-                bigBlind: data.big_blind || 20,
-                turnTime: data.turn_time_seconds || 120
+                startingStack: data.starting_stack || 1000,
+                smallBlind: data.small_blind ?? 2,
+                bigBlind: data.big_blind ?? 4,
+                turnTime: data.turn_time_seconds ?? 0
               });
               // Clean query param from address bar without page reload
               window.history.replaceState({}, document.title, window.location.pathname);

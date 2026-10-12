@@ -30,11 +30,11 @@ export const InviteToast = ({
           </p>
 
           <div className="invite-toast-meta">
-            <span>Blinds: {formatPoints(invite.smallBlind || 10)}/{formatPoints(invite.bigBlind || 20)}</span>
+            <span>Blinds: {formatPoints(invite.smallBlind ?? 2)}/{formatPoints(invite.bigBlind ?? 4)}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Coins className="w-3 h-3 text-amber-400" />
-              {formatPoints(invite.startingStack || 1500)}
+              {formatPoints(invite.startingStack || 1000)}
             </span>
           </div>
 

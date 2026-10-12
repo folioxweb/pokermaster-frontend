@@ -208,9 +208,9 @@ export function useSocialPresence(currentUser, activeGameRoom, onJoinGame) {
       toUsername: targetUser.username,
       roomCode: roomConfig.roomCode,
       roomName: roomConfig.roomName || 'Poker Table',
-      smallBlind: roomConfig.smallBlind || 10,
-      bigBlind: roomConfig.bigBlind || 20,
-      startingStack: roomConfig.startingStack || 1500,
+      smallBlind: roomConfig.smallBlind ?? 2,
+      bigBlind: roomConfig.bigBlind ?? 4,
+      startingStack: roomConfig.startingStack || 1000,
       createdAt: Date.now()
     };
 
@@ -343,9 +343,9 @@ export function useSocialPresence(currentUser, activeGameRoom, onJoinGame) {
         roomCode: invite.roomCode,
         roomName: invite.roomName || 'Invited Table',
         isPractice: false,
-        smallBlind: invite.smallBlind || 10,
-        bigBlind: invite.bigBlind || 20,
-        startingStack: invite.startingStack || 1500
+        smallBlind: invite.smallBlind ?? 2,
+        bigBlind: invite.bigBlind ?? 4,
+        startingStack: invite.startingStack || 1000
       });
     }
   };

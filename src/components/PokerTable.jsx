@@ -82,17 +82,28 @@ export const PokerTable = ({
     sbSeat: 1,
     bbSeat: 2,
     currentBet: 0,
-    minRaise: gameRoom?.bigBlind || 20,
+    minRaise: gameRoom?.bigBlind ?? 4,
     mainPot: 0,
     sidePots: [],
     winners: []
   });
 
-  const [turnTimeLeft, setTurnTimeLeft] = useState(gameRoom?.turnTime || 120);
-  const turnMaxTime = gameRoom?.turnTime || 120;
+  // Waiting Room Settings (Editable by ANY player before match begins)
+  const [tableSettings, setTableSettings] = useState({
+    smallBlind: gameRoom?.smallBlind ?? 2,
+    bigBlind: gameRoom?.bigBlind ?? 4,
+    startingStack: gameRoom?.startingStack || 1000,
+    turnTime: gameRoom?.turnTime !== undefined && gameRoom?.turnTime !== null ? gameRoom.turnTime : 0,
+    blindsFrequency: gameRoom?.blindsFrequency || 'fast_5'
+  });
+
+  const turnMaxTime = tableSettings.turnTime !== undefined && tableSettings.turnTime !== null
+    ? tableSettings.turnTime
+    : (gameRoom?.turnTime !== undefined && gameRoom?.turnTime !== null ? gameRoom.turnTime : 0);
+
+  const [turnTimeLeft, setTurnTimeLeft] = useState(turnMaxTime);
   const [winningCards, setWinningCards] = useState([]);
   const [announcement, setAnnouncement] = useState('Waiting for host to start hand');
-
   const [flyingChips, setFlyingChips] = useState([]);
   const [isPotPulsing, setIsPotPulsing] = useState(false);
   const [heroShowCardsClicked, setHeroShowCardsClicked] = useState(false);
@@ -101,14 +112,6 @@ export const PokerTable = ({
   const [matchChampion, setMatchChampion] = useState(null);
   const [lobbyRedirectCountdown, setLobbyRedirectCountdown] = useState(null);
 
-  // Waiting Room Settings (Editable by ANY player before match begins)
-  const [tableSettings, setTableSettings] = useState({
-    smallBlind: gameRoom?.smallBlind || 10,
-    bigBlind: gameRoom?.bigBlind || 20,
-    startingStack: gameRoom?.startingStack || 1500,
-    turnTime: gameRoom?.turnTime || 120,
-    blindsFrequency: gameRoom?.blindsFrequency || 'fast_5'
-  });
   const [isWaitingLobbyMinimized, setIsWaitingLobbyMinimized] = useState(false);
   const [inviteLinkCopied, setInviteLinkCopied] = useState(false);
 
@@ -184,7 +187,7 @@ export const PokerTable = ({
             seat_index: 0,
             user_id: user?.id,
             username: user?.username || 'Hero',
-            chips: gameRoom?.startingStack || 1500,
+            chips: gameRoom?.startingStack || 1000,
             current_round_bet: 0,
             total_hand_bet: 0,
             status: 'active',
@@ -198,7 +201,7 @@ export const PokerTable = ({
           initialList.push({
             seat_index: i,
             username: BOT_NAMES[i - 1] || `Bot ${i + 1}`,
-            chips: gameRoom?.startingStack || 1500,
+            chips: gameRoom?.startingStack || 1000,
             current_round_bet: 0,
             total_hand_bet: 0,
             status: 'active',
@@ -278,7 +281,7 @@ export const PokerTable = ({
             user_id: user.id || null,
             username: user.username,
             seat_index: assignedSeat,
-            chips: myExisting?.chips || gameRoom.startingStack || 1500,
+            chips: myExisting?.chips || gameRoom.startingStack || 1000,
             current_round_bet: 0,
             total_hand_bet: 0,
             status: 'active',
@@ -298,7 +301,7 @@ export const PokerTable = ({
         seat_index: assignedSeat,
         user_id: user.id,
         username: user.username,
-        chips: myExisting?.chips || gameRoom.startingStack || 1500,
+        chips: myExisting?.chips || gameRoom.startingStack || 1000,
         current_round_bet: 0,
         total_hand_bet: 0,
         status: 'active',
@@ -316,7 +319,7 @@ export const PokerTable = ({
             seat_index: p.seat_index,
             user_id: p.user_id,
             username: p.username,
-            chips: p.chips || gameRoom.startingStack || 1500,
+            chips: p.chips || gameRoom.startingStack || 1000,
             current_round_bet: p.current_round_bet || 0,
             total_hand_bet: p.total_hand_bet || 0,
             status: p.status || 'active',
@@ -622,6 +625,13 @@ export const PokerTable = ({
     }
 
     if (turnTimerRef.current) clearInterval(turnTimerRef.current);
+
+    // If turnMaxTime <= 0, no time limit!
+    if (!turnMaxTime || turnMaxTime <= 0) {
+      setTurnTimeLeft(0);
+      return;
+    }
+
     setTurnTimeLeft(turnMaxTime);
 
     turnTimerRef.current = setInterval(() => {
@@ -639,7 +649,7 @@ export const PokerTable = ({
     }, 1000);
 
     return () => clearInterval(turnTimerRef.current);
-  }, [handState.currentTurnSeat, handState.phase]);
+  }, [handState.currentTurnSeat, handState.phase, turnMaxTime]);
 
   // AI Bot Turn Execution (in Practice mode or when testing with bots)
   useEffect(() => {
@@ -676,7 +686,7 @@ export const PokerTable = ({
       seat_index: seatIndex,
       user_id: user.id,
       username: user.username,
-      chips: gameRoom?.startingStack || 1500,
+      chips: tableSettings.startingStack || gameRoom?.startingStack || 1000,
       current_round_bet: 0,
       total_hand_bet: 0,
       status: 'active',
@@ -719,7 +729,7 @@ export const PokerTable = ({
     const newBot = {
       seat_index: openSeat,
       username: botName,
-      chips: gameRoom?.startingStack || 1500,
+      chips: tableSettings.startingStack || gameRoom?.startingStack || 1000,
       current_round_bet: 0,
       total_hand_bet: 0,
       status: 'active',
@@ -1065,8 +1075,8 @@ export const PokerTable = ({
 
     const isFirstHand = (handStateRef.current.handNumber || 0) === 0;
     const newHandNum = (handStateRef.current.handNumber || 0) + 1;
-    let sbAmount = tableSettings.smallBlind || gameRoom?.smallBlind || 10;
-    let bbAmount = tableSettings.bigBlind || gameRoom?.bigBlind || 20;
+    let sbAmount = tableSettings.smallBlind ?? gameRoom?.smallBlind ?? 2;
+    let bbAmount = tableSettings.bigBlind ?? gameRoom?.bigBlind ?? 4;
 
     // Apply blinds escalation frequency from custom options
     const freq = tableSettings.blindsFrequency || gameRoom?.blindsFrequency || 'fast_5';
@@ -1085,7 +1095,7 @@ export const PokerTable = ({
 
     const updatedPlayers = [];
     for (const p of currentPlayers) {
-      const baseChips = isFirstHand ? (tableSettings.startingStack || p.chips || 1500) : p.chips;
+      const baseChips = isFirstHand ? (tableSettings.startingStack || p.chips || 1000) : p.chips;
       if (baseChips <= 0) {
         updatedPlayers.push({ ...p, chips: 0, status: 'sitting_out', cards: [], sealedCards: null });
         continue;
@@ -2100,6 +2110,7 @@ export const PokerTable = ({
                     </label>
                     <div className="waiting-setting-pills">
                       {[
+                        { sb: 2, bb: 4, label: '2 / 4' },
                         { sb: 5, bb: 10, label: '5 / 10' },
                         { sb: 10, bb: 20, label: '10 / 20' },
                         { sb: 25, bb: 50, label: '25 / 50' },
@@ -2127,6 +2138,7 @@ export const PokerTable = ({
                     </label>
                     <div className="waiting-setting-pills">
                       {[
+                        { sec: 0, label: '∞ No Limit' },
                         { sec: 15, label: '15s Blitz' },
                         { sec: 30, label: '30s Rapid' },
                         { sec: 60, label: '60s Normal' },

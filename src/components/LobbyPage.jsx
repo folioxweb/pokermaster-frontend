@@ -41,10 +41,10 @@ export const LobbyPage = ({
   // Create Table Form State
   const [tableName, setTableName] = useState('Championship Ring');
   const [maxPlayers, setMaxPlayers] = useState(6); // 3 to 8
-  const [smallBlind, setSmallBlind] = useState(10);
-  const [bigBlind, setBigBlind] = useState(20);
-  const [startingStack, setStartingStack] = useState(1500);
-  const [turnTime, setTurnTime] = useState(120);
+  const [smallBlind, setSmallBlind] = useState(2);
+  const [bigBlind, setBigBlind] = useState(4);
+  const [startingStack, setStartingStack] = useState(1000);
+  const [turnTime, setTurnTime] = useState(0);
   const [creatingTable, setCreatingTable] = useState(false);
   const isCreatingRef = useRef(false);
 
@@ -552,8 +552,8 @@ export const LobbyPage = ({
                       }}
                       className="lobby-form-select"
                     >
+                      <option value="2/4">{formatPoints(2)} / {formatPoints(4)} (Default • 2/4 Micro)</option>
                       <option value="1/2">{formatPoints(1)} / {formatPoints(2)} (Micro • 1, 2, 4, 8, 16...)</option>
-                      <option value="2/4">{formatPoints(2)} / {formatPoints(4)} (Micro • 2, 4, 8, 16, 32...)</option>
                       <option value="5/10">{formatPoints(5)} / {formatPoints(10)} (Low Stakes)</option>
                       <option value="10/20">{formatPoints(10)} / {formatPoints(20)} (Standard 10/20)</option>
                       <option value="25/50">{formatPoints(25)} / {formatPoints(50)} (Mid Stakes)</option>
@@ -573,10 +573,10 @@ export const LobbyPage = ({
                       onChange={(e) => setStartingStack(Number(e.target.value))}
                       className="lobby-form-select"
                     >
+                      <option value={1000}>{formatPoints(1000)} (Default Stack)</option>
                       <option value={100}>{formatPoints(100)} (Micro Stack)</option>
                       <option value={250}>{formatPoints(250)} (Short Stack)</option>
                       <option value={500}>{formatPoints(500)} (Medium Stack)</option>
-                      <option value={1000}>{formatPoints(1000)} (Standard Stack)</option>
                       <option value={1500}>{formatPoints(1500)} (Deep 75BB)</option>
                       <option value={2500}>{formatPoints(2500)} (Pro Stack)</option>
                       <option value={5000}>{formatPoints(5000)} (High Roller)</option>
@@ -592,11 +592,12 @@ export const LobbyPage = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <label className="lobby-form-label" style={{ margin: 0 }}>Shot Clock (Turn Timer)</label>
                     <span className="table-badge-shotclock">
-                      {turnTime >= 60 ? `${turnTime / 60} Min` : `${turnTime}s`} per turn
+                      {turnTime === 0 ? '∞ No Limit' : turnTime >= 60 ? `${turnTime / 60} Min` : `${turnTime}s`} per turn
                     </span>
                   </div>
                   <div className="shot-clock-grid">
                     {[
+                      { sec: 0, label: '∞', desc: 'No Limit' },
                       { sec: 30, label: '30s', desc: 'Blitz' },
                       { sec: 60, label: '1m', desc: 'Quick' },
                       { sec: 90, label: '1.5m', desc: 'Normal' },

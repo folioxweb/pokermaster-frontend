@@ -53,8 +53,9 @@ export const PlayerSeat = ({
   const hasCards = Boolean(player.hasCards || (player.cards && player.cards.length >= 2) || (!isSittingOut && !isHandEnded && !isFolded));
 
   // SVG turn timer circle stroke dashoffset
-  const progressRatio = Math.max(0, Math.min(1, turnTimeLeft / turnMaxTime));
-  const strokeDashoffset = 140 * (1 - progressRatio);
+  const isNoLimit = !turnMaxTime || turnMaxTime <= 0;
+  const progressRatio = isNoLimit ? 1 : Math.max(0, Math.min(1, turnTimeLeft / turnMaxTime));
+  const strokeDashoffset = isNoLimit ? 0 : 140 * (1 - progressRatio);
 
   let statusClass = '';
   if (isCurrentTurn) statusClass = 'active-turn';
@@ -110,7 +111,7 @@ export const PlayerSeat = ({
               strokeWidth="2.5"
               strokeDasharray="140"
               strokeDashoffset={strokeDashoffset}
-              style={{ transition: 'stroke-dashoffset 1s linear' }}
+              style={{ transition: isNoLimit ? 'none' : 'stroke-dashoffset 1s linear' }}
             />
           </svg>
         )}

@@ -12,7 +12,7 @@ export const LobbyModal = ({
   const [activeTab, setActiveTab] = useState('practice'); // 'practice' | 'multiplayer'
   const [username, setUsername] = useState('Parth');
   const [playerCount, setPlayerCount] = useState(6); // 3 to 8
-  const [startingStack, setStartingStack] = useState(1500);
+  const [startingStack, setStartingStack] = useState(1000);
   const [roomCode, setRoomCode] = useState('');
   const [roomName, setRoomName] = useState('Championship Ring');
 

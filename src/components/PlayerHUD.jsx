@@ -8,12 +8,12 @@ export const PlayerHUD = ({
   heroPlayer = null,
   currentTurnPlayerName = '',
   currentBet = 0,
-  minRaise = 20,
-  bigBlind = 20,
+  minRaise = 4,
+  bigBlind = 4,
   mainPot = 0,
   handRank = null, // { name: 'Two Pair', description: 'Two Pair, Kings and Queens' }
-  turnTimeLeft = 120,
-  turnMaxTime = 120,
+  turnTimeLeft = 0,
+  turnMaxTime = 0,
   onAction = null  // (action, amount) => void
 }) => {
   if (!heroPlayer || heroPlayer.status === 'folded' || heroPlayer.status === 'sitting_out') {
@@ -95,9 +95,11 @@ export const PlayerHUD = ({
           )}
 
           {isMyTurn ? (
-            <div className={`poker-hud-timer-badge ${turnTimeLeft <= 5 ? 'urgent' : ''}`}>
+            <div className={`poker-hud-timer-badge ${turnMaxTime > 0 && turnTimeLeft <= 5 ? 'urgent' : ''}`}>
               <Clock className="w-3.5 h-3.5" />
-              <span>YOUR TURN: <strong>{turnTimeLeft}s</strong></span>
+              <span>
+                YOUR TURN: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞ NO LIMIT'}</strong>
+              </span>
             </div>
           ) : (
             <div className="poker-hud-waiting-badge">
