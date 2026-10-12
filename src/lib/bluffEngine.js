@@ -184,9 +184,10 @@ export function decideBotPlay(botHand = [], trickClaimRank = null, canPass = fal
 
     // If bot has matching cards:
     if (matchingCards.length > 0) {
-      // 82% of the time: play matching cards honestly!
+      // 82% of the time: play matching cards honestly (max 4 cards in a single turn!)
       if (Math.random() < 0.82) {
-        const count = Math.min(matchingCards.length, Math.random() < 0.6 ? matchingCards.length : Math.floor(Math.random() * matchingCards.length) + 1);
+        const maxPlayCount = Math.min(4, matchingCards.length);
+        const count = Math.min(maxPlayCount, Math.random() < 0.6 ? maxPlayCount : Math.floor(Math.random() * maxPlayCount) + 1);
         return {
           action: 'play',
           cards: matchingCards.slice(0, Math.max(1, count)),
@@ -230,9 +231,10 @@ export function decideBotPlay(botHand = [], trickClaimRank = null, canPass = fal
     bestCards.push(jokers[0]);
   }
 
-  // 85% of the time: lead honestly with best rank
+  // 85% of the time: lead honestly with best rank (capped at 4 cards)
   if (bestCards.length > 0 && Math.random() < 0.85) {
-    const count = bestCards.length <= 2 ? bestCards.length : (Math.random() < 0.7 ? bestCards.length : bestCards.length - 1);
+    const maxLead = Math.min(4, bestCards.length);
+    const count = maxLead <= 2 ? maxLead : (Math.random() < 0.7 ? maxLead : maxLead - 1);
     return {
       action: 'play',
       cards: bestCards.slice(0, Math.max(1, count)),
@@ -244,11 +246,11 @@ export function decideBotPlay(botHand = [], trickClaimRank = null, canPass = fal
   const plausible = ['A', 'K', 'Q', 'J', '10', '9', '8'];
   const bluffClaim = plausible[Math.floor(Math.random() * plausible.length)];
   const junk = botHand.filter((c) => c !== 'Jr' && c !== 'Jb');
-  const cardsToPlay = (junk.length > 0 ? junk : botHand).slice(0, Math.min(botHand.length, Math.random() < 0.7 ? 1 : 2));
+  const cardsToBluff = (junk.length > 0 ? junk : botHand).slice(0, Math.min(botHand.length, Math.random() < 0.7 ? 1 : 2));
 
   return {
     action: 'play',
-    cards: cardsToPlay.length > 0 ? cardsToPlay : [botHand[0]],
+    cards: cardsToBluff.length > 0 ? cardsToBluff : [botHand[0]],
     claimedRank: bluffClaim
   };
 }

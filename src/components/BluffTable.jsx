@@ -22,7 +22,8 @@ import {
   Share2,
   Link,
   ChevronDown,
-  Mail
+  Mail,
+  Zap
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -106,9 +107,12 @@ export const BluffTable = ({
 
   const channelRef = useRef(null);
   const challengeTimerRef = useRef(null);
+  const botChallengeTimerRef = useRef(null);
+  const challengeLockRef = useRef(false);
   const playersRef = useRef(players);
   const matchStateRef = useRef(matchState);
   const myHandRef = useRef(myHand);
+  const [selectedRank, setSelectedRank] = useState(null);
 
   const isCreator = (gameRoom?.host_username || gameRoom?.hostUsername) === user?.username || Boolean(gameRoom?.isHost) || Boolean(gameRoom?.isPractice) || !gameRoom?.host_username;
   const isCreatorRef = useRef(isCreator);
@@ -305,7 +309,13 @@ export const BluffTable = ({
           if (payload.challengeResult) setChallengeResult(payload.challengeResult);
         })
         .on('broadcast', { event: 'BLUFF_CHALLENGE_CALLED' }, ({ payload }) => {
+          challengeLockRef.current = true;
+          if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
+          if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
+          setChallengeTimeLeft(0);
           playCheckKnock();
+          if (payload?.challengeResult) setChallengeResult(payload.challengeResult);
+          if (payload?.matchState) setMatchState(payload.matchState);
           setAnnouncement(`🚨 ${payload.challenger} CALLED BLUFF on ${payload.target}!`);
         });
 
@@ -704,52 +714,100 @@ export const BluffTable = ({
     const sorted = sortHand(myHand);
     setMyHand(sorted);
     setSelectedCardIndices([]);
+    setSelectedRank(null);
   };
 
-  // Auto-Select Cards Matching Current Claim Rank
-  const handleAutoSelectCurrentRank = () => {
-    const targetRank = heroClaimRank;
+  // Select All Cards of Given Rank (DO NOT SELECT JOKERS per Requirement 3)
+  const handleSelectAllOfRank = (rankToSelect) => {
+    if (!rankToSelect) return;
     const matching = [];
     myHand.forEach((c, idx) => {
-      const isJoker = c === 'Jr' || c === 'Jb';
+      if (c === 'Jr' || c === 'Jb') return; // NEVER SELECT JOKERS
       const cRank = c.length === 3 ? '10' : c[0];
-      if (isJoker || cRank === targetRank) {
+      if (cRank === rankToSelect) {
         matching.push(idx);
       }
     });
-    setSelectedCardIndices(matching);
+
+    if (matching.length === 0) return;
+
+    // Toggle: if already all matching are selected, deselect; otherwise select up to 4
+    const allSelected = matching.every((idx) => selectedCardIndices.includes(idx));
+    if (allSelected) {
+      setSelectedCardIndices((prev) => prev.filter((idx) => !matching.includes(idx)));
+      setSelectedRank(null);
+    } else {
+      const toSelect = matching.slice(0, 4);
+      setSelectedCardIndices(toSelect);
+      setSelectedRank(rankToSelect);
+      if (!matchState.trickClaimRank) {
+        setHeroClaimRank(rankToSelect);
+      }
+    }
+  };
+
+  // Auto-Select Cards Matching Current Claim Rank (Excludes Jokers)
+  const handleAutoSelectCurrentRank = () => {
+    handleSelectAllOfRank(matchState.trickClaimRank || heroClaimRank);
   };
 
   // Action: Call Bluff!
+  // First-Come-First-Served Atomic Mutex: Only one player can call bluff at a time!
   const handleCallBluff = (challengerSeat) => {
+    if (challengeLockRef.current) return;
+    if (matchStateRef.current.phase !== 'challenge_window') return;
+    challengeLockRef.current = true;
+
     if (challengeTimerRef.current) clearInterval(challengeTimerRef.current);
+    if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
     setChallengeTimeLeft(0);
     playCheckKnock();
 
-    const blufferSeat = matchState.lastPlaySeat;
-    const bluffer = players.find((p) => p.seat_index === blufferSeat);
-    const challenger = players.find((p) => p.seat_index === challengerSeat);
+    const currentState = matchStateRef.current;
+    const currentPlayers = playersRef.current;
+    const blufferSeat = currentState.lastPlaySeat;
+    const bluffer = currentPlayers.find((p) => p.seat_index === blufferSeat);
+    const challenger = currentPlayers.find((p) => p.seat_index === challengerSeat);
 
-    const playedCards = matchState.lastPlayedCards;
-    const claimedRank = matchState.trickClaimRank || matchState.currentClaimRank;
+    const playedCards = currentState.lastPlayedCards || [];
+    const claimedRank = currentState.trickClaimRank || currentState.currentClaimRank;
 
     // Verify truth or bluff with wildcard Jokers
     const { isBluff, legalCards, bluffCards } = verifyPlay(playedCards, claimedRank);
 
-    let loserSeat = isBluff ? blufferSeat : challengerSeat;
-    let loser = isBluff ? bluffer : challenger;
+    // Turn & Penalty Rules:
+    // 1. If challenger is RIGHT (it was a bluff):
+    //    - Bluffer was caught bluffing and picks up whole pile!
+    //    - Challenger gets the turn to play next!
+    // 2. If challenger is WRONG (bluffer told the truth):
+    //    - Challenger was wrong and picks up whole pile!
+    //    - The player who played last (bluffer) gets the turn to play next!
+    const loserSeat = isBluff ? blufferSeat : challengerSeat;
+    const loser = isBluff ? bluffer : challenger;
+    const nextStarterSeat = isBluff ? challengerSeat : blufferSeat;
 
-    // Loser picks up entire central pile!
-    const wholePile = matchState.discardPile;
+    const wholePile = currentState.discardPile || [];
+    const isSingleDeck = (currentState.deckType || gameRoom?.deckType || 'single') === 'single';
 
-    const updatedPlayers = players.map((p) => {
+    const updatedPlayers = currentPlayers.map((p) => {
       if (p.seat_index === loserSeat) {
-        const combinedHand = p.seat_index === mySeatIndex ? sortHand([...myHand, ...wholePile]) : (p.isBot ? sortHand([...p.cards, ...wholePile]) : []);
-        if (p.seat_index === mySeatIndex) setMyHand(combinedHand);
+        let combinedHand = [];
+        if (p.seat_index === mySeatIndexRef.current) {
+          const raw = [...myHandRef.current, ...wholePile];
+          combinedHand = isSingleDeck ? Array.from(new Set(raw)) : raw;
+          setMyHand(sortHand(combinedHand));
+        } else if (p.isBot) {
+          const raw = [...(p.cards || []), ...wholePile];
+          combinedHand = isSingleDeck ? Array.from(new Set(raw)) : raw;
+        } else {
+          combinedHand = [];
+        }
+
+        const sortedHand = sortHand(combinedHand);
         return {
           ...p,
-          cards: combinedHand,
-          cardCount: p.cardCount + wholePile.length
+          cards: sortedHand,
+          cardCount: isSingleDeck ? sortedHand.length : (p.cardCount + wholePile.length)
         };
       }
       return p;
@@ -764,26 +822,45 @@ export const BluffTable = ({
       loser: loser?.username
     };
 
+    // Transition immediately to showdown so no other player or bot can act
+    const showdownState = {
+      ...currentState,
+      phase: 'showdown',
+      discardPile: [] // Pile picked up by loser
+    };
+
     setChallengeResult(result);
     setPlayers(updatedPlayers);
+    setMatchState(showdownState);
 
-    if (isBluff) {
-      setAnnouncement(`🚨 CAUGHT! ${bluffer?.username} was BLUFFING! Picks up ${wholePile.length} cards.`);
-    } else {
-      setAnnouncement(`✨ INNOCENT! ${bluffer?.username} told the truth! ${challenger?.username} picks up ${wholePile.length} cards.`);
+    const announcementMsg = isBluff
+      ? `🚨 CAUGHT! ${challenger?.username} CALLED BLUFF! ${bluffer?.username} bluffed and picks up ${wholePile.length} cards!`
+      : `✨ INNOCENT! ${bluffer?.username} told the truth! ${challenger?.username} was wrong and picks up ${wholePile.length} cards!`;
+    setAnnouncement(announcementMsg);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_CHALLENGE_CALLED',
+        payload: {
+          challenger: challenger?.username,
+          target: bluffer?.username,
+          challengeResult: result,
+          matchState: showdownState
+        }
+      });
     }
 
-    // Winner of challenge starts next trick with any rank and cards!
-    const nextStarterSeat = isBluff ? challengerSeat : blufferSeat;
-
+    // Show reveal modal for 4.5 seconds, then winner leads new trick
     setTimeout(() => {
       setChallengeResult(null);
+      challengeLockRef.current = false;
       const starter = playersRef.current.find((p) => p.seat_index === nextStarterSeat);
       const nextMatch = {
         ...matchStateRef.current,
         phase: 'playing',
         currentTurnSeat: nextStarterSeat,
-        trickClaimRank: null, // Winner leads new trick with any rank!
+        trickClaimRank: null, // Winner leads new trick with any rank & cards!
         lastPlaySeat: null,
         lastPlayedCardsCount: 0,
         lastPlayedCards: [],
@@ -792,7 +869,9 @@ export const BluffTable = ({
         passAllowed: false // Leader must lead cards
       };
       setMatchState(nextMatch);
-      const winMsg = `✨ ${starter?.username} won the challenge and gets the chance to lead with any rank & cards!`;
+      const winMsg = isBluff
+        ? `🎯 ${challenger?.username} was RIGHT and gets the turn to lead with any rank & cards!`
+        : `🛡️ ${bluffer?.username} played truthfully and gets the turn to lead with any rank & cards!`;
       setAnnouncement(winMsg);
       broadcastState(playersRef.current, nextMatch, winMsg);
     }, 4500);
@@ -854,7 +933,8 @@ export const BluffTable = ({
             lastPlayerCardCount
           );
 
-          const timer = setTimeout(() => {
+          if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
+          botChallengeTimerRef.current = setTimeout(() => {
             if (wantsToCall) {
               handleCallBluff(nextBot.seat_index);
             } else {
@@ -862,7 +942,9 @@ export const BluffTable = ({
               handlePassChallenge();
             }
           }, 1600);
-          return () => clearTimeout(timer);
+          return () => {
+            if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
+          };
         }
         return;
       }
@@ -887,10 +969,13 @@ export const BluffTable = ({
             ? Math.floor(Math.random() * 1400) + 3800 // Hero has 3.8s+ to react!
             : Math.floor(Math.random() * 1400) + 1800;
 
-          const timer = setTimeout(() => {
+          if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
+          botChallengeTimerRef.current = setTimeout(() => {
             handleCallBluff(bot.seat_index);
           }, delay);
-          return () => clearTimeout(timer);
+          return () => {
+            if (botChallengeTimerRef.current) clearTimeout(botChallengeTimerRef.current);
+          };
         }
       }
     }
@@ -917,14 +1002,22 @@ export const BluffTable = ({
     matchState.lastPlaySeat !== mySeatIndex &&
     (matchState.challengeRule === 'next_only' ? isHeroNext : true);
 
-  const getCardMargin = (idx, total) => {
+  const getCardMargin = (idx, totalInRow) => {
     if (idx === 0) return '0px';
-    if (isMobile) return '-32px';
-    if (total > 24) return '-60px';
-    if (total > 18) return '-52px';
-    if (total > 14) return '-44px';
-    if (total > 10) return '-38px';
-    if (total > 6) return '-30px';
+    if (isMobile) {
+      // Dynamic margin to utilize mobile width (~360px - 420px) and keep cards readable
+      const availableWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth - 28, 430) : 360;
+      const cardWidth = 60;
+      if (totalInRow <= 1) return '0px';
+      const step = (availableWidth - cardWidth) / (totalInRow - 1);
+      const computedMargin = step - cardWidth;
+      return `${Math.max(-36, Math.min(-14, Math.round(computedMargin)))}px`;
+    }
+    if (totalInRow > 24) return '-60px';
+    if (totalInRow > 18) return '-52px';
+    if (totalInRow > 14) return '-44px';
+    if (totalInRow > 10) return '-38px';
+    if (totalInRow > 6) return '-30px';
     return '-22px';
   };
 
@@ -1509,24 +1602,49 @@ export const BluffTable = ({
 
         {/* FANNED CARDS: SITS DIRECTLY ON FELT ACROSS FULL DESKTOP WIDTH (SINGLE ROW) */}
         <div className="bluff-fanned-container">
+          {/* Quick Action: Select All of Rank (Strictly excludes Jokers per Requirement 3) */}
+          {selectedRank && countOfSelectedRank > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+              <button
+                type="button"
+                onClick={() => handleSelectAllOfRank(selectedRank)}
+                className="bluff-select-all-floating-btn"
+                title={`Select all ${RANK_NAMES[selectedRank] || selectedRank}s (no Jokers)`}
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-300" />
+                <span>Select All {selectedRank}s ({countOfSelectedRank})</span>
+              </button>
+            </div>
+          )}
+
           <div className="bluff-fanned-row">
             {(isMobile && myHand.length > 7 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand).map((card, i) => {
               const globalIdx = i;
               const isSelected = selectedCardIndices.includes(globalIdx);
-              const cardMargin = getCardMargin(i, myHand.length);
+              const row1Length = isMobile && myHand.length > 7 ? Math.ceil(myHand.length / 2) : myHand.length;
+              const cardMargin = getCardMargin(i, row1Length);
+              const isJoker = card === 'Jr' || card === 'Jb';
+              const cardRank = isJoker ? null : (card.length === 3 ? '10' : card[0]);
 
               return (
                 <div
                   key={`${card}-${globalIdx}`}
                   onClick={() => {
                     if (isSelected) {
-                      setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
+                      const newIndices = selectedCardIndices.filter((idx) => idx !== globalIdx);
+                      setSelectedCardIndices(newIndices);
+                      if (newIndices.length === 0) setSelectedRank(null);
                     } else {
+                      if (selectedCardIndices.length >= 4) {
+                        alert('In Bluff, you can select and play at most 4 cards per turn.');
+                        return;
+                      }
                       setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                      // Auto-set declared rank to clicked card ONLY if starting a new trick (not locked)
-                      if (!matchState.trickClaimRank && card && card !== 'Jr' && card !== 'Jb') {
-                        const r = card.length === 3 ? '10' : card[0];
-                        setHeroClaimRank(r);
+                      if (cardRank) {
+                        setSelectedRank(cardRank);
+                        if (!matchState.trickClaimRank) {
+                          setHeroClaimRank(cardRank);
+                        }
                       }
                     }
                   }}
@@ -1553,23 +1671,36 @@ export const BluffTable = ({
               {myHand.slice(Math.ceil(myHand.length / 2)).map((card, i) => {
                 const globalIdx = Math.ceil(myHand.length / 2) + i;
                 const isSelected = selectedCardIndices.includes(globalIdx);
+                const row2Length = myHand.length - Math.ceil(myHand.length / 2);
+                const cardMargin = getCardMargin(i, row2Length);
+                const isJoker = card === 'Jr' || card === 'Jb';
+                const cardRank = isJoker ? null : (card.length === 3 ? '10' : card[0]);
+
                 return (
                   <div
                     key={`${card}-${globalIdx}`}
                     onClick={() => {
                       if (isSelected) {
-                        setSelectedCardIndices(selectedCardIndices.filter((idx) => idx !== globalIdx));
+                        const newIndices = selectedCardIndices.filter((idx) => idx !== globalIdx);
+                        setSelectedCardIndices(newIndices);
+                        if (newIndices.length === 0) setSelectedRank(null);
                       } else {
+                        if (selectedCardIndices.length >= 4) {
+                          alert('In Bluff, you can select and play at most 4 cards per turn.');
+                          return;
+                        }
                         setSelectedCardIndices([...selectedCardIndices, globalIdx]);
-                        if (!matchState.trickClaimRank && card && card !== 'Jr' && card !== 'Jb') {
-                          const r = card.length === 3 ? '10' : card[0];
-                          setHeroClaimRank(r);
+                        if (cardRank) {
+                          setSelectedRank(cardRank);
+                          if (!matchState.trickClaimRank) {
+                            setHeroClaimRank(cardRank);
+                          }
                         }
                       }
                     }}
                     className={`bluff-fanned-card ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      marginLeft: i === 0 ? '0px' : '-32px',
+                      marginLeft: cardMargin,
                       zIndex: 10 + i
                     }}
                   >
@@ -1613,12 +1744,20 @@ export const BluffTable = ({
               </button>
               <button
                 type="button"
-                onClick={handleAutoSelectCurrentRank}
+                onClick={() => handleSelectAllOfRank(selectedRank || matchState.trickClaimRank || heroClaimRank)}
                 className="table-nav-btn bluff-dock-btn"
-                style={{ borderColor: '#a855f7', color: '#c084fc' }}
-                title={`Select ${matchState.trickClaimRank || heroClaimRank}s from your hand`}
+                style={{
+                  borderColor: selectedRank ? '#c084fc' : '#a855f7',
+                  color: selectedRank ? '#f3e8ff' : '#c084fc',
+                  background: selectedRank ? 'rgba(168, 85, 247, 0.28)' : undefined
+                }}
+                title={`Select all ${selectedRank || matchState.trickClaimRank || heroClaimRank}s from your hand (excludes Jokers)`}
               >
-                Pick {matchState.trickClaimRank ? `${matchState.trickClaimRank}s` : `${heroClaimRank}s`}
+                <Zap className="w-3 h-3 text-amber-300" />
+                <span>
+                  All {selectedRank || matchState.trickClaimRank || heroClaimRank}s
+                  {selectedRank && countOfSelectedRank > 0 ? ` (${countOfSelectedRank})` : ''}
+                </span>
               </button>
             </div>
           </div>
