@@ -1298,48 +1298,272 @@ button, input, select {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Hole Cards (Opponents - Compact card backs) */
+/* Hole Cards (Opponents - Compact card backs or revealed showdown cards) */
 .card-hole {
-  width: 42px;
-  height: 59px;
+  width: 46px;
+  height: 64px;
 }
 
 /* Hero Hole Cards (Current Player - Large & Prominent) */
 .card-hero {
-  width: 62px;
-  height: 87px;
+  width: 70px;
+  height: 98px;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.75));
 }
 
 /* Community Cards (Center Flop/Turn/River) - Large, prominent, and clearly visible */
 .card-community {
-  width: 82px;
-  height: 115px;
+  width: 84px;
+  height: 118px;
 }
 
 .poker-card-slot {
-  width: 82px;
-  height: 115px;
-  border-radius: 6px;
-  border: 1.5px dashed rgba(251, 191, 36, 0.25);
-  background: rgba(0, 0, 0, 0.25);
+  width: 84px;
+  height: 118px;
+  border-radius: 8px;
+  border: 1.5px dashed rgba(251, 191, 36, 0.28);
+  background: rgba(0, 0, 0, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* ==============================================================================
+   DESKTOP VIEW SIZING & PROMINENT CARD VISIBILITY
+   Fills empty desktop widescreen, enlarges felt, community & hole cards
+   ============================================================================== */
+
+/* 1. Standard Desktop / Laptop (>= 1024px) */
 @media (min-width: 1024px) {
-  .card-hero {
-    width: 66px;
-    height: 92px;
+  .poker-table-outer {
+    width: min(92vw, 1220px);
+    max-width: 1220px;
+    height: clamp(440px, calc(100vh - 250px), 560px);
+    border-width: 16px;
+    padding: 10px;
   }
-  .card-community {
-    width: 86px;
-    height: 120px;
-  }
+  .card-community,
   .poker-card-slot {
-    width: 86px;
-    height: 120px;
+    width: 98px !important;
+    height: 137px !important;
+    border-radius: 8px;
+  }
+  .card-hero {
+    width: 86px !important;
+    height: 120px !important;
+  }
+  .card-hole {
+    width: 58px !important;
+    height: 81px !important;
+  }
+  .poker-community-cards-row {
+    gap: 12px;
+    padding: 12px 18px;
+    border-radius: 20px;
+  }
+  .poker-hole-cards-row > *:not(:first-child) {
+    margin-left: -22px;
+  }
+  .poker-hole-cards-row.hero-cards-row > *:not(:first-child) {
+    margin-left: -28px;
+  }
+  .poker-player-box {
+    min-width: 115px;
+    padding: 6px 12px;
+    gap: 8px;
+    border-radius: 16px;
+  }
+  .poker-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+  .poker-username {
+    font-size: 13px;
+    max-width: 85px;
+  }
+  .poker-chips {
+    font-size: 12px;
+  }
+  .poker-pot-display {
+    padding: 6px 18px;
+    margin-bottom: 10px;
+  }
+  .poker-pot-title {
+    font-size: 11px;
+  }
+  .poker-pot-value {
+    font-size: 18px;
+  }
+  .poker-phase-tag {
+    font-size: 11px;
+    padding: 4px 12px;
+  }
+}
+
+/* 2. Large Desktop Displays (>= 1280px) */
+@media (min-width: 1280px) {
+  .poker-table-outer {
+    width: min(90vw, 1380px);
+    max-width: 1380px;
+    height: clamp(480px, calc(100vh - 240px), 630px);
+    border-width: 18px;
+    padding: 12px;
+  }
+  .card-community,
+  .poker-card-slot {
+    width: 112px !important;
+    height: 157px !important;
+    border-radius: 10px;
+  }
+  .card-hero {
+    width: 98px !important;
+    height: 137px !important;
+  }
+  .card-hole {
+    width: 68px !important;
+    height: 95px !important;
+  }
+  .poker-community-cards-row {
+    gap: 14px;
+    padding: 14px 22px;
+    border-radius: 22px;
+  }
+  .poker-hole-cards-row {
+    margin-bottom: 6px;
+  }
+  .poker-hole-cards-row > *:not(:first-child) {
+    margin-left: -26px;
+  }
+  .poker-hole-cards-row.hero-cards-row > *:not(:first-child) {
+    margin-left: -32px;
+  }
+  .poker-player-box {
+    min-width: 128px;
+    padding: 7px 14px;
+    gap: 10px;
+    border-radius: 18px;
+  }
+  .poker-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  .poker-username {
+    font-size: 14px;
+    max-width: 105px;
+  }
+  .poker-chips {
+    font-size: 13px;
+  }
+  .poker-pot-display {
+    padding: 6px 22px;
+    margin-bottom: 12px;
+  }
+  .poker-pot-title {
+    font-size: 12px;
+  }
+  .poker-pot-value {
+    font-size: 20px;
+  }
+  .poker-phase-tag {
+    font-size: 12px;
+    padding: 5px 14px;
+  }
+}
+
+/* 3. Ultra-wide / 1080p+ Full Desktop (>= 1536px) */
+@media (min-width: 1536px) {
+  .poker-table-outer {
+    width: min(88vw, 1500px);
+    max-width: 1500px;
+    height: clamp(520px, calc(100vh - 230px), 680px);
+    border-width: 20px;
+    padding: 14px;
+  }
+  .card-community,
+  .poker-card-slot {
+    width: 122px !important;
+    height: 171px !important;
+    border-radius: 10px;
+  }
+  .card-hero {
+    width: 108px !important;
+    height: 151px !important;
+  }
+  .card-hole {
+    width: 76px !important;
+    height: 106px !important;
+  }
+  .poker-community-cards-row {
+    gap: 16px;
+    padding: 16px 26px;
+    border-radius: 24px;
+  }
+  .poker-hole-cards-row {
+    margin-bottom: 7px;
+  }
+  .poker-hole-cards-row > *:not(:first-child) {
+    margin-left: -30px;
+  }
+  .poker-hole-cards-row.hero-cards-row > *:not(:first-child) {
+    margin-left: -36px;
+  }
+  .poker-player-box {
+    min-width: 138px;
+    padding: 8px 16px;
+    gap: 11px;
+    border-radius: 20px;
+  }
+  .poker-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
+  .poker-username {
+    font-size: 15px;
+    max-width: 120px;
+  }
+  .poker-chips {
+    font-size: 14px;
+  }
+  .poker-pot-display {
+    padding: 7px 24px;
+    margin-bottom: 14px;
+  }
+  .poker-pot-title {
+    font-size: 12px;
+  }
+  .poker-pot-value {
+    font-size: 22px;
+  }
+  .poker-phase-tag {
+    font-size: 13px;
+    padding: 5px 16px;
+  }
+}
+
+/* 4. Compact Desktop Heights (keeps cards proportional on short screens) */
+@media (min-width: 1024px) and (max-height: 720px) {
+  .poker-table-outer {
+    height: clamp(380px, calc(100vh - 210px), 480px) !important;
+  }
+  .card-community,
+  .poker-card-slot {
+    width: 88px !important;
+    height: 123px !important;
+  }
+  .card-hero {
+    width: 78px !important;
+    height: 109px !important;
+  }
+  .card-hole {
+    width: 52px !important;
+    height: 73px !important;
+  }
+  .poker-community-cards-row {
+    gap: 10px !important;
+    padding: 8px 14px !important;
   }
 }
 
@@ -1590,23 +1814,7 @@ button, input, select {
   backdrop-filter: blur(8px);
 }
 
-.poker-card-slot {
-  width: 70px;
-  height: 98px;
-  border-radius: 8px;
-  border: 2px dashed rgba(16, 185, 129, 0.25);
-  background: rgba(6, 78, 59, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-@media (min-width: 768px) {
-  .poker-card-slot {
-    width: 82px;
-    height: 115px;
-  }
-}
 
 /* ==============================================================================
    CHIP FLIGHT TO CENTER POT ANIMATION
