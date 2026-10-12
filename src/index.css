@@ -1847,18 +1847,64 @@ button, input, select {
 }
 
 .poker-preset-btn {
-  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 2px;
   border-radius: 8px;
   background: #1e293b;
   border: 1px solid #334155;
   color: #cbd5e1;
-  font-size: 10px;
-  font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 38px;
+}
+
+.poker-preset-title {
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.poker-preset-amount {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.1;
+  margin-top: 1px;
 }
 
 .poker-preset-btn:hover {
   background: #334155;
+  border-color: #64748b;
+  color: #ffffff;
+}
+
+.poker-preset-btn.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.poker-preset-btn.active .poker-preset-amount {
+  color: #dbeafe !important;
+}
+
+.poker-preset-btn.all-in {
+  background: linear-gradient(135deg, #881337 0%, #9f1239 100%);
+  border-color: #f43f5e;
+  color: #ffe4e6;
+}
+
+.poker-preset-btn.all-in .poker-preset-amount {
+  color: #fecdd3;
+}
+
+.poker-preset-btn.all-in:hover {
+  background: #be123c;
   color: #ffffff;
 }
 
@@ -4023,15 +4069,52 @@ button, input, select {
 
 [data-theme="light"] .poker-preset-btn,
 .light-theme .poker-preset-btn {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #334155;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .poker-preset-amount,
+.light-theme .poker-preset-amount {
+  color: #475569;
 }
 
 [data-theme="light"] .poker-preset-btn:hover,
 .light-theme .poker-preset-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #000000;
+}
+
+[data-theme="light"] .poker-preset-btn.active,
+.light-theme .poker-preset-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .poker-preset-btn.active .poker-preset-amount,
+.light-theme .poker-preset-btn.active .poker-preset-amount {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .poker-preset-btn.all-in,
+.light-theme .poker-preset-btn.all-in {
+  background: #fff1f2;
+  border: 1.5px solid #fb7185;
+  color: #be123c;
+}
+
+[data-theme="light"] .poker-preset-btn.all-in .poker-preset-amount,
+.light-theme .poker-preset-btn.all-in .poker-preset-amount {
+  color: #e11d48;
+}
+
+[data-theme="light"] .poker-preset-btn.all-in:hover,
+.light-theme .poker-preset-btn.all-in:hover {
+  background: #ffe4e6;
+  border-color: #f43f5e;
+  color: #9f1239;
 }
 
 [data-theme="light"] .poker-player-box,

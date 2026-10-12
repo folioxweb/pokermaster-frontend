@@ -1158,6 +1158,8 @@ export const PokerTable = ({
       bbSeat,
       currentBet: bbAmount,
       minRaise: bbAmount,
+      sbAmount,
+      bbAmount,
       mainPot: sbAmount + bbAmount,
       sidePots: [],
       winners: []
@@ -1788,7 +1790,7 @@ export const PokerTable = ({
           currentTurnPlayerName={currentTurnPlayer?.username}
           currentBet={handState.currentBet}
           minRaise={handState.minRaise}
-          bigBlind={gameRoom?.bigBlind || 20}
+          bigBlind={handState.bbAmount || tableSettings.bigBlind || gameRoom?.bigBlind || 20}
           mainPot={handState.mainPot}
           handRank={heroHandRank}
           turnTimeLeft={turnTimeLeft}

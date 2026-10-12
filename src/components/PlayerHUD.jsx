@@ -37,18 +37,26 @@ export const PlayerHUD = ({
     playChipClink();
   };
 
+  const multipliers = [2, 4, 8, 16];
+
+  const calcPresetAmount = (multiplier) => {
+    // When no bet has been made, base is the Big Blind (e.g. Bet 2 = 2 * BB)
+    // When facing a bet, base is max(currentBet, bigBlind)
+    const base = Math.max(currentBet, bigBlind || 20);
+    const target = base * multiplier;
+    return Math.min(maxBet, Math.max(minBetAllowed, target));
+  };
+
+  const applyMultiplier = (multiplier) => {
+    const amt = calcPresetAmount(multiplier);
+    setBetAmount(amt);
+    playChipClink();
+  };
+
   const applyPreset = (type) => {
     let amt = minBetAllowed;
     if (type === 'min') {
       amt = minBetAllowed;
-    } else if (type === '2.5bb') {
-      amt = Math.min(maxBet, Math.max(minBetAllowed, Math.round(bigBlind * 2.5)));
-    } else if (type === '3bb') {
-      amt = Math.min(maxBet, Math.max(minBetAllowed, bigBlind * 3));
-    } else if (type === 'half_pot') {
-      amt = Math.min(maxBet, Math.max(minBetAllowed, Math.round(currentBet + (mainPot * 0.5))));
-    } else if (type === 'pot') {
-      amt = Math.min(maxBet, Math.max(minBetAllowed, currentBet + mainPot));
     } else if (type === 'all_in') {
       amt = maxBet;
     }
@@ -104,12 +112,43 @@ export const PlayerHUD = ({
             {heroPlayer.chips > callAmount && (
               <div>
                 <div className="poker-presets-bar">
-                  <button type="button" onClick={() => applyPreset('min')} className="poker-preset-btn">Min</button>
-                  <button type="button" onClick={() => applyPreset('2.5bb')} className="poker-preset-btn">2.5x BB</button>
-                  <button type="button" onClick={() => applyPreset('3bb')} className="poker-preset-btn">3x BB</button>
-                  <button type="button" onClick={() => applyPreset('half_pot')} className="poker-preset-btn">1/2 Pot</button>
-                  <button type="button" onClick={() => applyPreset('pot')} className="poker-preset-btn">Pot</button>
-                  <button type="button" onClick={() => applyPreset('all_in')} className="poker-preset-btn" style={{ background: '#881337', color: '#fecdd3', borderColor: '#be123c' }}>All-In</button>
+                  {/* Min Option */}
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('min')}
+                    className={`poker-preset-btn ${betAmount === minBetAllowed ? 'active' : ''}`}
+                  >
+                    <span className="poker-preset-title">Min</span>
+                    <span className="poker-preset-amount">{formatPointsOnly(minBetAllowed)}</span>
+                  </button>
+
+                  {/* Dynamic Blind Multipliers: Bet 2, Bet 4, Bet 8, Bet 16 (or Raise 2x, 4x, etc.) */}
+                  {multipliers.map((m) => {
+                    const amt = calcPresetAmount(m);
+                    const isRaise = currentBet > 0;
+                    const label = isRaise ? `Raise ${m}x` : `Bet ${m}`;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => applyMultiplier(m)}
+                        className={`poker-preset-btn ${betAmount === amt ? 'active' : ''}`}
+                      >
+                        <span className="poker-preset-title">{label}</span>
+                        <span className="poker-preset-amount">{formatPointsOnly(amt)}</span>
+                      </button>
+                    );
+                  })}
+
+                  {/* All-In Option */}
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('all_in')}
+                    className={`poker-preset-btn all-in ${betAmount === maxBet ? 'active' : ''}`}
+                  >
+                    <span className="poker-preset-title">All-In</span>
+                    <span className="poker-preset-amount">{formatPointsOnly(maxBet)}</span>
+                  </button>
                 </div>
 
                 <div className="poker-slider-row">
