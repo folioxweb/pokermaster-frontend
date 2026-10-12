@@ -2022,22 +2022,23 @@ export const PokerTable = ({
                     return (
                       <div
                         key={p.seat_index}
-                        className={`waiting-roster-chip ${isHero ? 'is-hero' : ''} ${p.isBot ? 'is-bot' : ''}`}
+                        className={`waiting-roster-chip ${isHero ? 'is-hero' : ''} ${p.isBot ? 'is-bot' : ''} ${isCreator && !isHero ? 'has-kick' : ''}`}
                       >
                         <div className="waiting-roster-avatar">
                           {p.username.charAt(0).toUpperCase()}
                         </div>
                         <div className="waiting-roster-info">
-                          <span className="waiting-roster-name">
-                            {p.username} {isHero && <span className="waiting-you-badge">YOU</span>}
-                          </span>
+                          <div className="waiting-roster-name-row">
+                            <span className="waiting-roster-name">{p.username}</span>
+                            {isHero && <span className="waiting-you-badge">YOU</span>}
+                            {p.isBot && <span className="waiting-bot-tag">BOT</span>}
+                          </div>
                           <span className="waiting-roster-stack">
                             {formatPoints(p.chips || tableSettings.startingStack)}
                           </span>
                         </div>
-                        {p.isBot && <span className="waiting-bot-tag">AI BOT</span>}
 
-                        {/* Creator removal option for bots & other players */}
+                        {/* Sleek top-right ✕ kick button for creator */}
                         {isCreator && !isHero && (
                           <button
                             type="button"
@@ -2045,11 +2046,11 @@ export const PokerTable = ({
                               e.stopPropagation();
                               handleRemovePlayer(p);
                             }}
-                            className="waiting-kick-btn"
-                            title={`Remove ${p.username} from table (Host only)`}
+                            className="waiting-roster-kick-btn"
+                            title={`Remove ${p.username} from table`}
+                            aria-label={`Remove ${p.username}`}
                           >
-                            <UserX className="w-3 h-3" />
-                            <span>Remove</span>
+                            ✕
                           </button>
                         )}
                       </div>

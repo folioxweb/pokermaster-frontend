@@ -4113,19 +4113,19 @@ button, input, select {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
+  background: #0f172a;
   border: 1.5px solid rgba(99, 102, 241, 0.35);
   border-radius: 1.25rem;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(99, 102, 241, 0.2);
   display: flex;
   flex-direction: column;
 }
 
 [data-theme="light"] .waiting-lobby-card,
 .light-theme .waiting-lobby-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  background: #ffffff;
   border: 1.5px solid #cbd5e1;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .waiting-lobby-header {
@@ -4459,18 +4459,25 @@ button, input, select {
 
 .waiting-lobby-roster-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
 }
 
 .waiting-roster-chip {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 0;
+  transition: all 0.15s ease;
+}
+
+.waiting-roster-chip.has-kick {
+  padding-right: 32px;
 }
 
 .waiting-roster-chip.is-hero {
@@ -4482,6 +4489,7 @@ button, input, select {
 .light-theme .waiting-roster-chip {
   background: #ffffff;
   border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 [data-theme="light"] .waiting-roster-chip.is-hero,
@@ -4491,14 +4499,14 @@ button, input, select {
 }
 
 .waiting-roster-avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 900;
   color: #ffffff;
   flex-shrink: 0;
@@ -4507,12 +4515,21 @@ button, input, select {
 .waiting-roster-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.waiting-roster-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   min-width: 0;
 }
 
 .waiting-roster-name {
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
   color: #f8fafc;
   white-space: nowrap;
   overflow: hidden;
@@ -4526,10 +4543,10 @@ button, input, select {
 }
 
 .waiting-you-badge {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 800;
   color: #60a5fa;
-  margin-left: 2px;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .waiting-you-badge,
@@ -4542,25 +4559,26 @@ button, input, select {
 }
 
 .waiting-roster-stack {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #94a3b8;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .waiting-roster-stack,
 .light-theme .waiting-roster-stack {
-  color: #334155;
+  color: #475569;
   font-weight: 700;
 }
 
 .waiting-bot-tag {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 800;
   padding: 1px 4px;
   border-radius: 4px;
   background: rgba(148, 163, 184, 0.2);
   color: #94a3b8;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .waiting-bot-tag,
@@ -4570,40 +4588,48 @@ button, input, select {
   font-weight: 800;
 }
 
-.waiting-kick-btn {
+/* Sleek Circular Remove Button on Top-Right Corner */
+.waiting-roster-kick-btn {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 900;
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #f87171;
-  font-size: 0.68rem;
-  font-weight: 800;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.15s;
-  margin-left: auto;
+  transition: all 0.15s ease;
+  padding: 0;
+  line-height: 1;
 }
 
-.waiting-kick-btn:hover {
-  background: rgba(239, 68, 68, 0.35);
+.waiting-roster-kick-btn:hover {
+  background: #ef4444;
   color: #ffffff;
   border-color: #ef4444;
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
 }
 
-[data-theme="light"] .waiting-kick-btn,
-.light-theme .waiting-kick-btn {
-  background: #fef2f2;
-  border: 1.5px solid #f87171;
-  color: #b91c1c;
-  font-weight: 800;
-}
-
-[data-theme="light"] .waiting-kick-btn:hover,
-.light-theme .waiting-kick-btn:hover {
+[data-theme="light"] .waiting-roster-kick-btn,
+.light-theme .waiting-roster-kick-btn {
   background: #fee2e2;
-  color: #991b1b;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+}
+
+[data-theme="light"] .waiting-roster-kick-btn:hover,
+.light-theme .waiting-roster-kick-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
 }
 
 /* Settings Grid */
