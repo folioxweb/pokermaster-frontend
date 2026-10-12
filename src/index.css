@@ -4315,6 +4315,8 @@ button, input, select {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .waiting-lobby-section-title {
@@ -4330,13 +4332,95 @@ button, input, select {
 
 [data-theme="light"] .waiting-lobby-section-title,
 .light-theme .waiting-lobby-section-title {
-  color: #334155;
+  color: #0f172a;
+  font-weight: 900;
 }
 
 .waiting-sync-indicator {
   font-size: 0.7rem;
   font-weight: 600;
   color: #34d399;
+}
+
+[data-theme="light"] .waiting-sync-indicator,
+.light-theme .waiting-sync-indicator {
+  color: #047857;
+  font-weight: 800;
+}
+
+.waiting-lobby-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.waiting-lobby-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(14, 165, 233, 0.2);
+  border: 1px solid #38bdf8;
+  color: #bae6fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.waiting-lobby-link-btn:hover {
+  background: rgba(14, 165, 233, 0.35);
+  color: #ffffff;
+}
+
+[data-theme="light"] .waiting-lobby-link-btn,
+.light-theme .waiting-lobby-link-btn {
+  background: #f0f9ff;
+  border: 1.5px solid #0284c7;
+  color: #0369a1;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-lobby-link-btn:hover,
+.light-theme .waiting-lobby-link-btn:hover {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.waiting-lobby-invite-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #34d399;
+  color: #a7f3d0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.waiting-lobby-invite-btn:hover {
+  background: rgba(16, 185, 129, 0.35);
+  color: #ffffff;
+}
+
+[data-theme="light"] .waiting-lobby-invite-btn,
+.light-theme .waiting-lobby-invite-btn {
+  background: #ecfdf5;
+  border: 1.5px solid #059669;
+  color: #047857;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-lobby-invite-btn:hover,
+.light-theme .waiting-lobby-invite-btn:hover {
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .waiting-lobby-addbot-btn {
@@ -4357,6 +4441,20 @@ button, input, select {
 .waiting-lobby-addbot-btn:hover {
   background: rgba(99, 102, 241, 0.35);
   color: #ffffff;
+}
+
+[data-theme="light"] .waiting-lobby-addbot-btn,
+.light-theme .waiting-lobby-addbot-btn {
+  background: #eef2ff;
+  border: 1.5px solid #6366f1;
+  color: #4338ca;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-lobby-addbot-btn:hover,
+.light-theme .waiting-lobby-addbot-btn:hover {
+  background: #e0e7ff;
+  color: #312e81;
 }
 
 .waiting-lobby-roster-grid {
@@ -4424,6 +4522,7 @@ button, input, select {
 [data-theme="light"] .waiting-roster-name,
 .light-theme .waiting-roster-name {
   color: #0f172a;
+  font-weight: 800;
 }
 
 .waiting-you-badge {
@@ -4433,10 +4532,25 @@ button, input, select {
   margin-left: 2px;
 }
 
+[data-theme="light"] .waiting-you-badge,
+.light-theme .waiting-you-badge {
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 900;
+}
+
 .waiting-roster-stack {
   font-size: 0.7rem;
   font-weight: 600;
   color: #94a3b8;
+}
+
+[data-theme="light"] .waiting-roster-stack,
+.light-theme .waiting-roster-stack {
+  color: #334155;
+  font-weight: 700;
 }
 
 .waiting-bot-tag {
@@ -4447,6 +4561,49 @@ button, input, select {
   background: rgba(148, 163, 184, 0.2);
   color: #94a3b8;
   margin-left: auto;
+}
+
+[data-theme="light"] .waiting-bot-tag,
+.light-theme .waiting-bot-tag {
+  background: #e2e8f0;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.waiting-kick-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: auto;
+}
+
+.waiting-kick-btn:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+[data-theme="light"] .waiting-kick-btn,
+.light-theme .waiting-kick-btn {
+  background: #fef2f2;
+  border: 1.5px solid #f87171;
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-kick-btn:hover,
+.light-theme .waiting-kick-btn:hover {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 /* Settings Grid */
@@ -4489,13 +4646,26 @@ button, input, select {
 
 [data-theme="light"] .waiting-setting-label,
 .light-theme .waiting-setting-label {
-  color: #475569;
+  color: #0f172a;
+  font-weight: 900;
 }
 
 .waiting-setting-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.waiting-setting-pills.stack-pills {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+@media (max-width: 480px) {
+  .waiting-setting-pills.stack-pills {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .waiting-pill-btn {
@@ -4527,15 +4697,17 @@ button, input, select {
 
 [data-theme="light"] .waiting-pill-btn,
 .light-theme .waiting-pill-btn {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a;
+  font-weight: 800;
 }
 
 [data-theme="light"] .waiting-pill-btn:hover,
 .light-theme .waiting-pill-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #000000;
 }
 
 [data-theme="light"] .waiting-pill-btn.active,
@@ -4543,6 +4715,7 @@ button, input, select {
   background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
   border-color: #1d4ed8 !important;
   color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
 .waiting-lobby-footer {
@@ -4563,6 +4736,30 @@ button, input, select {
 .waiting-lobby-status-note {
   font-size: 0.8rem;
   flex: 1;
+}
+
+[data-theme="light"] .waiting-lobby-badge-status,
+.light-theme .waiting-lobby-badge-status {
+  color: #047857;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-lobby-status-note,
+.light-theme .waiting-lobby-status-note {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+[data-theme="light"] .waiting-lobby-status-note .text-emerald-400,
+.light-theme .waiting-lobby-status-note .text-emerald-400 {
+  color: #047857 !important;
+  font-weight: 800;
+}
+
+[data-theme="light"] .waiting-lobby-status-note .text-amber-400,
+.light-theme .waiting-lobby-status-note .text-amber-400 {
+  color: #b45309 !important;
+  font-weight: 800;
 }
 
 .waiting-lobby-start-btn {

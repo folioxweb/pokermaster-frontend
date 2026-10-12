@@ -5,6 +5,7 @@ import { PokerTable } from './components/PokerTable';
 import { SocialModal } from './components/SocialModal';
 import { InviteToast } from './components/InviteToast';
 import { useSocialPresence } from './lib/useSocialPresence';
+import { supabase } from './lib/supabaseClient';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -60,6 +61,43 @@ export default function App() {
       setLoadingInitial(false);
     }
   }, []);
+
+  // Direct table invite via URL: e.g. https://domain/?room=PK-7389
+  useEffect(() => {
+    if (!currentUser) return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const roomParam = params.get('room') || params.get('join');
+      if (roomParam) {
+        const cleanCode = roomParam.trim().toUpperCase();
+        supabase
+          .from('poker_rooms')
+          .select('*')
+          .eq('code', cleanCode)
+          .maybeSingle()
+          .then(({ data, error }) => {
+            if (data && !error) {
+              handleJoinGame({
+                roomId: data.id,
+                roomCode: data.code,
+                roomName: data.name,
+                isPractice: false,
+                hostUsername: data.host_username,
+                maxPlayers: data.max_players || 6,
+                startingStack: data.starting_stack || 1500,
+                smallBlind: data.small_blind || 10,
+                bigBlind: data.big_blind || 20,
+                turnTime: data.turn_time_seconds || 120
+              });
+              // Clean query param from address bar without page reload
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          });
+      }
+    } catch (err) {
+      console.warn('Direct invite link parse error:', err);
+    }
+  }, [currentUser]);
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);

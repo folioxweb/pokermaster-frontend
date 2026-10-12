@@ -18,7 +18,11 @@ import {
   Eye,
   Clock,
   Coins,
-  ChevronDown
+  ChevronDown,
+  Share2,
+  Link,
+  UserX,
+  Mail
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -106,6 +110,10 @@ export const PokerTable = ({
     blindsFrequency: gameRoom?.blindsFrequency || 'fast_5'
   });
   const [isWaitingLobbyMinimized, setIsWaitingLobbyMinimized] = useState(false);
+  const [inviteLinkCopied, setInviteLinkCopied] = useState(false);
+
+  // Check if current user is the room creator / host
+  const isCreator = (gameRoom?.host_username || gameRoom?.hostUsername) === user?.username || Boolean(gameRoom?.isHost);
 
   const channelRef = useRef(null);
   const turnTimerRef = useRef(null);
@@ -504,6 +512,17 @@ export const PokerTable = ({
             setTableSettings(payload.settings);
             setAnnouncement(`⚙️ ${payload.updatedBy || 'Player'} updated table settings`);
           }
+        })
+        .on('broadcast', { event: 'PLAYER_REMOVED' }, ({ payload }) => {
+          if (payload) {
+            if (payload.username === user?.username || payload.seatIndex === mySeatIndexRef.current) {
+              alert('You have been removed from the table by the room host.');
+              onLeaveTable();
+              return;
+            }
+            setPlayers((prev) => prev.filter((p) => p.seat_index !== payload.seatIndex));
+            setAnnouncement(`🚪 ${payload.username} was removed from the table`);
+          }
         });
 
       if (rid) {
@@ -834,33 +853,122 @@ export const PokerTable = ({
     }
   };
 
-  // Handle any player updating settings in the Waiting Lobby
-  const handleUpdateSetting = (key, value) => {
-    const updated = { ...tableSettings, [key]: value };
-    setTableSettings(updated);
+  // Handle any player updating settings in the Waiting Lobby (supports atomic object patches)
+  const handleUpdateSetting = (keyOrUpdates, value) => {
+    const updates = typeof keyOrUpdates === 'object' && keyOrUpdates !== null
+      ? keyOrUpdates
+      : { [keyOrUpdates]: value };
 
-    if (channelRef.current) {
-      channelRef.current.send({
-        type: 'broadcast',
-        event: 'TABLE_SETTINGS_SYNC',
-        payload: {
-          settings: updated,
-          updatedBy: user.username
-        }
-      });
+    setTableSettings((prev) => {
+      const updated = { ...prev, ...updates };
+
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'TABLE_SETTINGS_SYNC',
+          payload: {
+            settings: updated,
+            updatedBy: user.username
+          }
+        });
+      }
+
+      if (activeRoomIdRef.current) {
+        const dbPayload = {};
+        if ('smallBlind' in updates) dbPayload.small_blind = updates.smallBlind;
+        if ('bigBlind' in updates) dbPayload.big_blind = updates.bigBlind;
+        if ('startingStack' in updates) dbPayload.starting_stack = updates.startingStack;
+        if ('turnTime' in updates) dbPayload.turn_time_seconds = updates.turnTime;
+        supabase
+          .from('poker_rooms')
+          .update(dbPayload)
+          .eq('id', activeRoomIdRef.current)
+          .then(() => {});
+      }
+
+      return updated;
+    });
+  };
+
+  // Share or copy direct table invite link
+  const handleShareInviteLink = async () => {
+    const inviteUrl = `${window.location.origin}${window.location.pathname}?room=${gameRoom?.roomCode || ''}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Join Poker Table: ${gameRoom?.name || "Texas Hold'em"}`,
+          text: `Join my Texas Hold'em poker table with room code ${gameRoom?.roomCode}!`,
+          url: inviteUrl
+        });
+        setAnnouncement('Invite shared!');
+      } else {
+        await navigator.clipboard.writeText(inviteUrl);
+        setInviteLinkCopied(true);
+        setAnnouncement('🔗 Invite link copied to clipboard!');
+        setTimeout(() => setInviteLinkCopied(false), 2500);
+      }
+    } catch {
+      navigator.clipboard?.writeText(inviteUrl);
+      setInviteLinkCopied(true);
+      setAnnouncement('🔗 Invite link copied to clipboard!');
+      setTimeout(() => setInviteLinkCopied(false), 2500);
+    }
+  };
+
+  // Room creator can remove/kick players or bots
+  const handleRemovePlayer = async (targetPlayer) => {
+    if (!isCreator) {
+      alert('Only the room creator can remove players from this table.');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to remove "${targetPlayer.username}" from this table?`)) {
+      return;
     }
 
-    if (activeRoomIdRef.current) {
-      const dbPayload = {};
-      if (key === 'smallBlind') dbPayload.small_blind = value;
-      if (key === 'bigBlind') dbPayload.big_blind = value;
-      if (key === 'startingStack') dbPayload.starting_stack = value;
-      if (key === 'turnTime') dbPayload.turn_time_seconds = value;
-      supabase
-        .from('poker_rooms')
-        .update(dbPayload)
-        .eq('id', activeRoomIdRef.current)
-        .then(() => {});
+    // 1. Bot removal
+    if (targetPlayer.isBot) {
+      setPlayers((prev) => prev.filter((p) => p.seat_index !== targetPlayer.seat_index));
+      setAnnouncement(`Bot ${targetPlayer.username} was removed`);
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'PLAYER_REMOVED',
+          payload: {
+            seatIndex: targetPlayer.seat_index,
+            username: targetPlayer.username,
+            removedBy: user.username
+          }
+        });
+      }
+      return;
+    }
+
+    // 2. Real Player removal: Delete from Supabase & broadcast
+    try {
+      if (activeRoomIdRef.current) {
+        await supabase
+          .from('poker_room_players')
+          .delete()
+          .eq('room_id', activeRoomIdRef.current)
+          .eq('seat_index', targetPlayer.seat_index);
+      }
+
+      setPlayers((prev) => prev.filter((p) => p.seat_index !== targetPlayer.seat_index));
+      setAnnouncement(`${targetPlayer.username} was removed by room host`);
+
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'PLAYER_REMOVED',
+          payload: {
+            seatIndex: targetPlayer.seat_index,
+            username: targetPlayer.username,
+            removedBy: user.username
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Error removing player:', err);
     }
   };
 
@@ -1821,6 +1929,14 @@ export const PokerTable = ({
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleShareInviteLink}
+                      className="waiting-lobby-copy-btn waiting-lobby-link-icon-btn"
+                      title="Copy / Share Invite Link"
+                    >
+                      {inviteLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Link className="w-3.5 h-3.5 text-sky-400" />}
+                    </button>
                   </div>
                   {gameRoom?.host_username && (
                     <div className="waiting-lobby-host-box">
@@ -1850,16 +1966,54 @@ export const PokerTable = ({
                     <Users className="w-4 h-4 text-indigo-400" />
                     <span>Seated Players ({players.length} / {gameRoom?.maxPlayers || 6})</span>
                   </div>
-                  {players.length < (gameRoom?.maxPlayers || 6) && (
+
+                  <div className="waiting-lobby-actions-group">
+                    {/* Invite via direct URL link */}
                     <button
                       type="button"
-                      onClick={handleAddBot}
-                      className="waiting-lobby-addbot-btn"
+                      onClick={handleShareInviteLink}
+                      className="waiting-lobby-link-btn"
+                      title="Invite anyone via direct link"
                     >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>+ Add Practice Bot</span>
+                      {inviteLinkCopied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Link Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Invite Link</span>
+                        </>
+                      )}
                     </button>
-                  )}
+
+                    {/* Invite live friends from Social Suite */}
+                    {onOpenSocial && (
+                      <button
+                        type="button"
+                        onClick={onOpenSocial}
+                        className="waiting-lobby-invite-btn"
+                        title="Invite online friends"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Invite Friends</span>
+                      </button>
+                    )}
+
+                    {/* Add Practice Bot */}
+                    {players.length < (gameRoom?.maxPlayers || 6) && (
+                      <button
+                        type="button"
+                        onClick={handleAddBot}
+                        className="waiting-lobby-addbot-btn"
+                        title="Add a practice bot"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>+ Add Practice Bot</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="waiting-lobby-roster-grid">
@@ -1878,10 +2032,26 @@ export const PokerTable = ({
                             {p.username} {isHero && <span className="waiting-you-badge">YOU</span>}
                           </span>
                           <span className="waiting-roster-stack">
-                            {formatPoints(p.chips || tableSettings.startingStack)} pts
+                            {formatPoints(p.chips || tableSettings.startingStack)}
                           </span>
                         </div>
                         {p.isBot && <span className="waiting-bot-tag">AI BOT</span>}
+
+                        {/* Creator removal option for bots & other players */}
+                        {isCreator && !isHero && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePlayer(p);
+                            }}
+                            className="waiting-kick-btn"
+                            title={`Remove ${p.username} from table (Host only)`}
+                          >
+                            <UserX className="w-3 h-3" />
+                            <span>Remove</span>
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -1905,12 +2075,12 @@ export const PokerTable = ({
                       <Coins className="w-3.5 h-3.5 text-amber-400" />
                       <span>Starting Chips</span>
                     </label>
-                    <div className="waiting-setting-pills">
+                    <div className="waiting-setting-pills stack-pills">
                       {[500, 1000, 1500, 2500, 5000].map((stack) => (
                         <button
                           key={stack}
                           type="button"
-                          onClick={() => handleUpdateSetting('startingStack', stack)}
+                          onClick={() => handleUpdateSetting({ startingStack: stack })}
                           className={`waiting-pill-btn ${tableSettings.startingStack === stack ? 'active' : ''}`}
                         >
                           {formatPoints(stack)}
@@ -1936,8 +2106,7 @@ export const PokerTable = ({
                           key={b.label}
                           type="button"
                           onClick={() => {
-                            handleUpdateSetting('smallBlind', b.sb);
-                            handleUpdateSetting('bigBlind', b.bb);
+                            handleUpdateSetting({ smallBlind: b.sb, bigBlind: b.bb });
                           }}
                           className={`waiting-pill-btn ${tableSettings.smallBlind === b.sb && tableSettings.bigBlind === b.bb ? 'active' : ''}`}
                         >
@@ -1963,7 +2132,7 @@ export const PokerTable = ({
                         <button
                           key={t.sec}
                           type="button"
-                          onClick={() => handleUpdateSetting('turnTime', t.sec)}
+                          onClick={() => handleUpdateSetting({ turnTime: t.sec })}
                           className={`waiting-pill-btn ${tableSettings.turnTime === t.sec ? 'active' : ''}`}
                         >
                           {t.label}
@@ -1988,7 +2157,7 @@ export const PokerTable = ({
                         <button
                           key={f.id}
                           type="button"
-                          onClick={() => handleUpdateSetting('blindsFrequency', f.id)}
+                          onClick={() => handleUpdateSetting({ blindsFrequency: f.id })}
                           className={`waiting-pill-btn ${tableSettings.blindsFrequency === f.id ? 'active' : ''}`}
                         >
                           {f.label}
