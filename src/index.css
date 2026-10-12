@@ -5935,39 +5935,42 @@ button, input, select {
 .bluff-fanned-card {
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2), filter 0.18s ease;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1), filter 0.18s ease;
   user-select: none;
   flex-shrink: 0;
   border-radius: 8px;
 }
 
 .bluff-fanned-card:hover {
-  transform: translateY(-24px);
+  transform: translateY(-8px);
   z-index: 130 !important;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.9));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
 }
 
 .bluff-fanned-card.is-selected {
-  transform: translateY(-36px);
+  transform: translateY(-14px);
   z-index: 160 !important;
-  filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.95)) drop-shadow(0 14px 28px rgba(0, 0, 0, 0.85));
+  outline: 2.5px solid #c084fc;
+  outline-offset: -1px;
+  border-radius: 8px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.75));
 }
 
 .bluff-card-selected-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 22px;
-  height: 22px;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
   border-radius: 9999px;
   background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-  border: 2px solid #ffffff;
+  border: 1.5px solid #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   z-index: 170;
-  animation: popIn 0.16s ease-out;
+  animation: popIn 0.14s ease-out;
 }
 
 @keyframes popIn {
@@ -6270,16 +6273,16 @@ button, input, select {
     margin-top: -24px;
   }
   .bluff-fanned-card:hover {
-    transform: translateY(-12px);
+    transform: translateY(-5px);
   }
   .bluff-fanned-card.is-selected {
-    transform: translateY(-20px);
+    transform: translateY(-10px);
   }
   .bluff-card-selected-badge {
-    width: 18px;
-    height: 18px;
-    top: -6px;
-    right: -6px;
+    width: 15px;
+    height: 15px;
+    top: -4px;
+    right: -4px;
   }
   .bluff-challenge-floating-banner {
     flex-direction: column;
@@ -6330,6 +6333,81 @@ button, input, select {
     height: 25px;
     font-size: 10px;
   }
+}
+
+/* ==========================================================================
+   LOBBY SOLO PRACTICE ARENA & CAPACITY GRID 7 STYLES
+   ========================================================================== */
+.table-capacity-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .table-capacity-grid-7 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+}
+
+.lobby-info-box-purple {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(88, 28, 135, 0.25);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #e9d5ff;
+  margin: 0.85rem 0;
+}
+
+.lobby-info-box-emerald {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(6, 78, 59, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+  margin: 0.85rem 0;
+}
+
+.lobby-info-box-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.lobby-info-box-text {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+[data-theme="light"] .lobby-info-box-purple,
+.light-theme .lobby-info-box-purple {
+  background: #faf5ff;
+  border-color: #d8b4fe;
+  color: #6b21a8;
+}
+
+[data-theme="light"] .lobby-info-box-purple .lobby-info-box-text,
+.light-theme .lobby-info-box-purple .lobby-info-box-text {
+  color: #581c87;
+}
+
+[data-theme="light"] .lobby-info-box-emerald,
+.light-theme .lobby-info-box-emerald {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #065f46;
+}
+
+[data-theme="light"] .lobby-info-box-emerald .lobby-info-box-text,
+.light-theme .lobby-info-box-emerald .lobby-info-box-text {
+  color: #047857;
 }
 
 

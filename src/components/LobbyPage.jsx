@@ -861,39 +861,29 @@ export const LobbyPage = ({
                           {bluffChallengeRule === 'anyone' ? '⚡ Anyone Can Call' : '👉 Next Person Only'}
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="bluff-deck-grid">
                         <button
                           type="button"
                           onClick={() => setBluffChallengeRule('anyone')}
-                          className={`p-3 rounded-xl border text-left transition-all ${
-                            bluffChallengeRule === 'anyone'
-                              ? 'bg-purple-950/50 border-purple-500 text-purple-200 shadow-lg shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffChallengeRule === 'anyone' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1">
-                            <span>⚡ Anyone Can Call</span>
+                          <div className="deck-card-icon">⚡</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Anyone Can Call</span>
+                            <span className="deck-card-desc">Free-for-all: Any seated player can call bluff during the reaction timer.</span>
                           </div>
-                          <span className="text-[11px] text-slate-400 leading-tight block">
-                            Free-for-all: Any seated player can call bluff during the reaction timer.
-                          </span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setBluffChallengeRule('next_only')}
-                          className={`p-3 rounded-xl border text-left transition-all ${
-                            bluffChallengeRule === 'next_only'
-                              ? 'bg-purple-950/50 border-purple-500 text-purple-200 shadow-lg shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffChallengeRule === 'next_only' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5 mb-1">
-                            <span>👉 Next Person Only</span>
+                          <div className="deck-card-icon">👉</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Next Person Only</span>
+                            <span className="deck-card-desc">Strict turn rotation: Only the immediate next player challenges or accepts & plays!</span>
                           </div>
-                          <span className="text-[11px] text-slate-400 leading-tight block">
-                            Strict turn rotation: Only the immediate next player challenges or accepts & plays!
-                          </span>
                         </button>
                       </div>
                     </div>
@@ -1253,112 +1243,111 @@ export const LobbyPage = ({
               {selectedGameMode === 'bluff' ? (
                 /* --- BLUFF MASTER PRACTICE --- */
                 <div>
-                  <div className="flex items-center space-x-2 text-purple-400 mb-1">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c084fc', marginBottom: '4px' }}>
                     <Sparkles className="w-5 h-5" />
                     <h2 className="lobby-section-title">Solo Bluff Practice Arena</h2>
                   </div>
-                  <p className="lobby-section-desc mb-5">
+                  <p className="lobby-section-desc" style={{ marginBottom: '1.25rem' }}>
                     Practice Bluff (Cheat / I Doubt It) against AI bots with strategic bluffing and probabilistic challenge logic.
                   </p>
 
-                  <div className="space-y-4">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {/* Table Size Pill Grid */}
                     <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="lobby-form-label">Table Size</label>
-                        <span className="text-xs font-bold text-purple-400">{bluffPracticeSeats} Players</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <label className="lobby-form-label" style={{ margin: 0 }}>Table Size</label>
+                        <span className="table-badge-capacity">{bluffPracticeSeats} Players</span>
                       </div>
-                      <input
-                        type="range"
-                        min={2}
-                        max={8}
-                        value={bluffPracticeSeats}
-                        onChange={(e) => setBluffPracticeSeats(Number(e.target.value))}
-                        className="w-full accent-purple-500 cursor-pointer"
-                      />
-                      <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                        <span>2 Players</span>
-                        <span>5 Standard</span>
-                        <span>8 Full Ring</span>
+                      <div className="table-capacity-grid-7">
+                        {[2, 3, 4, 5, 6, 7, 8].map((seats) => (
+                          <button
+                            key={seats}
+                            type="button"
+                            onClick={() => setBluffPracticeSeats(seats)}
+                            className={`table-capacity-pill ${bluffPracticeSeats === seats ? 'active' : ''}`}
+                          >
+                            <span className="capacity-pill-number">{seats}</span>
+                            <span className="capacity-pill-label">
+                              {seats === 2 ? 'Heads-Up' : seats === 5 ? '5-Std' : seats === 8 ? '8-Ring' : `${seats}P`}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
+                    {/* Deck Configuration Grid */}
                     <div>
                       <label className="lobby-form-label">Deck Configuration</label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="bluff-deck-grid">
                         <button
                           type="button"
                           onClick={() => setBluffDeckType('single')}
-                          className={`p-2.5 rounded-xl border text-left transition-all ${
-                            bluffDeckType === 'single'
-                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffDeckType === 'single' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1">
-                            <span>🃏 Single Deck</span>
+                          <div className="deck-card-icon">🃏</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Single Deck (54 Cards)</span>
+                            <span className="deck-card-desc">52 standard cards + 2 wild Jokers. Best for 2–4 players.</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">54 Cards (2 Jokers)</div>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setBluffDeckType('double')}
-                          className={`p-2.5 rounded-xl border text-left transition-all ${
-                            bluffDeckType === 'double'
-                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffDeckType === 'double' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1">
-                            <span>🃏🃏 Double Deck</span>
+                          <div className="deck-card-icon">🃏🃏</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Double Deck (108 Cards)</span>
+                            <span className="deck-card-desc">104 standard cards + 4 wild Jokers. Best for 5–8 players.</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">108 Cards (4 Jokers)</div>
                         </button>
                       </div>
                     </div>
 
+                    {/* Challenge Rule Mode Grid */}
                     <div>
-                      <label className="lobby-form-label">Challenge Rule Mode</label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <label className="lobby-form-label" style={{ margin: 0 }}>Challenge Rule Mode</label>
+                        <span className="table-badge-shotclock">
+                          {bluffChallengeRule === 'anyone' ? '⚡ Anyone Can Call' : '👉 Next Person Only'}
+                        </span>
+                      </div>
+                      <div className="bluff-deck-grid">
                         <button
                           type="button"
                           onClick={() => setBluffChallengeRule('anyone')}
-                          className={`p-2.5 rounded-xl border text-left transition-all ${
-                            bluffChallengeRule === 'anyone'
-                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffChallengeRule === 'anyone' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1">
-                            <span>⚡ Anyone Can Call</span>
+                          <div className="deck-card-icon">⚡</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Anyone Can Call</span>
+                            <span className="deck-card-desc">Free-for-all: Any player can challenge during the reaction timer.</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">Free-for-all challenge window</div>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setBluffChallengeRule('next_only')}
-                          className={`p-2.5 rounded-xl border text-left transition-all ${
-                            bluffChallengeRule === 'next_only'
-                              ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-900/30'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
+                          className={`bluff-deck-card ${bluffChallengeRule === 'next_only' ? 'active' : ''}`}
                         >
-                          <div className="text-xs font-bold text-white flex items-center gap-1">
-                            <span>👉 Next Person Only</span>
+                          <div className="deck-card-icon">👉</div>
+                          <div className="deck-card-meta">
+                            <span className="deck-card-title">Next Person Only</span>
+                            <span className="deck-card-desc">Strict turn rotation: Only the immediate next player challenges or plays.</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">Strict clockwise rotation</div>
                         </button>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-800/40 text-xs text-purple-200 space-y-1.5">
-                      <div className="flex items-center space-x-2 text-purple-300 font-bold">
+                    {/* AI Info Banner */}
+                    <div className="lobby-info-box-purple">
+                      <div className="lobby-info-box-header">
                         <CheckCircle2 className="w-4 h-4 text-purple-400" />
                         <span>Realistic Bluff AI Heuristics</span>
                       </div>
-                      <p className="text-[11px] text-slate-300">
-                        Bots follow rank rules (A → 2 → ... → K → A), execute wild Joker substitutions, bluff when necessary, and challenge suspicious claims!
+                      <p className="lobby-info-box-text">
+                        Bots analyze pile depth, calculate card distribution odds, bluff with strategic frequencies, and challenge suspicious claims!
                       </p>
                     </div>
 
@@ -1375,42 +1364,44 @@ export const LobbyPage = ({
               ) : (
                 /* --- TEXAS HOLD'EM PRACTICE --- */
                 <div>
-                  <div className="flex items-center space-x-2 text-emerald-400 mb-1">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', marginBottom: '4px' }}>
                     <Bot className="w-5 h-5" />
                     <h2 className="lobby-section-title">Solo Hold'em Arena</h2>
                   </div>
-                  <p className="lobby-section-desc mb-5">
+                  <p className="lobby-section-desc" style={{ marginBottom: '1.25rem' }}>
                     Practice Texas Hold'em against intelligent simulation bots with instant dealt hands and zero waiting.
                   </p>
 
-                  <div className="space-y-4">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="lobby-form-label">Table Size</label>
-                        <span className="text-xs font-bold text-emerald-400">{practiceSeats} Seats</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <label className="lobby-form-label" style={{ margin: 0 }}>Table Size</label>
+                        <span className="table-badge-capacity">{practiceSeats} Seats</span>
                       </div>
-                      <input
-                        type="range"
-                        min={3}
-                        max={8}
-                        value={practiceSeats}
-                        onChange={(e) => setPracticeSeats(Number(e.target.value))}
-                        className="w-full accent-emerald-400 cursor-pointer"
-                      />
-                      <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                        <span>3 Players</span>
-                        <span>6-Max</span>
-                        <span>8 Full Ring</span>
+                      <div className="table-capacity-grid">
+                        {[3, 4, 5, 6, 7, 8].map((seats) => (
+                          <button
+                            key={seats}
+                            type="button"
+                            onClick={() => setPracticeSeats(seats)}
+                            className={`table-capacity-pill ${practiceSeats === seats ? 'active' : ''}`}
+                          >
+                            <span className="capacity-pill-number">{seats}</span>
+                            <span className="capacity-pill-label">
+                              {seats === 3 ? '3-Max' : seats === 6 ? '6-Max' : seats === 8 ? '8-Ring' : `${seats} Seats`}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1.5">
-                      <div className="flex items-center space-x-2 text-emerald-300 font-bold">
-                        <CheckCircle2 className="w-4 h-4" />
+                    <div className="lobby-info-box-emerald">
+                      <div className="lobby-info-box-header">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                         <span>Realistic Bot Decision Engine</span>
                       </div>
-                      <p className="text-[11px] text-slate-400">
-                        Bots fold, call, bet, and raise based on pot odds and hand rankings. Perfect for warming up or testing bankroll strategies!
+                      <p className="lobby-info-box-text">
+                        Bots fold, call, bet, and raise based on pot odds, position, and hand strength. Perfect for warming up or testing bankroll strategies!
                       </p>
                     </div>
 

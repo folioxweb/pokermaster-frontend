@@ -756,35 +756,13 @@ export const BluffTable = ({
                   )}
                 </div>
 
-                {/* Challenge Reaction Slap Window on Felt */}
+                {/* Challenge Reaction Countdown on Center Felt */}
                 {matchState.phase === 'challenge_window' && (
-                  <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#f43f5e', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                      ⚡ CHALLENGE WINDOW: {challengeTimeLeft}s
+                  <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(225, 29, 72, 0.18)', border: '1px solid rgba(225, 29, 72, 0.5)', padding: '4px 12px', borderRadius: '9999px' }}>
+                    <Clock className="w-3.5 h-3.5 text-rose-400 animate-spin" />
+                    <span style={{ fontSize: '11px', fontWeight: 900, color: '#fda4af', letterSpacing: '0.08em' }}>
+                      REACTION WINDOW: {challengeTimeLeft}s
                     </span>
-                    {canIChallenge && (
-                      <button
-                        type="button"
-                        onClick={() => handleCallBluff(mySeatIndex)}
-                        style={{
-                          background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
-                          border: '2px solid #fda4af',
-                          color: '#ffffff',
-                          fontWeight: 900,
-                          fontSize: '14px',
-                          padding: '10px 24px',
-                          borderRadius: '9999px',
-                          cursor: 'pointer',
-                          boxShadow: '0 0 25px rgba(225, 29, 72, 0.7)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        <ShieldAlert className="w-5 h-5 text-amber-300" />
-                        <span>CALL BLUFF!</span>
-                      </button>
-                    )}
                   </div>
                 )}
               </div>
