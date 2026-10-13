@@ -317,6 +317,12 @@ export const BluffTable = ({
           if (payload?.challengeResult) setChallengeResult(payload.challengeResult);
           if (payload?.matchState) setMatchState(payload.matchState);
           setAnnouncement(`🚨 ${payload.challenger} CALLED BLUFF on ${payload.target}!`);
+        })
+        .on('broadcast', { event: 'BLUFF_MATCH_VICTORY' }, ({ payload }) => {
+          playWinCelebration();
+          confetti({ particleCount: 220, spread: 110, origin: { y: 0.5 } });
+          if (payload?.matchState) setMatchState(payload.matchState);
+          if (payload?.announcement) setAnnouncement(payload.announcement);
         });
 
       channel.subscribe((status) => {
@@ -610,8 +616,13 @@ export const BluffTable = ({
     if (activeState.phase !== 'challenge_window') return;
 
     // If last player emptied their hand and wasn't challenged, they WIN!
-    if (activeState.winner) {
-      handleMatchVictory(activeState.winner);
+    const lastP = activePlayers.find((p) => p.seat_index === activeState.lastPlaySeat);
+    const lastPCount = activeState.lastPlaySeat === mySeatIndexRef.current
+      ? myHandRef.current.length
+      : (lastP?.cardCount ?? (lastP?.cards?.length ?? 1));
+
+    if (activeState.winner || lastPCount === 0) {
+      handleMatchVictory(activeState.winner || lastP);
       return;
     }
 
@@ -651,6 +662,15 @@ export const BluffTable = ({
     if (newPassCount >= totalPlayers - 1 && activeState.lastPlaySeat !== null) {
       const clearedPileCount = activeState.discardPile.length;
       const lastPlayer = currentPlayers.find((p) => p.seat_index === activeState.lastPlaySeat);
+      const lastPCount = activeState.lastPlaySeat === mySeatIndexRef.current
+        ? myHandRef.current.length
+        : (lastPlayer?.cardCount ?? (lastPlayer?.cards?.length ?? 1));
+
+      // If the player who played last has 0 cards, their play survived everyone passing! THEY WIN!
+      if (lastPCount === 0) {
+        handleMatchVictory(lastPlayer);
+        return;
+      }
 
       // ALL CARDS IN DISCARD PILE ARE CLEARED OUT OF THE GAME!
       // AND THE PLAYER WHO PLAYED LAST GETS THE CHANCE!
@@ -851,10 +871,24 @@ export const BluffTable = ({
       });
     }
 
-    // Show reveal modal for 4.5 seconds, then winner leads new trick
+    // Show reveal modal for 4.5 seconds, then declare victory or winner leads new trick
     setTimeout(() => {
       setChallengeResult(null);
       challengeLockRef.current = false;
+
+      // 1. VICTORY CHECK: Did the bluffer survive truthfully with 0 cards?
+      if (!isBluff) {
+        const blufferP = playersRef.current.find((p) => p.seat_index === blufferSeat);
+        const blufferCount = blufferSeat === mySeatIndexRef.current
+          ? myHandRef.current.length
+          : (blufferP?.cardCount ?? (blufferP?.cards?.length ?? 1));
+
+        if (blufferCount === 0) {
+          handleMatchVictory(blufferP || bluffer);
+          return;
+        }
+      }
+
       const starter = playersRef.current.find((p) => p.seat_index === nextStarterSeat);
       const nextMatch = {
         ...matchStateRef.current,
@@ -983,13 +1017,61 @@ export const BluffTable = ({
 
   // Victory Handler
   const handleMatchVictory = (champ) => {
+    if (!champ) return;
     playWinCelebration();
     confetti({ particleCount: 220, spread: 110, origin: { y: 0.5 } });
-    setAnnouncement(`🏆 ${champ.username} EMPTIED THEIR HAND AND WINS THE MATCH!`);
-    setMatchState((prev) => ({ ...prev, phase: 'ended', winner: champ }));
+    const winMsg = `🏆 ${champ.username} EMPTIED THEIR HAND AND WON THE MATCH!`;
+    setAnnouncement(winMsg);
+    const endedState = {
+      ...matchStateRef.current,
+      phase: 'ended',
+      winner: champ,
+      lastPlayedCards: [],
+      discardPile: []
+    };
+    setMatchState(endedState);
+
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'BLUFF_MATCH_VICTORY',
+        payload: {
+          winner: champ,
+          matchState: endedState,
+          announcement: winMsg
+        }
+      });
+    }
   };
 
-  const isMyTurn = matchState.currentTurnSeat === mySeatIndex && matchState.phase === 'playing';
+  // Safety Monitor: Ensure a player who has 0 cards is immediately declared winner
+  useEffect(() => {
+    if (matchState.phase === 'playing' && !matchState.winner) {
+      if (myHand.length === 0 && !matchState.challengeCountdown) {
+        const heroP = players.find((p) => p.seat_index === mySeatIndex);
+        if (heroP) {
+          handleMatchVictory(heroP);
+          return;
+        }
+      }
+      if (!matchState.challengeCountdown) {
+        const zeroCardsPlayer = players.find((p) => p.cardCount === 0 && p.seat_index !== mySeatIndex);
+        if (zeroCardsPlayer) {
+          handleMatchVictory(zeroCardsPlayer);
+          return;
+        }
+      }
+      const activeP = players.find((p) => p.seat_index === matchState.currentTurnSeat);
+      if (activeP) {
+        const count = activeP.seat_index === mySeatIndex ? myHand.length : (activeP.cardCount ?? 1);
+        if (count === 0) {
+          handleMatchVictory(activeP);
+        }
+      }
+    }
+  }, [matchState.phase, matchState.challengeCountdown, matchState.winner, matchState.currentTurnSeat, myHand.length, players, mySeatIndex]);
+
+  const isMyTurn = matchState.currentTurnSeat === mySeatIndex && matchState.phase === 'playing' && myHand.length > 0;
 
   // Strict Turn Rotation vs Anyone Can Call
   const totalPlayersCount = players.length;
@@ -1020,6 +1102,14 @@ export const BluffTable = ({
     if (totalInRow > 6) return '-30px';
     return '-22px';
   };
+
+  // Card & Selection Calculations for Render
+  const countOfSelectedRank = selectedRank
+    ? myHand.filter((c) => c !== 'Jr' && c !== 'Jb' && (c.length === 3 ? '10' : c[0]) === selectedRank).length
+    : 0;
+
+  const row1Cards = isMobile && myHand.length > 7 ? myHand.slice(0, Math.ceil(myHand.length / 2)) : myHand;
+  const row2Cards = isMobile && myHand.length > 7 ? myHand.slice(Math.ceil(myHand.length / 2)) : [];
 
   return (
     <div className="table-viewport-container">
@@ -1143,12 +1233,14 @@ export const BluffTable = ({
                 {/* Trick Rank Status */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 18px', borderRadius: '9999px', background: 'rgba(15, 23, 42, 0.95)', border: '1.5px solid #a855f7', marginBottom: '12px' }}>
                   <span style={{ fontSize: '11px', fontWeight: 800, color: '#c084fc' }}>
-                    {matchState.trickClaimRank ? 'LOCKED TRICK RANK:' : 'TRICK STATUS:'}
+                    {matchState.phase === 'ended' ? 'MATCH RESULT:' : (matchState.trickClaimRank ? 'LOCKED TRICK RANK:' : 'TRICK STATUS:')}
                   </span>
-                  <span style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff' }}>
-                    {matchState.trickClaimRank
-                      ? `${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank} (${matchState.trickClaimRank}s ONLY)`
-                      : `${players.find((p) => p.seat_index === matchState.currentTurnSeat)?.username || 'LEADER'} GETS THE CHANCE`}
+                  <span style={{ fontSize: '16px', fontWeight: 900, color: matchState.phase === 'ended' ? '#fbbf24' : '#ffffff' }}>
+                    {matchState.phase === 'ended'
+                      ? `🏆 ${matchState.winner?.username || 'WINNER'} WINS!`
+                      : (matchState.trickClaimRank
+                        ? `${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank} (${matchState.trickClaimRank}s ONLY)`
+                        : `${players.find((p) => p.seat_index === matchState.currentTurnSeat)?.username || 'LEADER'} GETS THE CHANCE`)}
                   </span>
                 </div>
 
@@ -1546,6 +1638,96 @@ export const BluffTable = ({
         </div>
       )}
 
+      {/* GRAND VICTORY MODAL */}
+      {matchState.phase === 'ended' && matchState.winner && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 10000,
+          background: 'rgba(0, 0, 0, 0.88)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(180deg, #1e1338 0%, #0d091a 100%)',
+            border: '2px solid #fbbf24',
+            borderRadius: '28px',
+            padding: '32px 28px',
+            maxWidth: '500px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 25px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(251, 191, 36, 0.35)',
+            animation: 'popIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)'
+          }}>
+            <div style={{
+              width: '76px',
+              height: '76px',
+              borderRadius: '9999px',
+              background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              boxShadow: '0 0 30px rgba(251, 191, 36, 0.6)'
+            }}>
+              <Trophy className="w-10 h-10 text-white fill-white" />
+            </div>
+
+            <span style={{ fontSize: '13px', fontWeight: 900, color: '#fbbf24', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              👑 CHAMPION OF TAASH ROYALE 👑
+            </span>
+
+            <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', margin: '8px 0 6px 0' }}>
+              {matchState.winner.username} WINS!
+            </h2>
+
+            <p style={{ fontSize: '14px', color: '#cbd5e1', marginBottom: '24px' }}>
+              {matchState.winner.seat_index === mySeatIndex ? 'Congratulations! You emptied your hand first and won the match!' : `${matchState.winner.username} has discarded all their cards and won the game!`}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {isCreator && (
+                <button
+                  type="button"
+                  onClick={startNewBluffMatch}
+                  className="waiting-lobby-start-btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
+                    borderColor: '#c084fc',
+                    width: '100%',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>PLAY AGAIN (DEAL NEW HAND)</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={onLeaveTable}
+                className="table-nav-btn"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  padding: '12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ffffff',
+                  fontWeight: 700
+                }}
+              >
+                <span>RETURN TO LOBBY</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* FULL-WIDTH BLUFF BOTTOM VIEWPORT (NO GIANT WHITE BACKGROUND) */}
       <div className="bluff-bottom-container">
         {/* Challenge Reaction Slap Banner (Floating Centered Pill) */}
@@ -1763,7 +1945,13 @@ export const BluffTable = ({
           </div>
 
           {/* Center: Locked Trick Rank vs Lead Any Rank Selector */}
-          {isMyTurn ? (
+          {matchState.phase === 'ended' ? (
+            <div className="bluff-dock-center">
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#fbbf24' }}>
+                🏆 MATCH CONCLUDED • {matchState.winner?.username || 'Winner'} WON!
+              </span>
+            </div>
+          ) : isMyTurn ? (
             matchState.trickClaimRank ? (
               <div className="bluff-dock-center">
                 <div className="bluff-dock-locked-chip">
@@ -1807,38 +1995,63 @@ export const BluffTable = ({
             </div>
           )}
 
-          {/* Right: Turn Actions (Pass / Play) */}
+          {/* Right: Turn Actions (Pass / Play / Rematch) */}
           <div className="bluff-dock-right">
-            {isMyTurn && matchState.passAllowed && (
-              <button
-                type="button"
-                onClick={() => handlePassTurn(mySeatIndex)}
-                className="table-nav-btn bluff-dock-btn"
-                style={{ padding: '8px 18px', fontWeight: 800, background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444', color: '#fca5a5' }}
-              >
-                PASS
-              </button>
-            )}
+            {matchState.phase === 'ended' ? (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {isCreator && (
+                  <button
+                    type="button"
+                    onClick={startNewBluffMatch}
+                    className="bluff-play-btn-large"
+                    style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)' }}
+                  >
+                    PLAY AGAIN
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onLeaveTable}
+                  className="table-nav-btn bluff-dock-btn"
+                  style={{ padding: '8px 16px' }}
+                >
+                  LEAVE
+                </button>
+              </div>
+            ) : (
+              <>
+                {isMyTurn && matchState.passAllowed && (
+                  <button
+                    type="button"
+                    onClick={() => handlePassTurn(mySeatIndex)}
+                    className="table-nav-btn bluff-dock-btn"
+                    style={{ padding: '8px 18px', fontWeight: 800, background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444', color: '#fca5a5' }}
+                  >
+                    PASS
+                  </button>
+                )}
 
-            <button
-              type="button"
-              disabled={!isMyTurn || selectedCardIndices.length === 0}
-              onClick={() => {
-                const cardsToPlay = selectedCardIndices.map((i) => myHand[i]);
-                const rankToPlay = matchState.trickClaimRank || heroClaimRank;
-                handlePlayCards(cardsToPlay, true, rankToPlay);
-              }}
-              className="bluff-play-btn-large"
-            >
-              <Flame className="w-4 h-4 text-amber-300" />
-              <span>
-                {selectedCardIndices.length > 0
-                  ? (matchState.trickClaimRank
-                      ? `PLAY ${selectedCardIndices.length} AS ${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank}`
-                      : `LEAD ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`)
-                  : `SELECT CARDS`}
-              </span>
-            </button>
+                <button
+                  type="button"
+                  disabled={!isMyTurn || selectedCardIndices.length === 0}
+                  onClick={() => {
+                    const cardsToPlay = selectedCardIndices.map((i) => myHand[i]);
+                    const rankToPlay = matchState.trickClaimRank || heroClaimRank;
+                    handlePlayCards(cardsToPlay, true, rankToPlay);
+                  }}
+                  className="bluff-play-btn-large"
+                >
+                  <Flame className="w-4 h-4 text-amber-300" />
+                  <span>
+                    {selectedCardIndices.length > 0
+                      ? (matchState.trickClaimRank
+                          ? `PLAY ${selectedCardIndices.length} AS ${RANK_NAMES[matchState.trickClaimRank] || matchState.trickClaimRank}`
+                          : `LEAD ${selectedCardIndices.length} ${RANK_NAMES[heroClaimRank] || heroClaimRank}`)
+                      : `SELECT CARDS`}
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
