@@ -18,23 +18,37 @@ export const PlayerSeat = ({
   turnMaxTime = 120,
   isWinner = false,
   winningCards = [],
-  onSit = null
+  onSit = null,
+  isCreator = false,
+  onRemovePlayer = null,
+  onAddBotToSeat = null
 }) => {
-  // Empty seat state
+  // Empty seat state (Keeps other players' positions rock-solid!)
   if (!player) {
     return (
       <div
-        className="poker-seat"
+        className="poker-seat vacant"
         style={{ left: position.left, top: position.top }}
       >
-        <button
-          onClick={() => onSit && onSit(seatIndex)}
-          className="poker-empty-seat-btn"
-          title="Take Seat"
-        >
-          <span>+ SIT</span>
-          <span style={{ fontSize: '8px', opacity: 0.7 }}>Seat {seatIndex + 1}</span>
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center' }}>
+          <button
+            onClick={() => onSit && onSit(seatIndex)}
+            className="poker-empty-seat-btn"
+            title={`Take Seat ${seatIndex + 1}`}
+          >
+            <span>+ SIT</span>
+            <span style={{ fontSize: '8px', opacity: 0.7 }}>Seat {seatIndex + 1}</span>
+          </button>
+          {isCreator && isHandEnded && onAddBotToSeat && (
+            <button
+              onClick={() => onAddBotToSeat(seatIndex)}
+              className="poker-empty-bot-btn"
+              title={`Add Bot to Seat ${seatIndex + 1}`}
+            >
+              <span>+ Bot</span>
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -130,12 +144,32 @@ export const PlayerSeat = ({
                 YOU
               </span>
             )}
+            {player.isBot && (
+              <span style={{ fontSize: '7.5px', fontWeight: 900, color: '#c084fc', background: 'rgba(168,85,247,0.2)', padding: '1px 3px', borderRadius: '3px' }}>
+                BOT
+              </span>
+            )}
           </div>
           {/* Display Stack as Points and Currency */}
           <span className="poker-chips">
             {formatPoints(player.chips || 0)}
           </span>
         </div>
+
+        {/* Host Remove/Kick Button (Only visible to Room Owner on non-hero seats) */}
+        {isCreator && !isHero && onRemovePlayer && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemovePlayer(player);
+            }}
+            className="poker-seat-kick-btn"
+            title={`Remove ${player.username} (${player.isBot ? 'Bot' : 'Player'})`}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Action / Current Bet Status Pill (Cleanly displayed in pod, NOT on felt) */}

@@ -185,20 +185,18 @@ export const ChipBadge = ({ amount = 0, className = '' }) => {
   if (amount <= 0) return null;
 
   const chips = getChipBreakdown(amount, 3);
-  const primaryChip = chips[0] || 20;
-  const config = CHIP_CONFIGS[primaryChip] || CHIP_CONFIGS[20];
 
   return (
     <div
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border shadow-md ${className}`}
+      className={`inline-flex items-center gap-1.5 px-1 py-0.5 ${className}`}
       style={{
-        background: 'rgba(11, 15, 25, 0.94)',
-        borderColor: config.borderColor,
-        boxShadow: `0 4px 12px rgba(0,0,0,0.6)`
+        background: 'transparent',
+        border: 'none',
+        boxShadow: 'none'
       }}
     >
-      {/* Overlapping Staged Chips */}
-      <div style={{ display: 'flex', alignItems: 'center', marginLeft: '-2px' }}>
+      {/* Overlapping Staged Chips with Natural Drop Shadow */}
+      <div style={{ display: 'flex', alignItems: 'center', filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.85))' }}>
         {chips.map((chipVal, idx) => (
           <div
             key={idx}
@@ -212,8 +210,16 @@ export const ChipBadge = ({ amount = 0, className = '' }) => {
         ))}
       </div>
 
-      {/* Total Amount in Points (Strictly No Dollar Sign) */}
-      <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24', letterSpacing: '0.02em' }}>
+      {/* Total Amount in Points (Transparent Background with Crisp Text Shadow) */}
+      <span
+        style={{
+          fontSize: '11px',
+          fontWeight: 900,
+          color: '#fbbf24',
+          letterSpacing: '0.03em',
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.8), 0 0 2px #000'
+        }}
+      >
         {formatPoints(amount)}
       </span>
     </div>

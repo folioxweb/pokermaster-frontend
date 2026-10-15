@@ -45,9 +45,10 @@ export const CommunityArea = ({
       <div className="poker-community-cards-row">
         {cardSlots.map((index) => {
           const card = communityCards[index];
-          const isWinningCard = card && winningCards.includes(card);
+          const isValidCard = typeof card === 'string' && card.length >= 2;
+          const isWinningCard = isValidCard && winningCards.includes(card);
 
-          if (card) {
+          if (isValidCard) {
             return (
               <CardAsset
                 key={index}

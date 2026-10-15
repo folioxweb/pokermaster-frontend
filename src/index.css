@@ -2088,7 +2088,14 @@ button, input, select {
   border: 1px solid #d97706;
 }
 
-/* Empty Seat Button */
+/* Empty Seat Button & Vacant Seats */
+.poker-seat.vacant {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  pointer-events: auto;
+}
+
 .poker-empty-seat-btn {
   display: flex;
   flex-direction: column;
@@ -2111,6 +2118,56 @@ button, input, select {
   background: rgba(16, 185, 129, 0.2);
   border-color: #34d399;
   transform: scale(1.08);
+}
+
+.poker-empty-bot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px dashed rgba(192, 132, 252, 0.5);
+  color: #c084fc;
+  font-size: 8.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.poker-empty-bot-btn:hover {
+  background: rgba(168, 85, 247, 0.35);
+  border-color: #d8b4fe;
+  transform: scale(1.05);
+}
+
+/* Host Kick / Remove Button on Player Seat */
+.poker-seat-kick-btn {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: 40;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.poker-seat-kick-btn:hover {
+  background: #dc2626;
+  transform: scale(1.2);
 }
 
 /* Badges (D, SB, BB, All-In) */

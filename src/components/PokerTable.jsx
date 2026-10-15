@@ -55,6 +55,69 @@ import { PokerChipSVG } from './ChipStack';
 
 const BOT_NAMES = ['Viper', 'AceHigh', 'BluffKing', 'Maverick', 'ChipLeader', 'LadyLuck', 'RiverRat'];
 
+// Standard 52-card deck generator
+const generateDeck = () => {
+  const suits = ['s', 'h', 'd', 'c'];
+  const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
+  const deck = [];
+  for (const s of suits) {
+    for (const r of ranks) {
+      deck.push(`${r}${s}`);
+    }
+  }
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+};
+
+// Resilient Card Drawer: Guarantees exact count of valid cards without returning undefined, null, or duplicates
+const drawCardsFromDeck = (neededCount, currentDeck = [], usedCards = []) => {
+  const deck = [...(currentDeck || [])];
+  const drawn = [];
+  const usedSet = new Set((usedCards || []).filter(c => typeof c === 'string' && c.length >= 2));
+
+  while (drawn.length < neededCount) {
+    if (deck.length > 0) {
+      const card = deck.shift();
+      if (card && typeof card === 'string' && card.length >= 2 && !usedSet.has(card)) {
+        drawn.push(card);
+        usedSet.add(card);
+      }
+    } else {
+      const freshDeck = generateDeck();
+      for (const card of freshDeck) {
+        if (!usedSet.has(card)) {
+          deck.push(card);
+        }
+      }
+      if (deck.length === 0) break;
+    }
+  }
+
+  return { drawn, remainingDeck: deck };
+};
+
+// Auto-Heal Community Cards: Ensures no street ever has missing/null/empty cards
+const healCommunityCards = (handState, currentPlayers = [], dealerSecretCards = {}) => {
+  if (!handState || !['flop', 'turn', 'river', 'showdown', 'ended'].includes(handState.phase)) {
+    return handState?.communityCards || [];
+  }
+  const reqCount = handState.phase === 'flop' ? 3 : handState.phase === 'turn' ? 4 : 5;
+  const valid = (handState.communityCards || []).filter(c => typeof c === 'string' && c.length >= 2);
+  if (valid.length < reqCount) {
+    const allUsed = [
+      ...valid,
+      ...(currentPlayers || []).flatMap(p => p.cards || []),
+      ...Object.values(dealerSecretCards || {}).flat()
+    ];
+    const { drawn } = drawCardsFromDeck(reqCount - valid.length, [], allUsed);
+    return [...valid, ...drawn];
+  }
+  return valid;
+};
+
 export const PokerTable = ({
   gameRoom,
   user,
@@ -405,7 +468,9 @@ export const PokerTable = ({
             });
           }
           if (payload.handState && payload.handState.phase !== 'waiting') {
-            setHandState(sanitizeHandStateForBroadcast(payload.handState));
+            const safeHandState = sanitizeHandStateForBroadcast(payload.handState);
+            safeHandState.communityCards = healCommunityCards(safeHandState, payload.players || [], dealerSecretCardsRef.current);
+            setHandState(safeHandState);
           }
         })
         .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
@@ -460,8 +525,9 @@ export const PokerTable = ({
           if (payload.announcement) setAnnouncement(payload.announcement);
           if (payload.winningCards) setWinningCards(payload.winningCards);
 
-          // 5. Update handState (strictly ensure undealt deck is empty)
+          // 5. Update handState (strictly ensure undealt deck is empty and cards match phase)
           const safeHandState = sanitizeHandStateForBroadcast(payload.handState);
+          safeHandState.communityCards = healCommunityCards(safeHandState, payload.players || [], dealerSecretCardsRef.current);
           setHandState(safeHandState);
 
           // 6. Zero-Knowledge Hole Cards Resolution
@@ -610,7 +676,7 @@ export const PokerTable = ({
         channelRef.current.send({
           type: 'broadcast',
           event: 'PLAYER_LEFT',
-          payload: { username: user?.username }
+          payload: { username: user?.username, seat_index: mySeatIndexRef.current }
         });
         supabase.removeChannel(channelRef.current);
       }
@@ -733,24 +799,24 @@ export const PokerTable = ({
     }
   };
 
-  // Host Adds an AI Bot to fill an open seat
-  const handleAddBot = () => {
-    const totalMax = Math.max(3, Math.min(8, gameRoom?.maxPlayers || 6));
+  // Host Adds an AI Bot to a specific vacant seat
+  const handleAddBotToSeat = (targetSeatIndex) => {
+    const totalMax = Math.max(2, Math.min(8, gameRoom?.maxPlayers || 6));
     if (players.length >= totalMax) {
       alert('Table is full!');
       return;
     }
-
-    const occupiedSeats = players.map(p => p.seat_index);
-    let openSeat = 1;
-    while (occupiedSeats.includes(openSeat) && openSeat < totalMax) {
-      openSeat++;
+    if (players.some((p) => p.seat_index === targetSeatIndex)) {
+      alert('Seat is already occupied!');
+      return;
     }
 
-    const botName = BOT_NAMES[(openSeat - 1) % BOT_NAMES.length];
+    const existingNames = new Set(players.map((p) => p.username));
+    const availableName = BOT_NAMES.find((n) => !existingNames.has(n)) || `Bot_${targetSeatIndex + 1}`;
+
     const newBot = {
-      seat_index: openSeat,
-      username: botName,
+      seat_index: targetSeatIndex,
+      username: availableName,
       chips: tableSettings.startingStack || gameRoom?.startingStack || 1000,
       current_round_bet: 0,
       total_hand_bet: 0,
@@ -761,9 +827,9 @@ export const PokerTable = ({
       isBot: true
     };
 
-    const updated = [...players, newBot];
+    const updated = [...players, newBot].sort((a, b) => a.seat_index - b.seat_index);
     setPlayers(updated);
-    setAnnouncement(`Added ${botName} to Seat ${openSeat + 1}`);
+    setAnnouncement(`🤖 Added ${availableName} (Bot) to Seat ${targetSeatIndex + 1}`);
 
     if (channelRef.current) {
       channelRef.current.send({
@@ -771,6 +837,25 @@ export const PokerTable = ({
         event: 'SEAT_TAKEN',
         payload: newBot
       });
+    }
+  };
+
+  // Host Adds an AI Bot to fill the next available vacant seat
+  const handleAddBot = () => {
+    const totalMax = Math.max(2, Math.min(8, gameRoom?.maxPlayers || 6));
+    if (players.length >= totalMax) {
+      alert('Table is full!');
+      return;
+    }
+
+    const occupiedSeats = players.map((p) => p.seat_index);
+    let openSeat = 0;
+    while (occupiedSeats.includes(openSeat) && openSeat < totalMax) {
+      openSeat++;
+    }
+
+    if (openSeat < totalMax) {
+      handleAddBotToSeat(openSeat);
     }
   };
 
@@ -1031,23 +1116,6 @@ export const PokerTable = ({
     }
 
     setLobbyRedirectCountdown(5);
-  };
-
-  // Helper: Deck generator
-  const generateDeck = () => {
-    const suits = ['s', 'h', 'd', 'c'];
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
-    const deck = [];
-    for (const s of suits) {
-      for (const r of ranks) {
-        deck.push(`${r}${s}`);
-      }
-    }
-    for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
   };
 
   // START HAND (Clockwise Blinds Rotation: Dealer -> SB -> BB -> UTG)
@@ -1350,8 +1418,8 @@ export const PokerTable = ({
   const advanceStreet = (playersList, currentPot, actorInfo) => {
     const currentHandState = handStateRef.current;
     let nextPhase = 'flop';
-    let newCommunity = [...currentHandState.communityCards];
-    let remainingDeck = [...dealerDeckRef.current];
+    let validCommunity = (currentHandState.communityCards || []).filter(c => typeof c === 'string' && c.length >= 2);
+    let remainingDeck = [...(dealerDeckRef.current || [])];
 
     triggerChipsFlight(playersList);
     playCardDeal();
@@ -1363,22 +1431,40 @@ export const PokerTable = ({
       last_action: p.status === 'folded' ? 'fold' : null
     }));
 
+    // Collect all cards currently in play to prevent duplicates
+    const allUsedCards = [
+      ...validCommunity,
+      ...resetPlayers.flatMap((p) => p.cards || []),
+      ...Object.values(dealerSecretCardsRef.current || {}).flat()
+    ];
+
+    let targetCount = 3;
     if (currentHandState.phase === 'preflop') {
       nextPhase = 'flop';
-      remainingDeck.shift(); // burn
-      newCommunity.push(remainingDeck.shift(), remainingDeck.shift(), remainingDeck.shift());
+      targetCount = 3;
     } else if (currentHandState.phase === 'flop') {
       nextPhase = 'turn';
-      remainingDeck.shift();
-      newCommunity.push(remainingDeck.shift());
+      targetCount = 4;
     } else if (currentHandState.phase === 'turn') {
       nextPhase = 'river';
-      remainingDeck.shift();
-      newCommunity.push(remainingDeck.shift());
+      targetCount = 5;
     } else if (currentHandState.phase === 'river') {
       dealerDeckRef.current = remainingDeck;
-      resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
+      resolveShowdown(resetPlayers, validCommunity, currentPot, actorInfo);
       return;
+    }
+
+    // Burn 1 card if available
+    if (remainingDeck.length > 0) {
+      remainingDeck.shift();
+    }
+
+    // Deal cards needed for the new street
+    const cardsNeeded = Math.max(0, targetCount - validCommunity.length);
+    if (cardsNeeded > 0) {
+      const { drawn, remainingDeck: nextDeck } = drawCardsFromDeck(cardsNeeded, remainingDeck, allUsedCards);
+      validCommunity.push(...drawn);
+      remainingDeck = nextDeck;
     }
 
     // Check if remaining active contenders can make any further bets (i.e. at least 2 players have chips)
@@ -1386,12 +1472,18 @@ export const PokerTable = ({
 
     // If at most 1 player has chips left (all others are all-in or folded), run out the remaining board cards to showdown
     if (!canAnyPlayerBet && nextPhase !== 'river') {
-      while (newCommunity.length < 5 && remainingDeck.length > 0) {
-        remainingDeck.shift(); // burn
-        newCommunity.push(remainingDeck.shift());
+      while (validCommunity.length < 5) {
+        if (remainingDeck.length > 0) remainingDeck.shift(); // burn
+        const { drawn, remainingDeck: nextDeck } = drawCardsFromDeck(1, remainingDeck, [
+          ...validCommunity,
+          ...resetPlayers.flatMap((p) => p.cards || []),
+          ...Object.values(dealerSecretCardsRef.current || {}).flat()
+        ]);
+        validCommunity.push(...drawn);
+        remainingDeck = nextDeck;
       }
       dealerDeckRef.current = remainingDeck;
-      resolveShowdown(resetPlayers, newCommunity, currentPot, actorInfo);
+      resolveShowdown(resetPlayers, validCommunity, currentPot, actorInfo);
       return;
     }
 
@@ -1404,7 +1496,7 @@ export const PokerTable = ({
     const nextHandState = {
       ...currentHandState,
       phase: nextPhase,
-      communityCards: newCommunity,
+      communityCards: validCommunity,
       deck: [], // Undealt deck remains 100% private to dealer memory
       currentBet: 0,
       minRaise: gameRoom?.bigBlind || 20,
@@ -1418,6 +1510,18 @@ export const PokerTable = ({
   };
 
   const resolveShowdown = (playersList, communityCards, totalPot, actorInfo) => {
+    let finalCommunity = (communityCards || []).filter(c => typeof c === 'string' && c.length >= 2);
+    if (finalCommunity.length < 5) {
+      const allUsed = [
+        ...finalCommunity,
+        ...playersList.flatMap((p) => p.cards || []),
+        ...Object.values(dealerSecretCardsRef.current || {}).flat()
+      ];
+      const { drawn, remainingDeck: nextDeck } = drawCardsFromDeck(5 - finalCommunity.length, dealerDeckRef.current, allUsed);
+      finalCommunity.push(...drawn);
+      dealerDeckRef.current = nextDeck;
+    }
+
     const contenders = playersList.filter((p) => p.status === 'active' || p.status === 'all_in');
 
     if (contenders.length === 0) return;
@@ -1457,7 +1561,7 @@ export const PokerTable = ({
     // Evaluate hands using dealer's private secret storage
     const evaluations = contenders.map((player) => {
       const secretCards = dealerSecretCardsRef.current[player.seat_index] || player.cards || [];
-      const allCards = [...secretCards, ...communityCards];
+      const allCards = [...secretCards, ...finalCommunity];
       const evaluation = evaluateHand(allCards);
       return { player: { ...player, cards: secretCards }, evaluation };
     });
@@ -1510,7 +1614,7 @@ export const PokerTable = ({
     const nextHandState = {
       ...handStateRef.current,
       phase: 'showdown',
-      communityCards,
+      communityCards: finalCommunity,
       deck: [],
       mainPot: effectivePot,
       winners: winnersList.map((w, idx) => ({
@@ -1547,12 +1651,18 @@ export const PokerTable = ({
     playWinCelebration();
     confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
 
-    let finalCommunity = [...handStateRef.current.communityCards];
+    let finalCommunity = (handStateRef.current.communityCards || []).filter(c => typeof c === 'string' && c.length >= 2);
     if (gameRoom?.showRemainingRiverCards && finalCommunity.length < 5) {
-      const remainingDeck = [...dealerDeckRef.current];
+      const remainingDeck = [...(dealerDeckRef.current || [])];
       const needed = 5 - finalCommunity.length;
-      finalCommunity = [...finalCommunity, ...remainingDeck.slice(0, needed)];
-      dealerDeckRef.current = remainingDeck.slice(needed);
+      const allUsed = [
+        ...finalCommunity,
+        ...playersList.flatMap((p) => p.cards || []),
+        ...Object.values(dealerSecretCardsRef.current || {}).flat()
+      ];
+      const { drawn, remainingDeck: nextDeck } = drawCardsFromDeck(needed, remainingDeck, allUsed);
+      finalCommunity = [...finalCommunity, ...drawn];
+      dealerDeckRef.current = nextDeck;
     }
 
     const nextHandState = {
@@ -1832,6 +1942,50 @@ export const PokerTable = ({
                   <span className="table-dropdown-val">{gameRoom?.roomCode}</span>
                 </button>
 
+                {isCreator && (
+                  <>
+                    <div className="table-dropdown-divider" />
+                    <div style={{ padding: '6px 12px 3px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.45)' }}>
+                      Manage Table ({players.length}/{gameRoom?.maxPlayers || 6})
+                    </div>
+                    {players.filter((p) => p.seat_index !== mySeatIndex).map((opponent) => (
+                      <div
+                        key={opponent.seat_index}
+                        className="table-dropdown-item"
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 600 }}>{opponent.username}</span>
+                          {opponent.isBot ? (
+                            <span style={{ fontSize: '8px', fontWeight: 800, background: 'rgba(168,85,247,0.3)', color: '#c084fc', padding: '1px 5px', borderRadius: '4px' }}>BOT</span>
+                          ) : (
+                            <span style={{ fontSize: '8px', fontWeight: 800, background: 'rgba(59,130,246,0.3)', color: '#93c5fd', padding: '1px 5px', borderRadius: '4px' }}>LIVE</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleRemovePlayer(opponent);
+                            setIsMenuOpen(false);
+                          }}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.2)',
+                            color: '#f87171',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </>
+                )}
+
                 <div className="table-dropdown-divider" />
 
                 <button
@@ -1914,29 +2068,33 @@ export const PokerTable = ({
                 isPotPulsing={isPotPulsing}
               />
 
-              {/* Seated Players: Positioned on the OUTER RAIL of the table */}
-              {players.map((player) => {
-                const totalSeats = Math.max(players.length, gameRoom?.maxPlayers || 6);
-                const pos = getSeatCoordinates(player.seat_index, totalSeats, mySeatIndex);
-                const isWinner = handState.winners.some((w) => w.seat_index === player.seat_index);
+              {/* Seated Players & Vacant Spaces: Positioned on the OUTER RAIL */}
+              {Array.from({ length: Math.max(2, Math.min(8, gameRoom?.maxPlayers || 6)) }, (_, seatIdx) => {
+                const totalSeats = Math.max(2, Math.min(8, gameRoom?.maxPlayers || 6));
+                const player = players.find((p) => p.seat_index === seatIdx);
+                const pos = getSeatCoordinates(seatIdx, totalSeats, mySeatIndex);
+                const isWinner = player ? handState.winners.some((w) => w.seat_index === player.seat_index) : false;
 
                 return (
                   <PlayerSeat
-                    key={player.seat_index}
-                    player={player}
-                    seatIndex={player.seat_index}
+                    key={seatIdx}
+                    player={player || null}
+                    seatIndex={seatIdx}
                     position={pos}
-                    isHero={player.seat_index === mySeatIndex}
+                    isHero={player ? player.seat_index === mySeatIndex : false}
                     isHandEnded={isWaitingOrEnded}
-                    isDealer={player.seat_index === handState.dealerSeat}
-                    isSB={player.seat_index === handState.sbSeat}
-                    isBB={player.seat_index === handState.bbSeat}
-                    isCurrentTurn={player.seat_index === handState.currentTurnSeat && !isWaitingOrEnded}
+                    isDealer={player ? player.seat_index === handState.dealerSeat : false}
+                    isSB={player ? player.seat_index === handState.sbSeat : false}
+                    isBB={player ? player.seat_index === handState.bbSeat : false}
+                    isCurrentTurn={player ? (player.seat_index === handState.currentTurnSeat && !isWaitingOrEnded) : false}
                     turnTimeLeft={turnTimeLeft}
                     turnMaxTime={turnMaxTime}
                     isWinner={isWinner}
                     winningCards={winningCards}
                     onSit={handleSitAtSeat}
+                    isCreator={isCreator}
+                    onRemovePlayer={handleRemovePlayer}
+                    onAddBotToSeat={handleAddBotToSeat}
                   />
                 );
               })}
