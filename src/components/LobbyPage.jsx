@@ -22,7 +22,8 @@ import {
   Moon,
   Sparkles,
   Flame,
-  Gamepad2
+  Gamepad2,
+  Crown
 } from 'lucide-react';
 
 import { formatPoints, formatPointsOnly } from '../lib/formatters';
@@ -110,21 +111,60 @@ export const LobbyPage = ({
         if (directData) roomList = directData;
       }
 
+      // Query player breakdown (live humans vs bots)
+      let roomPlayersMap = {};
+      try {
+        const roomIds = roomList.map((r) => r.id).filter(Boolean);
+        if (roomIds.length > 0) {
+          const { data: allPlayers } = await supabase
+            .from('poker_room_players')
+            .select('room_id, user_id, username')
+            .in('room_id', roomIds);
+
+          if (allPlayers) {
+            for (const p of allPlayers) {
+              if (!roomPlayersMap[p.room_id]) {
+                roomPlayersMap[p.room_id] = { total: 0, humans: 0, bots: 0 };
+              }
+              roomPlayersMap[p.room_id].total++;
+              if (p.user_id !== null) {
+                roomPlayersMap[p.room_id].humans++;
+              } else {
+                roomPlayersMap[p.room_id].bots++;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Error fetching player breakdown:', err);
+      }
+
       const now = Date.now();
       const validRooms = [];
       const staleEmptyIds = [];
 
       for (const r of roomList) {
         if (r.status === 'closed' || r.status === 'ended') continue;
-        const pCount = Number(r.player_count || 0);
+        const breakdown = roomPlayersMap[r.id] || {
+          total: Number(r.player_count || 0),
+          humans: Number(r.player_count || 0),
+          bots: 0
+        };
+        const pCount = breakdown.total;
+        const humansCount = breakdown.humans;
+        const botsCount = breakdown.bots;
         const ageMs = r.created_at ? (now - new Date(r.created_at).getTime()) : 0;
 
-        // Any table with 0 players that has been open for > 60 seconds is treated as abandoned.
-        // It is omitted from the public lobby and marked closed.
+        // Any table with 0 humans and 0 bots open for > 60 seconds is treated as abandoned.
         if (pCount === 0 && ageMs > 60000) {
           staleEmptyIds.push(r.id);
         } else {
-          validRooms.push(r);
+          validRooms.push({
+            ...r,
+            player_count: pCount,
+            humansCount,
+            botsCount
+          });
         }
       }
 
@@ -146,38 +186,52 @@ export const LobbyPage = ({
     }
   };
 
-  // Close / Delete a Table (Allowed ONLY for table creator, and ONLY if 0 players are seated)
+  // Close / Delete a Table (Allowed for table creator / owner)
   const handleCloseRoom = async (room, e) => {
     if (e) e.stopPropagation();
 
-    // Protection 1: Active players protection - No one can delete a table with active players
-    if ((room.player_count || 0) > 0) {
-      alert('Cannot delete this table: There are active players currently seated at the table.');
+    // Creator ownership check
+    const isOwner = !room.host_username || room.host_username === user?.username;
+    if (!isOwner) {
+      alert(`Only the table creator (${room.host_username || 'Host'}) can delete this table.`);
       return;
     }
 
-    // Protection 2: Creator ownership protection - Table created by user A can only be deleted by user A
-    if (room.host_username && user?.username && room.host_username !== user.username) {
-      alert(`Only the table creator (${room.host_username}) can delete this table.`);
-      return;
+    const humans = room.humansCount || 0;
+    const bots = room.botsCount || 0;
+
+    let confirmMsg = `Are you sure you want to delete table "${room.name}"?`;
+    if (humans > 0) {
+      confirmMsg = `Table "${room.name}" has ${humans} active live player(s)${bots > 0 ? ` and ${bots} bot(s)` : ''}. Are you sure you want to close this table and dismiss the game?`;
+    } else if (bots > 0) {
+      confirmMsg = `Are you sure you want to delete table "${room.name}"? (${bots} bot(s) will be removed).`;
     }
 
-    if (!window.confirm(`Are you sure you want to close and remove table "${room.name}"?`)) return;
+    if (!window.confirm(confirmMsg)) return;
+
     try {
+      // 1. Delete all player & bot rows for this room
+      await supabase
+        .from('poker_room_players')
+        .delete()
+        .eq('room_id', room.id);
+
+      // 2. Mark table closed in database
       await supabase
         .from('poker_rooms')
         .update({ status: 'closed' })
         .eq('id', room.id);
+
       fetchRooms();
     } catch (err) {
       console.warn('Error closing room:', err);
     }
   };
 
-  // Clean empty tables with 0 players created by the current user
+  // Clean empty/bot-only tables created by the current user
   const handleCleanEmptyRooms = async () => {
     const myEmptyRooms = rooms.filter(
-      (r) => (r.player_count || 0) === 0 && (!r.host_username || r.host_username === user?.username)
+      (r) => (r.humansCount === 0 || (r.player_count || 0) === 0) && (!r.host_username || r.host_username === user?.username)
     );
     if (myEmptyRooms.length === 0) {
       alert('You have no empty tables to clean up.');
@@ -641,61 +695,126 @@ export const LobbyPage = ({
                   })
                   .map((r) => {
                     const isBluff = r.code?.startsWith('BL-') || r.name?.toLowerCase().includes('bluff');
+                    const isOwner = !r.host_username || r.host_username === user?.username;
+                    const humans = r.humansCount ?? (r.player_count || 0);
+                    const bots = r.botsCount ?? 0;
+                    const totalPlayers = r.player_count || 0;
+                    const maxP = r.max_players || 6;
+                    const isFull = totalPlayers >= maxP;
+
                     return (
-                      <div key={r.id || r.code} className="lobby-room-card">
-                        <div className="lobby-room-card-header">
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                              <span className={`lobby-game-chip ${isBluff ? 'bluff' : 'poker'}`}>
-                                {isBluff ? '🎭 Bluff' : '♠ Hold\'em'}
-                              </span>
-                              <h4 className="lobby-room-name">{r.name}</h4>
-                            </div>
-                            <span className="lobby-room-code">Code: {r.code} • Host: {r.host_username || 'Host'}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span className={`lobby-room-status-badge ${(r.player_count || 0) > 0 ? (r.status === 'in_progress' ? 'live' : 'waiting') : 'empty'}`}>
-                              {(r.player_count || 0) > 0
-                                ? (r.status === 'in_progress' ? 'Live Hand' : 'Open Seats')
-                                : 'Empty'}
+                      <div key={r.id || r.code} className={`lobby-room-card ${isOwner ? 'owner-card' : ''}`}>
+                        {/* Top Badge Strip: Game Chip + Host status on left, Hand status + Delete on right */}
+                        <div className="lobby-room-badge-strip">
+                          <div className="lobby-badge-left">
+                            <span className={`lobby-game-chip ${isBluff ? 'bluff' : 'poker'}`}>
+                              {isBluff ? '🎭 Bluff' : '♠ Hold\'em'}
                             </span>
-                            {/* Only table creator can delete table, and ONLY when 0 active players are seated */}
-                            {(!r.host_username || r.host_username === user?.username) && (r.player_count || 0) === 0 && (
+                            {isOwner && (
+                              <span className="lobby-owner-badge" title="You created this table">
+                                <Crown className="w-3 h-3 text-amber-400" />
+                                <span>Host</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="lobby-badge-right">
+                            <span className={`lobby-room-status-badge ${
+                              r.status === 'in_progress'
+                                ? 'live'
+                                : totalPlayers > 0
+                                  ? 'waiting'
+                                  : 'empty'
+                            }`}>
+                              {r.status === 'in_progress' ? (
+                                <>
+                                  <span className="status-dot live" />
+                                  <span>Live Hand</span>
+                                </>
+                              ) : totalPlayers > 0 ? (
+                                <>
+                                  <span className="status-dot waiting" />
+                                  <span>{isFull ? 'Table Full' : 'Open Seats'}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="status-dot empty" />
+                                  <span>Empty</span>
+                                </>
+                              )}
+                            </span>
+                            {/* Table owner can delete the table anytime (with confirmation) */}
+                            {isOwner && (
                               <button
                                 onClick={(e) => handleCloseRoom(r, e)}
                                 className="lobby-room-delete-btn"
-                                title="Close / Delete Table (Creator only)"
+                                title="Close / Delete Table (Host only)"
+                                aria-label="Delete Table"
                               >
-                                <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-400" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </div>
                         </div>
 
-                        {isBluff ? (
-                          <div className="lobby-room-stats">
-                            <div className="lobby-stat-item">
-                              <Users className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Seats: {r.player_count ?? 0} / {r.max_players || 6}</span>
-                            </div>
-                            <div className="lobby-stat-item">
-                              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                              <span>Rules: Jokers Wild</span>
-                            </div>
+                        {/* Room Title and Host Metadata */}
+                        <div className="lobby-room-main-info">
+                          <h4 className="lobby-room-name" title={r.name}>{r.name}</h4>
+                          <div className="lobby-room-meta-row">
+                            <span className="lobby-code-pill">#{r.code}</span>
+                            <span className="lobby-host-text">
+                              <User className="w-3 h-3 text-slate-400" />
+                              <span>{r.host_username ? (r.host_username === user?.username ? 'You (Host)' : r.host_username) : 'Public Host'}</span>
+                            </span>
                           </div>
-                        ) : (
-                          <div className="lobby-room-stats">
-                            <div className="lobby-stat-item">
-                              <Users className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Seats: {r.player_count ?? 0} / {r.max_players || 6}</span>
-                            </div>
-                            <div className="lobby-stat-item">
-                              <Coins className="w-3.5 h-3.5 text-amber-400" />
-                              <span>Blinds: {formatPoints(r.small_blind || 10)} / {formatPoints(r.big_blind || 20)}</span>
-                            </div>
-                          </div>
-                        )}
+                        </div>
 
+                        {/* Room Telemetry / Stats Cards */}
+                        <div className="lobby-room-stats">
+                          <div className="lobby-stat-item">
+                            <div className="stat-label-row">
+                              <Users className="w-3.5 h-3.5 text-blue-400" />
+                              <span className="stat-title">Seats</span>
+                            </div>
+                            <div className="stat-value">
+                              {totalPlayers} / {maxP}
+                            </div>
+                            <div className="stat-subtext">
+                              {totalPlayers === 0
+                                ? 'Vacant'
+                                : humans > 0 && bots > 0
+                                  ? `${humans} live, ${bots} bot${bots > 1 ? 's' : ''}`
+                                  : humans > 0
+                                    ? `${humans} live player${humans > 1 ? 's' : ''}`
+                                    : `${bots} bot${bots > 1 ? 's' : ''}`}
+                            </div>
+                          </div>
+
+                          <div className="lobby-stat-item">
+                            <div className="stat-label-row">
+                              {isBluff ? (
+                                <>
+                                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                                  <span className="stat-title">Challenge</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Coins className="w-3.5 h-3.5 text-amber-400" />
+                                  <span className="stat-title">Stakes</span>
+                                </>
+                              )}
+                            </div>
+                            <div className="stat-value">
+                              {isBluff
+                                ? `${r.turn_time_seconds || 8}s Timer`
+                                : `${formatPoints(r.small_blind || 10)} / ${formatPoints(r.big_blind || 20)}`}
+                            </div>
+                            <div className="stat-subtext">
+                              {isBluff ? 'Jokers Wild' : `Stack: ${formatPoints(r.starting_stack || 1000)}`}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action CTA Button */}
                         <button
                           onClick={() => onJoinGame({
                             roomId: r.id,
@@ -710,11 +829,13 @@ export const LobbyPage = ({
                             startingStack: r.starting_stack || 1000,
                             smallBlind: r.small_blind || 2,
                             bigBlind: r.big_blind || 4,
-                            turnTime: r.turn_time_seconds || 0
+                            turnTime: r.turn_time_seconds || 0,
+                            hostUsername: r.host_username,
+                            isHost: isOwner
                           })}
-                          className="lobby-room-join-btn"
+                          className={`lobby-room-join-btn ${isOwner ? 'host-btn' : ''}`}
                         >
-                          <span>Join Table</span>
+                          <span>{isOwner ? 'Enter My Table' : 'Join Table'}</span>
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
