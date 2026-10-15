@@ -1658,12 +1658,6 @@ export const PokerTable = ({
           </div>
         </div>
 
-        {/* Live Announcement Center Marquee */}
-        <div className="table-marquee-box">
-          <span style={{ color: '#f59e0b', marginRight: '6px' }}>●</span>
-          <span>{announcement}</span>
-        </div>
-
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {onOpenSocial && (
@@ -1728,6 +1722,66 @@ export const PokerTable = ({
           )}
         </div>
       </header>
+
+      {/* PERSISTENT TABLE INFORMATION BOARD (ALL THE TIME, ZERO UI BLOCKING) */}
+      <div className="poker-info-board">
+        <div className="poker-info-board-inner">
+          {/* Table Room & Code */}
+          <div className="poker-info-chip room-chip" onClick={copyRoomCode} title="Click to copy room code" style={{ cursor: 'pointer' }}>
+            <span className="poker-info-chip-label">ROOM</span>
+            <span className="poker-info-chip-val">{gameRoom?.roomCode || 'PK-TABLE'}</span>
+          </div>
+
+          {/* Blinds */}
+          <div className="poker-info-chip blinds-chip">
+            <span className="poker-info-chip-label">BLINDS</span>
+            <span className="poker-info-chip-val">
+              {formatPointsOnly(handState.smallBlind || tableSettings.smallBlind || 50)} / {formatPointsOnly(handState.bigBlind || tableSettings.bigBlind || 100)}
+            </span>
+          </div>
+
+          {/* Hand # & Phase */}
+          <div className="poker-info-chip hand-chip">
+            <span className="poker-info-chip-label">HAND</span>
+            <span className="poker-info-chip-val">
+              #{handState.handNumber || 1} • <span className="poker-phase-tag">{handState.phase === 'waiting' ? 'WAITING' : handState.phase.toUpperCase()}</span>
+            </span>
+          </div>
+
+          {/* Total Pot */}
+          <div className="poker-info-chip pot-chip">
+            <span className="poker-info-chip-label">POT</span>
+            <span className="poker-info-chip-val highlight">
+              {formatPoints(handState.mainPot || 0)}
+            </span>
+          </div>
+
+          {/* Time Limit & Active Turn (Request 5!) */}
+          <div className={`poker-info-chip timer-chip ${handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? 'is-hero' : ''} ${turnMaxTime > 0 && turnTimeLeft <= 5 && !isWaitingOrEnded ? 'is-urgent' : ''}`}>
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span className="poker-info-chip-label">TIME:</span>
+            <span className="poker-info-chip-val timer-val">
+              {handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? (
+                <span className="hero-turn-countdown">
+                  YOUR TURN: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞ NO LIMIT'}</strong>
+                </span>
+              ) : !isWaitingOrEnded ? (
+                <span>
+                  {currentTurnPlayer?.username ? `${currentTurnPlayer.username}` : 'TURN'}: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞'}</strong>
+                </span>
+              ) : (
+                <span>{turnMaxTime > 0 ? `${turnMaxTime}s LIMIT` : '∞ NO LIMIT'}</span>
+              )}
+            </span>
+          </div>
+
+          {/* Live Table Announcement Marquee */}
+          <div className="poker-info-marquee">
+            <span className="poker-info-pulse-dot">●</span>
+            <span className="poker-info-announcement-text">{announcement}</span>
+          </div>
+        </div>
+      </div>
 
       {/* Main Table Felt Stage */}
       <main className="table-stage">
@@ -1802,9 +1856,6 @@ export const PokerTable = ({
           minRaise={handState.minRaise}
           bigBlind={handState.bbAmount || tableSettings.bigBlind || gameRoom?.bigBlind || 20}
           mainPot={handState.mainPot}
-          handRank={heroHandRank}
-          turnTimeLeft={turnTimeLeft}
-          turnMaxTime={turnMaxTime}
           onAction={handlePlayerAction}
         />
       ) : (

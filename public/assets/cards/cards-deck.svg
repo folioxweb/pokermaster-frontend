@@ -14,20 +14,27 @@
 
     <!-- Card 2s -->
     <g id="s_2">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="2_s">
@@ -36,20 +43,27 @@
     
     <!-- Card 3s -->
     <g id="s_3">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="3_s">
@@ -58,20 +72,27 @@
     
     <!-- Card 4s -->
     <g id="s_4">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="4_s">
@@ -80,20 +101,27 @@
     
     <!-- Card 5s -->
     <g id="s_5">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="5_s">
@@ -102,20 +130,27 @@
     
     <!-- Card 6s -->
     <g id="s_6">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="6_s">
@@ -124,20 +159,27 @@
     
     <!-- Card 7s -->
     <g id="s_7">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="7_s">
@@ -146,20 +188,27 @@
     
     <!-- Card 8s -->
     <g id="s_8">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="8_s">
@@ -168,20 +217,27 @@
     
     <!-- Card 9s -->
     <g id="s_9">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="9_s">
@@ -190,20 +246,27 @@
     
     <!-- Card Ts -->
     <g id="s_T">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="6" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="6" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="T_s">
@@ -212,23 +275,27 @@
     
     <!-- Card Js -->
     <g id="s_J">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="J_s">
@@ -237,23 +304,27 @@
     
     <!-- Card Qs -->
     <g id="s_Q">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="Q_s">
@@ -262,23 +333,27 @@
     
     <!-- Card Ks -->
     <g id="s_K">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="K_s">
@@ -287,20 +362,27 @@
     
     <!-- Card As -->
     <g id="s_A">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♠</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♠</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="A_s">
@@ -309,20 +391,27 @@
     
     <!-- Card 2h -->
     <g id="h_2">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="2_h">
@@ -331,20 +420,27 @@
     
     <!-- Card 3h -->
     <g id="h_3">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="3_h">
@@ -353,20 +449,27 @@
     
     <!-- Card 4h -->
     <g id="h_4">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="4_h">
@@ -375,20 +478,27 @@
     
     <!-- Card 5h -->
     <g id="h_5">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="5_h">
@@ -397,20 +507,27 @@
     
     <!-- Card 6h -->
     <g id="h_6">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="6_h">
@@ -419,20 +536,27 @@
     
     <!-- Card 7h -->
     <g id="h_7">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="7_h">
@@ -441,20 +565,27 @@
     
     <!-- Card 8h -->
     <g id="h_8">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="8_h">
@@ -463,20 +594,27 @@
     
     <!-- Card 9h -->
     <g id="h_9">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="9_h">
@@ -485,20 +623,27 @@
     
     <!-- Card Th -->
     <g id="h_T">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="6" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="6" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="T_h">
@@ -507,23 +652,27 @@
     
     <!-- Card Jh -->
     <g id="h_J">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="J_h">
@@ -532,23 +681,27 @@
     
     <!-- Card Qh -->
     <g id="h_Q">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="Q_h">
@@ -557,23 +710,27 @@
     
     <!-- Card Kh -->
     <g id="h_K">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="K_h">
@@ -582,20 +739,27 @@
     
     <!-- Card Ah -->
     <g id="h_A">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♥</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♥</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="A_h">
@@ -604,20 +768,27 @@
     
     <!-- Card 2d -->
     <g id="d_2">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="2_d">
@@ -626,20 +797,27 @@
     
     <!-- Card 3d -->
     <g id="d_3">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="3_d">
@@ -648,20 +826,27 @@
     
     <!-- Card 4d -->
     <g id="d_4">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="4_d">
@@ -670,20 +855,27 @@
     
     <!-- Card 5d -->
     <g id="d_5">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="5_d">
@@ -692,20 +884,27 @@
     
     <!-- Card 6d -->
     <g id="d_6">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="6_d">
@@ -714,20 +913,27 @@
     
     <!-- Card 7d -->
     <g id="d_7">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="7_d">
@@ -736,20 +942,27 @@
     
     <!-- Card 8d -->
     <g id="d_8">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="8_d">
@@ -758,20 +971,27 @@
     
     <!-- Card 9d -->
     <g id="d_9">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="9_d">
@@ -780,20 +1000,27 @@
     
     <!-- Card Td -->
     <g id="d_T">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="6" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="6" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="T_d">
@@ -802,23 +1029,27 @@
     
     <!-- Card Jd -->
     <g id="d_J">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="J_d">
@@ -827,23 +1058,27 @@
     
     <!-- Card Qd -->
     <g id="d_Q">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="Q_d">
@@ -852,23 +1087,27 @@
     
     <!-- Card Kd -->
     <g id="d_K">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#ef4444" opacity="0.12" stroke="#dc2626" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#ef4444" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#dc2626">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="K_d">
@@ -877,20 +1116,27 @@
     
     <!-- Card Ad -->
     <g id="d_A">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-      <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
       
-        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">♦</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-        <text x="10" y="36" font-size="13" fill="#dc2626">♦</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,8 L 86,50 L 50,92 L 14,50 Z" fill="#dc2626" />
+        </g>
       </g>
     </g>
     <g id="A_d">
@@ -899,20 +1145,27 @@
     
     <!-- Card 2c -->
     <g id="c_2">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">2</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">2</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="2_c">
@@ -921,20 +1174,27 @@
     
     <!-- Card 3c -->
     <g id="c_3">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">3</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">3</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="3_c">
@@ -943,20 +1203,27 @@
     
     <!-- Card 4c -->
     <g id="c_4">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">4</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">4</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="4_c">
@@ -965,20 +1232,27 @@
     
     <!-- Card 5c -->
     <g id="c_5">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">5</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">5</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="5_c">
@@ -987,20 +1261,27 @@
     
     <!-- Card 6c -->
     <g id="c_6">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">6</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">6</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="6_c">
@@ -1009,20 +1290,27 @@
     
     <!-- Card 7c -->
     <g id="c_7">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">7</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">7</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="7_c">
@@ -1031,20 +1319,27 @@
     
     <!-- Card 8c -->
     <g id="c_8">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">8</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">8</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="8_c">
@@ -1053,20 +1348,27 @@
     
     <!-- Card 9c -->
     <g id="c_9">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">9</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">9</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="9_c">
@@ -1075,20 +1377,27 @@
     
     <!-- Card Tc -->
     <g id="c_T">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="6" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">10</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="6" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">10</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="T_c">
@@ -1097,23 +1406,27 @@
     
     <!-- Card Jc -->
     <g id="c_J">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">J</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">J</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="J_c">
@@ -1122,23 +1435,27 @@
     
     <!-- Card Qc -->
     <g id="c_Q">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">Q</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">Q</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="Q_c">
@@ -1147,23 +1464,27 @@
     
     <!-- Card Kc -->
     <g id="c_K">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="#374151" opacity="0.12" stroke="#111827" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="#374151" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="#111827">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">K</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">K</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="K_c">
@@ -1172,31 +1493,37 @@
     
     <!-- Card Ac -->
     <g id="c_A">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-      <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
       
-        <text x="50" y="78" font-size="34" text-anchor="middle" fill="#111827" font-family="system-ui, -apple-system, sans-serif">♣</text>
+      <!-- Center Art: Big Distinct Suit Shape -->
       
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+      </g>
+    
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="#111827" font-family="Outfit, Inter, system-ui, sans-serif">A</text>
-        <text x="10" y="36" font-size="13" fill="#111827">♣</text>
+        <text x="9" y="24" font-size="21" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">A</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z" fill="#0f172a" />
+        </g>
       </g>
     </g>
     <g id="A_c">
       <use href="#c_A" />
     </g>
+    
     <!-- Red Joker (Wildcard) -->
     <g id="joker_red">
       <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
       <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(220, 38, 38, 0.35)" stroke-width="0.8" />
-      
-      <!-- Top Left Vertical Text -->
       <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
       <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
       <text x="9" y="36" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">O</text>
@@ -1204,38 +1531,24 @@
       <text x="9" y="52" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">E</text>
       <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
 
-      <!-- Center Art: Ornate Jester Hat & Mask Wildcard -->
       <g transform="translate(50, 68)">
-        <!-- Sunburst rays -->
         <circle cx="0" cy="0" r="28" fill="rgba(254, 243, 199, 0.6)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
         <circle cx="0" cy="0" r="22" fill="rgba(254, 226, 226, 0.7)" stroke="#f87171" stroke-width="0.75" />
-        
-        <!-- Jester 3-Point Hat -->
         <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#dc2626" stroke="#991b1b" stroke-width="1.2" />
         <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1.2" />
-        
-        <!-- Hat Bells -->
         <circle cx="-20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
         <circle cx="0" cy="-32" r="3.2" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
         <circle cx="20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
-        
-        <!-- Jester Mask / Smile -->
         <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-        <!-- Eyes -->
         <path d="M-7 3 Q-5 0 -3 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
         <path d="M3 3 Q5 0 7 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
-        <!-- Cheeks -->
         <circle cx="-8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
         <circle cx="8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
-        <!-- Smile -->
         <path d="M-6 8 Q0 13 6 8" stroke="#991b1b" stroke-width="1.6" fill="none" stroke-linecap="round" />
-
-        <!-- Gold Wildcard Banner -->
         <rect x="-24" y="19" width="48" height="13" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.2" />
         <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#b45309" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
       </g>
 
-      <!-- Bottom Right Vertical Text (Rotated 180) -->
       <g transform="rotate(180 50 70)">
         <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
         <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
@@ -1245,19 +1558,13 @@
         <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
       </g>
     </g>
-    <g id="Jr">
-      <use href="#joker_red" />
-    </g>
-    <g id="r_J">
-      <use href="#joker_red" />
-    </g>
+    <g id="Jr"><use href="#joker_red" /></g>
+    <g id="r_J"><use href="#joker_red" /></g>
 
     <!-- Black Joker (Wildcard) -->
     <g id="joker_black">
       <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
       <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(15, 23, 42, 0.4)" stroke-width="0.8" />
-      
-      <!-- Top Left Vertical Text -->
       <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
       <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
       <text x="9" y="36" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">O</text>
@@ -1265,38 +1572,24 @@
       <text x="9" y="52" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">E</text>
       <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
 
-      <!-- Center Art: Onyx & Indigo Jester Hat & Mask Wildcard -->
       <g transform="translate(50, 68)">
-        <!-- Radiance rays -->
         <circle cx="0" cy="0" r="28" fill="rgba(241, 245, 249, 0.7)" stroke="rgba(100, 116, 139, 0.4)" stroke-width="1" />
         <circle cx="0" cy="0" r="22" fill="rgba(224, 231, 255, 0.7)" stroke="#818cf8" stroke-width="0.75" />
-        
-        <!-- Jester 3-Point Hat in Onyx & Royal Indigo -->
         <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#0f172a" stroke="#020617" stroke-width="1.2" />
         <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#4338ca" stroke="#312e81" stroke-width="1.2" />
-        
-        <!-- Hat Bells -->
         <circle cx="-20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
         <circle cx="0" cy="-32" r="3.2" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
         <circle cx="20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
-        
-        <!-- Jester Mask / Smile -->
         <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-        <!-- Eyes -->
         <path d="M-7 3 Q-5 0 -3 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
         <path d="M3 3 Q5 0 7 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
-        <!-- Cheeks -->
         <circle cx="-8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
         <circle cx="8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
-        <!-- Smile -->
         <path d="M-6 8 Q0 13 6 8" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round" />
-
-        <!-- Silver / Indigo Wildcard Banner -->
         <rect x="-24" y="19" width="48" height="13" rx="4" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.2" />
         <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#312e81" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
       </g>
 
-      <!-- Bottom Right Vertical Text (Rotated 180) -->
       <g transform="rotate(180 50 70)">
         <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
         <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
@@ -1306,12 +1599,8 @@
         <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
       </g>
     </g>
-    <g id="Jb">
-      <use href="#joker_black" />
-    </g>
-    <g id="b_J">
-      <use href="#joker_black" />
-    </g>
-    
+    <g id="Jb"><use href="#joker_black" /></g>
+    <g id="b_J"><use href="#joker_black" /></g>
+  
   </defs>
 </svg>

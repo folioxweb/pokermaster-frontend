@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { playChipClink } from '../lib/soundEffects';
 import { formatPoints, formatPointsOnly } from '../lib/formatters';
-import { Coins, Clock } from 'lucide-react';
+import { Coins, Plus, Minus } from 'lucide-react';
 
 export const PlayerHUD = ({
   isMyTurn = false,
@@ -11,9 +11,6 @@ export const PlayerHUD = ({
   minRaise = 4,
   bigBlind = 4,
   mainPot = 0,
-  handRank = null, // { name: 'Two Pair', description: 'Two Pair, Kings and Queens' }
-  turnTimeLeft = 0,
-  turnMaxTime = 0,
   onAction = null  // (action, amount) => void
 }) => {
   if (!heroPlayer || heroPlayer.status === 'folded' || heroPlayer.status === 'sitting_out') {
@@ -32,43 +29,52 @@ export const PlayerHUD = ({
   }, [minBetAllowed]);
 
   const handleSliderChange = (e) => {
-    const val = Number(e.target.value);
+    const val = Math.max(minBetAllowed, Math.min(maxBet, Number(e.target.value)));
     setBetAmount(val);
     playChipClink();
   };
 
-  const multipliers = [2, 4, 8, 16];
+  const handleStepAdjust = (delta) => {
+    const nextVal = Math.max(minBetAllowed, Math.min(maxBet, betAmount + delta));
+    setBetAmount(nextVal);
+    playChipClink();
+  };
 
+  // Base calculation for multiplier presets
   const calcPresetAmount = (multiplier) => {
-    // When no bet has been made, base is the Big Blind (e.g. Bet 2 = 2 * BB)
-    // When facing a bet, base is max(currentBet, bigBlind)
     const base = Math.max(currentBet, bigBlind || 20);
-    const target = base * multiplier;
+    const target = Math.round(base * multiplier);
     return Math.min(maxBet, Math.max(minBetAllowed, target));
   };
 
-  const applyMultiplier = (multiplier) => {
-    const amt = calcPresetAmount(multiplier);
-    setBetAmount(amt);
+  // 1. Remove duplicate Min vs Raise 2x:
+  // Candidates: 2.5x, 3x, 4x, 8x
+  // Filter out any that equal minBetAllowed (which removes duplicate Min) or equal maxBet (covered by All-In)
+  const candidateMultipliers = [2.5, 3, 4, 8];
+  const uniquePresets = [];
+  for (const m of candidateMultipliers) {
+    const amt = calcPresetAmount(m);
+    if (amt > minBetAllowed && amt < maxBet && !uniquePresets.some((p) => p.amt === amt)) {
+      uniquePresets.push({
+        m,
+        amt,
+        label: currentBet > 0 ? `Raise ${m}x` : `Bet ${m}x`
+      });
+    }
+  }
+
+  const applyPresetAmount = (amt) => {
+    setBetAmount(Math.min(maxBet, Math.max(minBetAllowed, amt)));
     playChipClink();
   };
 
-  const applyPreset = (type) => {
-    let amt = minBetAllowed;
-    if (type === 'min') {
-      amt = minBetAllowed;
-    } else if (type === 'all_in') {
-      amt = maxBet;
-    }
-    setBetAmount(amt);
-    playChipClink();
-  };
+  const stepSize = Math.max(1, Math.round((bigBlind || 20) / 2));
 
   return (
     <div className="poker-hud-wrapper">
       {/* Main Action HUD Panel */}
       <div className={`poker-hud-panel ${isMyTurn ? 'active' : ''}`}>
-        {/* Hero Identity, Hand Rank & Live Countdown Timer Bar */}
+        {/* Hero Identity Bar (No timer, No hand suggestion - timer is now on Information Board) */}
         <div className="poker-hud-hero-bar">
           <div className="poker-hud-hero-left">
             <div className="poker-hud-avatar">
@@ -85,23 +91,7 @@ export const PlayerHUD = ({
             </div>
           </div>
 
-          {/* Integrated Hand Rank Status Tag (Center) */}
-          {handRank && handRank.description && (
-            <div className="poker-hud-hand-badge" title={`${handRank.name}: ${handRank.description}`}>
-              <span className="poker-hud-hand-dot" />
-              <span className="poker-hud-hand-name">{handRank.name}:</span>
-              <span className="poker-hud-hand-desc">{handRank.description}</span>
-            </div>
-          )}
-
-          {isMyTurn ? (
-            <div className={`poker-hud-timer-badge ${turnMaxTime > 0 && turnTimeLeft <= 5 ? 'urgent' : ''}`}>
-              <Clock className="w-3.5 h-3.5" />
-              <span>
-                YOUR TURN: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞ NO LIMIT'}</strong>
-              </span>
-            </div>
-          ) : (
+          {!isMyTurn && (
             <div className="poker-hud-waiting-badge">
               <span>Waiting for {currentTurnPlayerName || 'turn'}...</span>
             </div>
@@ -114,61 +104,84 @@ export const PlayerHUD = ({
             {heroPlayer.chips > callAmount && (
               <div>
                 <div className="poker-presets-bar">
-                  {/* Min Option */}
+                  {/* Min Option (Always minimum allowed) */}
                   <button
                     type="button"
-                    onClick={() => applyPreset('min')}
+                    onClick={() => applyPresetAmount(minBetAllowed)}
                     className={`poker-preset-btn ${betAmount === minBetAllowed ? 'active' : ''}`}
+                    title="Minimum allowed raise"
                   >
                     <span className="poker-preset-title">Min</span>
                     <span className="poker-preset-amount">{formatPointsOnly(minBetAllowed)}</span>
                   </button>
 
-                  {/* Dynamic Blind Multipliers: Bet 2, Bet 4, Bet 8, Bet 16 (or Raise 2x, 4x, etc.) */}
-                  {multipliers.map((m) => {
-                    const amt = calcPresetAmount(m);
-                    const isRaise = currentBet > 0;
-                    const label = isRaise ? `Raise ${m}x` : `Bet ${m}`;
-                    return (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => applyMultiplier(m)}
-                        className={`poker-preset-btn ${betAmount === amt ? 'active' : ''}`}
-                      >
-                        <span className="poker-preset-title">{label}</span>
-                        <span className="poker-preset-amount">{formatPointsOnly(amt)}</span>
-                      </button>
-                    );
-                  })}
+                  {/* Multipliers that are strictly above Min and below All-In */}
+                  {uniquePresets.map((p) => (
+                    <button
+                      key={p.m}
+                      type="button"
+                      onClick={() => applyPresetAmount(p.amt)}
+                      className={`poker-preset-btn ${betAmount === p.amt ? 'active' : ''}`}
+                    >
+                      <span className="poker-preset-title">{p.label}</span>
+                      <span className="poker-preset-amount">{formatPointsOnly(p.amt)}</span>
+                    </button>
+                  ))}
 
-                  {/* All-In Option */}
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('all_in')}
-                    className={`poker-preset-btn all-in ${betAmount === maxBet ? 'active' : ''}`}
-                  >
-                    <span className="poker-preset-title">All-In</span>
-                    <span className="poker-preset-amount">{formatPointsOnly(maxBet)}</span>
-                  </button>
+                  {/* All-In Option (Only if above Min) */}
+                  {maxBet > minBetAllowed && (
+                    <button
+                      type="button"
+                      onClick={() => applyPresetAmount(maxBet)}
+                      className={`poker-preset-btn all-in ${betAmount === maxBet ? 'active' : ''}`}
+                    >
+                      <span className="poker-preset-title">All-In</span>
+                      <span className="poker-preset-amount">{formatPointsOnly(maxBet)}</span>
+                    </button>
+                  )}
                 </div>
 
+                {/* Granular Slider: Select ANY amount above minimum */}
                 <div className="poker-slider-row">
-                  <span className="poker-slider-minmax">
-                    {formatPointsOnly(minBetAllowed)}
-                  </span>
-                  <input
-                    type="range"
-                    min={minBetAllowed}
-                    max={maxBet}
-                    step={bigBlind}
-                    value={betAmount}
-                    onChange={handleSliderChange}
-                    className="poker-slider"
-                  />
-                  <span className="poker-slider-val">
-                    {formatPoints(betAmount)}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleStepAdjust(-stepSize)}
+                    className="poker-slider-step-btn"
+                    disabled={betAmount <= minBetAllowed}
+                    title={`Decrease by ${stepSize} PTS`}
+                  >
+                    <Minus className="w-3 h-3" />
+                  </button>
+
+                  <div className="poker-slider-track-wrap">
+                    <div className="poker-slider-labels">
+                      <span className="poker-slider-bound">Min: {formatPointsOnly(minBetAllowed)}</span>
+                      <span className="poker-slider-val-tag">
+                        {currentBet === 0 ? 'Bet:' : 'Raise To:'} <strong>{formatPoints(betAmount)}</strong>
+                      </span>
+                      <span className="poker-slider-bound">Max: {formatPointsOnly(maxBet)}</span>
+                    </div>
+
+                    <input
+                      type="range"
+                      min={minBetAllowed}
+                      max={maxBet}
+                      step={1}
+                      value={betAmount}
+                      onChange={handleSliderChange}
+                      className="poker-slider"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleStepAdjust(stepSize)}
+                    className="poker-slider-step-btn"
+                    disabled={betAmount >= maxBet}
+                    title={`Increase by ${stepSize} PTS`}
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
             )}

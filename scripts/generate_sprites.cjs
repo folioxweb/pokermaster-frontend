@@ -13,14 +13,38 @@ if (fs.existsSync(path.resolve(__dirname, '../dist'))) {
   fs.mkdirSync(distChipsDir, { recursive: true });
 }
 
-// Traditional 2-Color Card Deck:
-// Spades & Clubs = Crisp Deep Black
-// Hearts & Diamonds = Rich Casino Red
+// Traditional High-Contrast 2-Color Card Deck:
+// Spades & Clubs = Deep Obsidian Black (#0f172a)
+// Hearts & Diamonds = Rich Casino Red (#dc2626)
 const suits = {
-  s: { name: 'spades', symbol: '♠', color: '#111827', accent: '#374151' },
-  h: { name: 'hearts', symbol: '♥', color: '#dc2626', accent: '#ef4444' },
-  d: { name: 'diamonds', symbol: '♦', color: '#dc2626', accent: '#ef4444' }, // Original Red
-  c: { name: 'clubs', symbol: '♣', color: '#111827', accent: '#374151' }    // Original Black
+  s: {
+    name: 'spades',
+    symbol: '♠',
+    color: '#0f172a',
+    // Standard high-precision 100x100 viewBox Spade path
+    path: 'M 50,10 C 50,10 16,48 16,68 C 16,80 27,88 39,88 C 45,88 48,85 50,82.5 C 47.5,91 42,96 35,100 L 65,100 C 58,96 52.5,91 50,82.5 C 52,85 55,88 61,88 C 73,88 84,80 84,68 C 84,48 50,10 50,10 Z'
+  },
+  h: {
+    name: 'hearts',
+    symbol: '♥',
+    color: '#dc2626',
+    // Standard high-precision 100x100 viewBox Heart path
+    path: 'M 50,86 C 50,86 15,55 15,34 C 15,19 27,12 38.5,12 C 45.5,12 49,16 50,21 C 51,16 54.5,12 61.5,12 C 73,12 85,19 85,34 C 85,55 50,86 50,86 Z'
+  },
+  d: {
+    name: 'diamonds',
+    symbol: '♦',
+    color: '#dc2626',
+    // Sharp classic casino Diamond path
+    path: 'M 50,8 L 86,50 L 50,92 L 14,50 Z'
+  },
+  c: {
+    name: 'clubs',
+    symbol: '♣',
+    color: '#0f172a',
+    // Standard high-precision 100x100 viewBox Club path
+    path: 'M 50,12 C 39,12 31,21 31,31 C 31,37 33.5,42.5 37.5,46 C 32,44.5 25.5,46.5 21,51 C 15,57 15,67 21,73 C 27,79 37.5,79 43.5,73 C 45.5,71 47,68 47.8,65 C 46.8,76 41.5,88 34,98 L 66,98 C 58.5,88 53.2,76 52.2,65 C 53,68 54.5,71 56.5,73 C 62.5,79 73,79 79,73 C 85,67 85,57 79,51 C 74.5,46.5 68,44.5 62.5,46 C 66.5,42.5 69,37 69,31 C 69,21 61,12 50,12 Z'
+  }
 };
 
 const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
@@ -43,42 +67,37 @@ let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"
 for (const [suitKey, suitData] of Object.entries(suits)) {
   for (const rank of ranks) {
     const displayRank = rank === 'T' ? '10' : rank;
-    const isCourt = ['J', 'Q', 'K'].includes(rank);
-    const isAce = rank === 'A';
+    const isTen = rank === 'T';
+    const rankX = isTen ? '6' : '9';
 
-    let centerArt = '';
-    if (isAce) {
-      centerArt = `
-        <text x="50" y="78" font-size="34" text-anchor="middle" fill="${suitData.color}" font-family="system-ui, -apple-system, sans-serif">${suitData.symbol}</text>
-      `;
-    } else if (isCourt) {
-      centerArt = `
-        <rect x="26" y="42" width="48" height="56" rx="4" fill="${suitData.accent}" opacity="0.12" stroke="${suitData.color}" stroke-width="0.8" />
-        <circle cx="50" cy="62" r="14" fill="${suitData.accent}" opacity="0.25" />
-        <text x="50" y="68" font-size="20" font-weight="900" text-anchor="middle" fill="${suitData.color}" font-family="Outfit, Inter, system-ui, sans-serif">${rank}</text>
-        <text x="50" y="88" font-size="14" text-anchor="middle" fill="${suitData.color}">${suitData.symbol}</text>
-      `;
-    } else {
-      centerArt = `
-        <text x="50" y="74" font-size="28" text-anchor="middle" fill="${suitData.color}" font-family="system-ui, -apple-system, sans-serif">${suitData.symbol}</text>
-      `;
-    }
+    // Big, sharp, bold center suit art for ALL cards (Numbers, Court J/Q/K, and Ace)
+    // Scaled to 48x48 and perfectly centered at (50, 70)
+    const centerArt = `
+      <g transform="translate(26, 46) scale(0.48)">
+        <path d="${suitData.path}" fill="${suitData.color}" />
+      </g>
+    `;
 
     const cardGroup = `
     <!-- Card ${rank}${suitKey} -->
     <g id="${suitKey}_${rank}">
-      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
-      <!-- Top Left Rank & Pip -->
-      <text x="10" y="22" font-size="16" font-weight="800" fill="${suitData.color}" font-family="Outfit, Inter, system-ui, sans-serif">${displayRank}</text>
-      <text x="10" y="36" font-size="13" fill="${suitData.color}">${suitData.symbol}</text>
+      <rect width="100" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6" />
       
-      <!-- Center Art -->
+      <!-- Top Left Big Rank & Crisp Vector Pip -->
+      <text x="${rankX}" y="24" font-size="21" font-weight="900" fill="${suitData.color}" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">${displayRank}</text>
+      <g transform="translate(8, 29) scale(0.17)">
+        <path d="${suitData.path}" fill="${suitData.color}" />
+      </g>
+      
+      <!-- Center Art: Big Distinct Suit Shape -->
       ${centerArt}
 
-      <!-- Bottom Right Rank & Pip (Rotated) -->
+      <!-- Bottom Right Big Rank & Crisp Vector Pip (Rotated 180) -->
       <g transform="rotate(180 50 70)">
-        <text x="10" y="22" font-size="16" font-weight="800" fill="${suitData.color}" font-family="Outfit, Inter, system-ui, sans-serif">${displayRank}</text>
-        <text x="10" y="36" font-size="13" fill="${suitData.color}">${suitData.symbol}</text>
+        <text x="${rankX}" y="24" font-size="21" font-weight="900" fill="${suitData.color}" font-family="Outfit, Inter, system-ui, -apple-system, sans-serif" letter-spacing="-0.03em">${displayRank}</text>
+        <g transform="translate(8, 29) scale(0.17)">
+          <path d="${suitData.path}" fill="${suitData.color}" />
+        </g>
       </g>
     </g>
     <g id="${rank}_${suitKey}">
@@ -89,7 +108,92 @@ for (const [suitKey, suitData] of Object.entries(suits)) {
   }
 }
 
-svgContent += `\n  </defs>\n</svg>`;
+// Jokers (For Bluff / Wildcard Games)
+svgContent += `
+    <!-- Red Joker (Wildcard) -->
+    <g id="joker_red">
+      <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
+      <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(220, 38, 38, 0.35)" stroke-width="0.8" />
+      <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
+      <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="9" y="36" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">O</text>
+      <text x="9" y="44" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="9" y="52" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">E</text>
+      <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
+
+      <g transform="translate(50, 68)">
+        <circle cx="0" cy="0" r="28" fill="rgba(254, 243, 199, 0.6)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
+        <circle cx="0" cy="0" r="22" fill="rgba(254, 226, 226, 0.7)" stroke="#f87171" stroke-width="0.75" />
+        <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#dc2626" stroke="#991b1b" stroke-width="1.2" />
+        <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1.2" />
+        <circle cx="-20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        <circle cx="0" cy="-32" r="3.2" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        <circle cx="20" cy="-28" r="3" fill="#fbbf24" stroke="#d97706" stroke-width="0.8" />
+        <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <path d="M-7 3 Q-5 0 -3 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M3 3 Q5 0 7 3" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <circle cx="-8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
+        <circle cx="8" cy="7" r="2" fill="rgba(239, 68, 68, 0.5)" />
+        <path d="M-6 8 Q0 13 6 8" stroke="#991b1b" stroke-width="1.6" fill="none" stroke-linecap="round" />
+        <rect x="-24" y="19" width="48" height="13" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.2" />
+        <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#b45309" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
+      </g>
+
+      <g transform="rotate(180 50 70)">
+        <text x="9" y="16" font-size="12" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">★</text>
+        <text x="9" y="27" font-size="8.5" font-weight="900" fill="#dc2626" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="9" y="36" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">O</text>
+        <text x="9" y="44" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="9" y="52" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">E</text>
+        <text x="9" y="60" font-size="7.5" font-weight="800" fill="#dc2626" font-family="Outfit, Inter, sans-serif">R</text>
+      </g>
+    </g>
+    <g id="Jr"><use href="#joker_red" /></g>
+    <g id="r_J"><use href="#joker_red" /></g>
+
+    <!-- Black Joker (Wildcard) -->
+    <g id="joker_black">
+      <rect width="100" height="140" rx="8" fill="#fffdfa" stroke="#cbd5e1" stroke-width="1.5" />
+      <rect x="3.5" y="3.5" width="93" height="133" rx="6" fill="none" stroke="rgba(15, 23, 42, 0.4)" stroke-width="0.8" />
+      <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
+      <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
+      <text x="9" y="36" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">O</text>
+      <text x="9" y="44" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">K</text>
+      <text x="9" y="52" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">E</text>
+      <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
+
+      <g transform="translate(50, 68)">
+        <circle cx="0" cy="0" r="28" fill="rgba(241, 245, 249, 0.7)" stroke="rgba(100, 116, 139, 0.4)" stroke-width="1" />
+        <circle cx="0" cy="0" r="22" fill="rgba(224, 231, 255, 0.7)" stroke="#818cf8" stroke-width="0.75" />
+        <path d="M-18 -2 C-24 -16 -12 -28 -20 -28 C-10 -20 -8 -8 0 -4 C8 -8 10 -20 20 -28 C12 -28 24 -16 18 -2 Z" fill="#0f172a" stroke="#020617" stroke-width="1.2" />
+        <path d="M-8 -3 C-12 -20 0 -32 0 -32 C0 -32 12 -20 8 -3 Z" fill="#4338ca" stroke="#312e81" stroke-width="1.2" />
+        <circle cx="-20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        <circle cx="0" cy="-32" r="3.2" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        <circle cx="20" cy="-28" r="3" fill="#cbd5e1" stroke="#64748b" stroke-width="0.8" />
+        <ellipse cx="0" cy="5" rx="14" ry="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <path d="M-7 3 Q-5 0 -3 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M3 3 Q5 0 7 3" stroke="#4338ca" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <circle cx="-8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
+        <circle cx="8" cy="7" r="2" fill="rgba(148, 163, 184, 0.4)" />
+        <path d="M-6 8 Q0 13 6 8" stroke="#0f172a" stroke-width="1.6" fill="none" stroke-linecap="round" />
+        <rect x="-24" y="19" width="48" height="13" rx="4" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.2" />
+        <text x="0" y="29" font-size="9" font-weight="900" text-anchor="middle" fill="#312e81" letter-spacing="1.5" font-family="Outfit, Inter, sans-serif">★ WILD ★</text>
+      </g>
+
+      <g transform="rotate(180 50 70)">
+        <text x="9" y="16" font-size="12" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">★</text>
+        <text x="9" y="27" font-size="8.5" font-weight="900" fill="#0f172a" font-family="Outfit, Inter, sans-serif">J</text>
+        <text x="9" y="36" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">O</text>
+        <text x="9" y="44" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">K</text>
+        <text x="9" y="52" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">E</text>
+        <text x="9" y="60" font-size="7.5" font-weight="800" fill="#0f172a" font-family="Outfit, Inter, sans-serif">R</text>
+      </g>
+    </g>
+    <g id="Jb"><use href="#joker_black" /></g>
+    <g id="b_J"><use href="#joker_black" /></g>
+  `;
+
+  svgContent += `\n  </defs>\n</svg>`;
 
 // Write cards sprite to public and dist
 fs.writeFileSync(path.join(publicCardsDir, 'cards-deck.svg'), svgContent, 'utf8');
