@@ -22,7 +22,10 @@ import {
   Share2,
   Link,
   UserX,
-  Mail
+  Mail,
+  MoreVertical,
+  Palette,
+  LogOut
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { getSeatCoordinates } from '../lib/seatingMath';
@@ -64,6 +67,8 @@ export const PokerTable = ({
   const [feltTheme, setFeltTheme] = useState('emerald');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [copiedCode, setCopiedCode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   // Identify Hero seat (dynamically matches logged-in user handle)
   const [mySeatIndex, setMySeatIndex] = useState(0);
@@ -160,6 +165,23 @@ export const PokerTable = ({
   useEffect(() => {
     announcementRef.current = announcement;
   }, [announcement]);
+
+  // Close 3-dots dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   // Automatic lobby redirect effect on match completion
   useEffect(() => {
@@ -1631,19 +1653,20 @@ export const PokerTable = ({
 
   return (
     <div className="table-viewport-container">
-      {/* Top Table Header Bar */}
+      {/* Unified Single-Line Table Header Bar with Integrated Telemetry & 3-Dots Menu */}
       <header className="table-header-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Left: Lobby Back & Table Identity */}
+        <div className="table-header-left">
           <button
             onClick={onLeaveTable}
             className="table-nav-btn table-back-btn"
-            title="Leave Table"
+            title="Leave Table (Back to Lobby)"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Lobby</span>
+            <span className="table-nav-btn-text">Lobby</span>
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="table-header-title-box">
             <h2 className="table-room-title">
               {gameRoom?.roomName || 'Poker Room'}
             </h2>
@@ -1658,116 +1681,39 @@ export const PokerTable = ({
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {onOpenSocial && (
-            <button
-              onClick={onOpenSocial}
-              className="table-nav-btn table-invite-btn"
-              title="Invite Online Friends to Table"
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Invite ({onlineCount})</span>
-            </button>
-          )}
-
-          {isWaitingOrEnded && (
-            <>
-              {players.length < (gameRoom?.maxPlayers || 6) && (
-                <button
-                  onClick={handleAddBot}
-                  className="table-nav-btn table-bot-btn"
-                  title="Add Practice Bot"
-                >
-                  <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>+ Bot</span>
-                </button>
-              )}
-
-              <button
-                onClick={startNewHand}
-                className="table-nav-btn"
-                style={{ background: '#059669', borderColor: '#34d399', color: '#ffffff', fontWeight: 900 }}
-              >
-                <Play className="w-3.5 h-3.5 fill-white" />
-                <span>{handState.handNumber === 0 ? 'Deal Hand' : 'Next Hand'}</span>
-              </button>
-            </>
-          )}
-
-          <button
-            onClick={() => setFeltTheme(feltTheme === 'emerald' ? 'midnight' : 'emerald')}
-            className="table-nav-btn"
-            title="Toggle Felt Color"
-          >
-            {feltTheme === 'emerald' ? '🟢 Velvet' : '🔵 Dark'}
-          </button>
-
-          <button
-            onClick={() => setSoundOn(toggleSound())}
-            className="table-nav-btn"
-            title="Toggle Audio"
-          >
-            {soundOn ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
-          </button>
-
-          {onToggleTheme && (
-            <button
-              onClick={() => onToggleTheme()}
-              className="table-nav-btn"
-              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-            >
-              {theme === 'light' ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* PERSISTENT TABLE INFORMATION BOARD (ALL THE TIME, ZERO UI BLOCKING) */}
-      <div className="poker-info-board">
-        <div className="poker-info-board-inner">
-          {/* Table Room & Code */}
-          <div className="poker-info-chip room-chip" onClick={copyRoomCode} title="Click to copy room code" style={{ cursor: 'pointer' }}>
-            <span className="poker-info-chip-label">ROOM</span>
-            <span className="poker-info-chip-val">{gameRoom?.roomCode || 'PK-TABLE'}</span>
-          </div>
-
-          {/* Blinds */}
-          <div className="poker-info-chip blinds-chip">
-            <span className="poker-info-chip-label">BLINDS</span>
-            <span className="poker-info-chip-val">
+        {/* Center: Integrated Information Board Telemetry (Desktop View - Same Line!) */}
+        <div className="table-header-telemetry-desktop">
+          <div className="table-telemetry-chip">
+            <span className="telemetry-label">BLINDS</span>
+            <span className="telemetry-val">
               {formatPointsOnly(handState.smallBlind || tableSettings.smallBlind || 50)} / {formatPointsOnly(handState.bigBlind || tableSettings.bigBlind || 100)}
             </span>
           </div>
 
-          {/* Hand # & Phase */}
-          <div className="poker-info-chip hand-chip">
-            <span className="poker-info-chip-label">HAND</span>
-            <span className="poker-info-chip-val">
-              #{handState.handNumber || 1} • <span className="poker-phase-tag">{handState.phase === 'waiting' ? 'WAITING' : handState.phase.toUpperCase()}</span>
+          <div className="table-telemetry-chip">
+            <span className="telemetry-label">HAND</span>
+            <span className="telemetry-val">
+              #{handState.handNumber || 1} • <span className="telemetry-phase">{handState.phase === 'waiting' ? 'WAIT' : handState.phase.toUpperCase()}</span>
             </span>
           </div>
 
-          {/* Total Pot */}
-          <div className="poker-info-chip pot-chip">
-            <span className="poker-info-chip-label">POT</span>
-            <span className="poker-info-chip-val highlight">
+          <div className="table-telemetry-chip pot-chip">
+            <span className="telemetry-label">POT</span>
+            <span className="telemetry-val gold">
               {formatPoints(handState.mainPot || 0)}
             </span>
           </div>
 
-          {/* Time Limit & Active Turn (Request 5!) */}
-          <div className={`poker-info-chip timer-chip ${handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? 'is-hero' : ''} ${turnMaxTime > 0 && turnTimeLeft <= 5 && !isWaitingOrEnded ? 'is-urgent' : ''}`}>
+          <div className={`table-telemetry-chip timer-chip ${handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? 'is-hero' : ''} ${turnMaxTime > 0 && turnTimeLeft <= 5 && !isWaitingOrEnded ? 'is-urgent' : ''}`}>
             <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span className="poker-info-chip-label">TIME:</span>
-            <span className="poker-info-chip-val timer-val">
+            <span className="telemetry-val">
               {handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? (
-                <span className="hero-turn-countdown">
+                <span className="hero-turn-text">
                   YOUR TURN: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞ NO LIMIT'}</strong>
                 </span>
               ) : !isWaitingOrEnded ? (
                 <span>
-                  {currentTurnPlayer?.username ? `${currentTurnPlayer.username}` : 'TURN'}: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞'}</strong>
+                  {currentTurnPlayer?.username || 'Turn'}: <strong>{turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞'}</strong>
                 </span>
               ) : (
                 <span>{turnMaxTime > 0 ? `${turnMaxTime}s LIMIT` : '∞ NO LIMIT'}</span>
@@ -1775,13 +1721,166 @@ export const PokerTable = ({
             </span>
           </div>
 
-          {/* Live Table Announcement Marquee */}
-          <div className="poker-info-marquee">
-            <span className="poker-info-pulse-dot">●</span>
-            <span className="poker-info-announcement-text">{announcement}</span>
+          {announcement && (
+            <div className="table-header-announcement">
+              <span className="telemetry-dot">●</span>
+              <span className="telemetry-announcement-text">{announcement}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Quick Deal Action + 3-Dots Menu Button */}
+        <div className="table-header-right" ref={menuRef}>
+          {isWaitingOrEnded && (
+            <button
+              onClick={startNewHand}
+              className="table-nav-btn table-deal-btn"
+              style={{ background: '#059669', borderColor: '#34d399', color: '#ffffff', fontWeight: 900 }}
+              title="Deal Next Hand"
+            >
+              <Play className="w-3.5 h-3.5 fill-white" />
+              <span>{handState.handNumber === 0 ? 'Deal' : 'Next'}</span>
+            </button>
+          )}
+
+          {/* 3-Dots Menu Button (Mobile & Desktop) */}
+          <button
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            className={`table-nav-btn table-menu-btn ${isMenuOpen ? 'active' : ''}`}
+            title="Table Options Menu"
+            aria-label="Table Options"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+
+          {/* 3-Dots Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="table-dropdown-menu">
+              <div className="table-dropdown-header">
+                <span className="table-dropdown-title">Table Options</span>
+                <span className="table-dropdown-code">{gameRoom?.roomCode}</span>
+              </div>
+
+              <div className="table-dropdown-items">
+                {onOpenSocial && (
+                  <button
+                    onClick={() => {
+                      onOpenSocial();
+                      setIsMenuOpen(false);
+                    }}
+                    className="table-dropdown-item"
+                  >
+                    <Users className="w-4 h-4 text-sky-400" />
+                    <span>Invite Online Friends</span>
+                    <span className="table-dropdown-badge">{onlineCount}</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setFeltTheme(feltTheme === 'emerald' ? 'midnight' : 'emerald');
+                  }}
+                  className="table-dropdown-item"
+                >
+                  <Palette className="w-4 h-4 text-emerald-400" />
+                  <span>Felt Style:</span>
+                  <span className="table-dropdown-val">{feltTheme === 'emerald' ? 'Velvet Green' : 'Midnight Dark'}</span>
+                </button>
+
+                <button
+                  onClick={() => setSoundOn(toggleSound())}
+                  className="table-dropdown-item"
+                >
+                  {soundOn ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
+                  <span>Sound Effects:</span>
+                  <span className="table-dropdown-val">{soundOn ? 'On' : 'Muted'}</span>
+                </button>
+
+                {onToggleTheme && (
+                  <button
+                    onClick={() => onToggleTheme()}
+                    className="table-dropdown-item"
+                  >
+                    {theme === 'light' ? <Moon className="w-4 h-4 text-indigo-400" /> : <Sun className="w-4 h-4 text-amber-400" />}
+                    <span>Theme:</span>
+                    <span className="table-dropdown-val">{theme === 'light' ? 'Light' : 'Dark'}</span>
+                  </button>
+                )}
+
+                {isWaitingOrEnded && players.length < (gameRoom?.maxPlayers || 6) && (
+                  <button
+                    onClick={() => {
+                      handleAddBot();
+                      setIsMenuOpen(false);
+                    }}
+                    className="table-dropdown-item"
+                  >
+                    <UserPlus className="w-4 h-4 text-indigo-400" />
+                    <span>+ Add Practice Bot</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    copyRoomCode();
+                    setIsMenuOpen(false);
+                  }}
+                  className="table-dropdown-item"
+                >
+                  <Copy className="w-4 h-4 text-slate-400" />
+                  <span>Copy Room Code</span>
+                  <span className="table-dropdown-val">{gameRoom?.roomCode}</span>
+                </button>
+
+                <div className="table-dropdown-divider" />
+
+                <button
+                  onClick={() => {
+                    onLeaveTable();
+                    setIsMenuOpen(false);
+                  }}
+                  className="table-dropdown-item danger"
+                >
+                  <LogOut className="w-4 h-4 text-rose-400" />
+                  <span>Leave Table</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile View Telemetry Strip (100% on the screen, NO horizontal scrolling!) */}
+        <div className="table-mobile-telemetry-strip">
+          <div className="table-mobile-stat">
+            <span className="stat-label">BLINDS</span>
+            <span className="stat-val">{formatPointsOnly(handState.smallBlind || 50)}/{formatPointsOnly(handState.bigBlind || 100)}</span>
+          </div>
+          <div className="table-mobile-stat">
+            <span className="stat-label">HAND</span>
+            <span className="stat-val">#{handState.handNumber || 1}</span>
+          </div>
+          <div className="table-mobile-stat">
+            <span className="stat-label">POT</span>
+            <span className="stat-val gold">{formatPoints(handState.mainPot || 0)}</span>
+          </div>
+          <div className={`table-mobile-stat timer ${handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded ? 'hero' : ''} ${turnMaxTime > 0 && turnTimeLeft <= 5 && !isWaitingOrEnded ? 'urgent' : ''}`}>
+            <Clock className="w-3 h-3 text-amber-400" />
+            <span className="stat-val">
+              {handState.currentTurnSeat === mySeatIndex && !isWaitingOrEnded
+                ? `${turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞'}`
+                : (!isWaitingOrEnded ? (turnMaxTime > 0 ? `${turnTimeLeft}s` : '∞') : (turnMaxTime > 0 ? `${turnMaxTime}s` : '∞'))}
+            </span>
           </div>
         </div>
-      </div>
+
+        {/* Mobile Announcement Marquee (Compact 1-line ticker) */}
+        {announcement && (
+          <div className="table-mobile-marquee-strip">
+            <span className="dot">●</span>
+            <span className="text">{announcement}</span>
+          </div>
+        )}
+      </header>
 
       {/* Main Table Felt Stage */}
       <main className="table-stage">

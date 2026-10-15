@@ -12,9 +12,16 @@ export function getSeatCoordinates(seatIndex, totalSeats = 6, heroSeatIndex = 0)
   
   // Ellipse radii positioned along the OUTER edge / rail of the table
   const radiusX = 47.5; // Sits along outer bumper without overflowing screen
-  // For Hero (relativeIndex === 0, bottom center), anchor slightly tighter onto the table rail cushion (43.8%)
-  // so the player box and turn timer ring rest directly on the wooden rail and stay well clear of the bottom HUD.
-  const radiusY = relativeIndex === 0 ? 43.8 : 46.5;
+  // Radius Y calibration:
+  // - Top seat(s) (sin(angle) < -0.5, e.g. relativeIndex === 3 in 6-max): 41.5% so cards sit cleanly on top rail with generous breathing room below the header
+  // - Hero (relativeIndex === 0, bottom center): 43.5% so hero box and ring sit nicely on bottom rail
+  // - Side seats: 45.0% for balanced oval rail placement
+  let radiusY = 45.0;
+  if (Math.sin(angle) < -0.5) {
+    radiusY = 41.5;
+  } else if (relativeIndex === 0) {
+    radiusY = 43.5;
+  }
   
   const left = 50 + radiusX * Math.cos(angle);
   const top = 50 + radiusY * Math.sin(angle);
