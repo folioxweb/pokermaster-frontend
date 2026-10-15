@@ -335,15 +335,44 @@ export const PokerTable = ({
         }
       }
 
-      // 4. Assign seat for current user (auto-fill first available seat)
+      // 4. Assign seat for current user:
+      // Priority 1: User is already seated in this room (reconnect) -> Keep same seat
+      // Priority 2: Find lowest truly VACANT seat (no live player, no bot) -> Sit at vacant seat!
+      // Priority 3: All seats are occupied! If any seat has a BOT, replace the BOT so human can play
+      // Priority 4: All seats are occupied by live humans -> Table is full (spectator mode)
+      const allSeatIndices = Array.from({ length: totalMax }, (_, i) => i);
+      const occupiedSeatIndices = existingSeated.map((p) => p.seat_index);
+      const vacantSeats = allSeatIndices.filter((s) => !occupiedSeatIndices.includes(s));
+
       let assignedSeat = 0;
-      const myExisting = existingSeated.find(p => p.username === user.username);
+      const myExisting = existingSeated.find((p) => p.username === user.username);
+
       if (myExisting) {
         assignedSeat = myExisting.seat_index;
+      } else if (vacantSeats.length > 0) {
+        // ALWAYS take the first available vacant seat!
+        assignedSeat = vacantSeats[0];
       } else {
-        const occupied = existingSeated.map(p => p.seat_index);
-        while (occupied.includes(assignedSeat) && assignedSeat < totalMax) {
-          assignedSeat++;
+        // All seats are occupied! Only replace a bot if NO vacant seats exist!
+        const botSeat = existingSeated.find((p) => p.user_id === null || BOT_NAMES.includes(p.username));
+        if (botSeat) {
+          assignedSeat = botSeat.seat_index;
+          // Delete replaced bot from database so live player sits cleanly
+          if (rid) {
+            try {
+              await supabase
+                .from('poker_room_players')
+                .delete()
+                .eq('room_id', rid)
+                .eq('seat_index', assignedSeat);
+            } catch (err) {
+              console.warn('Error clearing replaced bot from poker_room_players:', err);
+            }
+          }
+        } else {
+          // Table is full with live humans
+          alert('Table is full with live players! You are in spectator mode.');
+          assignedSeat = -1;
         }
       }
 
@@ -351,8 +380,8 @@ export const PokerTable = ({
         setMySeatIndex(assignedSeat);
       }
 
-      // 5. Upsert current user into database poker_room_players
-      if (rid) {
+      // 5. Upsert current user into database poker_room_players (if assigned a seat)
+      if (rid && assignedSeat >= 0) {
         try {
           // Delete any existing seat for this user in this room first to guarantee no duplicate seats
           await supabase
@@ -397,9 +426,10 @@ export const PokerTable = ({
         isBot: false
       };
 
-      let tablePlayers = [heroPlayer];
+      let tablePlayers = assignedSeat >= 0 ? [heroPlayer] : [];
       for (const p of existingSeated) {
         if (p.seat_index !== assignedSeat) {
+          const isBotPlayer = p.user_id === null || BOT_NAMES.includes(p.username);
           tablePlayers.push({
             seat_index: p.seat_index,
             user_id: p.user_id,
@@ -412,10 +442,11 @@ export const PokerTable = ({
             cards: [],
             publicKey: p.publicKey || null,
             shownCards: false,
-            isBot: false
+            isBot: isBotPlayer
           });
         }
       }
+      tablePlayers.sort((a, b) => a.seat_index - b.seat_index);
 
       if (isMounted) {
         setPlayers(tablePlayers);
@@ -433,11 +464,10 @@ export const PokerTable = ({
 
       channel
         .on('broadcast', { event: 'PLAYER_JOINED' }, ({ payload }) => {
+          if (!payload) return;
           setPlayers((prev) => {
-            if (prev.some(p => p.seat_index === payload.seat_index || p.username === payload.username)) {
-              return prev.map(p => p.username === payload.username ? { ...p, ...payload, cards: p.seat_index === mySeatIndexRef.current ? p.cards : [] } : p);
-            }
-            return [...prev, { ...payload, cards: [], shownCards: false }];
+            const filtered = prev.filter((p) => p.seat_index !== payload.seat_index && p.username !== payload.username);
+            return [...filtered, { ...payload, cards: [], shownCards: false }].sort((a, b) => a.seat_index - b.seat_index);
           });
           setAnnouncement(`👤 ${payload.username} joined the table!`);
           // Reply with current table state sync (STRICTLY SANITIZED - ZERO LEAKS)
@@ -474,11 +504,12 @@ export const PokerTable = ({
           }
         })
         .on('broadcast', { event: 'SEAT_TAKEN' }, ({ payload }) => {
+          if (!payload) return;
           setPlayers((prev) => {
-            if (prev.some(p => p.seat_index === payload.seat_index)) {
-              return prev.map(p => p.seat_index === payload.seat_index ? { ...p, ...payload, cards: p.seat_index === mySeatIndexRef.current ? p.cards : [] } : p);
-            }
-            return [...prev, { ...payload, cards: [] }];
+            const filtered = prev.filter((p) => p.seat_index !== payload.seat_index && p.username !== payload.username);
+            const isHero = payload.seat_index === mySeatIndexRef.current;
+            const heroCards = isHero ? (prev.find((p) => p.seat_index === mySeatIndexRef.current)?.cards || []) : [];
+            return [...filtered, { ...payload, cards: heroCards }].sort((a, b) => a.seat_index - b.seat_index);
           });
           setAnnouncement(`👤 ${payload.username} seated at Seat ${payload.seat_index + 1}`);
         })
@@ -627,24 +658,30 @@ export const PokerTable = ({
               .eq('room_id', rid);
             if (refreshed && isMounted) {
               setPlayers((prev) => {
-                const map = new Map(prev.map(p => [p.seat_index, p]));
+                const prevMap = new Map(prev.map((p) => [p.seat_index, p]));
+                const refreshedSeats = new Set(refreshed.map((rp) => rp.seat_index));
+                const newPlayers = [];
                 for (const rp of refreshed) {
-                  if (rp.seat_index !== assignedSeat) {
-                    const existing = map.get(rp.seat_index) || {};
-                    map.set(rp.seat_index, {
-                      ...existing,
-                      seat_index: rp.seat_index,
-                      user_id: rp.user_id,
-                      username: rp.username,
-                      chips: rp.chips,
-                      status: rp.status,
-                      isBot: false,
-                      shownCards: existing.shownCards || false,
-                      cards: existing.cards || []
-                    });
-                  }
+                  const existing = prevMap.get(rp.seat_index) || {};
+                  const isBotPlayer = rp.user_id === null || BOT_NAMES.includes(rp.username);
+                  newPlayers.push({
+                    ...existing,
+                    seat_index: rp.seat_index,
+                    user_id: rp.user_id,
+                    username: rp.username,
+                    chips: rp.chips,
+                    status: rp.status,
+                    isBot: isBotPlayer,
+                    shownCards: existing.shownCards || false,
+                    cards: rp.seat_index === mySeatIndexRef.current ? (existing.cards || []) : []
+                  });
                 }
-                return Array.from(map.values());
+                const mySeat = mySeatIndexRef.current;
+                if (mySeat >= 0 && !refreshedSeats.has(mySeat)) {
+                  const heroExisting = prevMap.get(mySeat);
+                  if (heroExisting) newPlayers.push(heroExisting);
+                }
+                return newPlayers.sort((a, b) => a.seat_index - b.seat_index);
               });
             }
           }
@@ -764,7 +801,7 @@ export const PokerTable = ({
   }, [handState.currentTurnSeat, handState.phase, players, mySeatIndex]);
 
   // User Takes an Open Seat (Live Multiplayer)
-  const handleSitAtSeat = (seatIndex) => {
+  const handleSitAtSeat = async (seatIndex) => {
     if (players.some(p => p.username === user.username)) {
       alert('You are already seated at the table!');
       return;
@@ -786,8 +823,26 @@ export const PokerTable = ({
     };
 
     setMySeatIndex(seatIndex);
-    const updated = [...players, newSeated];
+    const updated = [...players.filter((p) => p.seat_index !== seatIndex), newSeated].sort((a, b) => a.seat_index - b.seat_index);
     setPlayers(updated);
+
+    if (activeRoomIdRef.current && !gameRoom?.isPractice) {
+      try {
+        await supabase.from('poker_room_players').upsert({
+          room_id: activeRoomIdRef.current,
+          user_id: user.id || null,
+          username: user.username,
+          seat_index: seatIndex,
+          chips: newSeated.chips,
+          current_round_bet: 0,
+          total_hand_bet: 0,
+          status: 'active',
+          is_connected: true
+        }, { onConflict: 'room_id,seat_index' });
+      } catch (err) {
+        console.warn('Error saving seated player to poker_room_players:', err);
+      }
+    }
 
     // Broadcast seat to other connected clients
     if (channelRef.current) {
@@ -830,6 +885,23 @@ export const PokerTable = ({
     const updated = [...players, newBot].sort((a, b) => a.seat_index - b.seat_index);
     setPlayers(updated);
     setAnnouncement(`🤖 Added ${availableName} (Bot) to Seat ${targetSeatIndex + 1}`);
+
+    // Persist bot in database poker_room_players so joining players immediately know this seat is occupied!
+    if (activeRoomIdRef.current && !gameRoom?.isPractice) {
+      supabase.from('poker_room_players').upsert({
+        room_id: activeRoomIdRef.current,
+        user_id: null,
+        username: availableName,
+        seat_index: targetSeatIndex,
+        chips: newBot.chips,
+        current_round_bet: 0,
+        total_hand_bet: 0,
+        status: 'active',
+        is_connected: true
+      }, { onConflict: 'room_id,seat_index' }).then(({ error }) => {
+        if (error) console.warn('Error persisting bot in poker_room_players:', error);
+      });
+    }
 
     if (channelRef.current) {
       channelRef.current.send({
@@ -1044,6 +1116,17 @@ export const PokerTable = ({
 
     // 1. Bot removal
     if (targetPlayer.isBot) {
+      if (activeRoomIdRef.current && !gameRoom?.isPractice) {
+        try {
+          await supabase
+            .from('poker_room_players')
+            .delete()
+            .eq('room_id', activeRoomIdRef.current)
+            .eq('seat_index', targetPlayer.seat_index);
+        } catch (err) {
+          console.warn('Error deleting bot from poker_room_players:', err);
+        }
+      }
       setPlayers((prev) => prev.filter((p) => p.seat_index !== targetPlayer.seat_index));
       setAnnouncement(`Bot ${targetPlayer.username} was removed`);
       if (channelRef.current) {
